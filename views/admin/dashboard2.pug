@@ -1,0 +1,436 @@
+include header.pug
+ul.horizontal
+	li
+		a(href="../admin/admindash") User Management
+	//li
+		//a(href="../admin/equipmain") Equipment Management
+	li
+		a(href="../admin/manumain") Manufacturer Management
+style.
+	ul.horizontal {
+	  list-style-type: none;
+	  padding: 0;
+	  overflow: hidden;
+	  background-color: #f3f3f3;
+	  width: 100%;
+	  border: 1px solid #e7e7e7;
+	}
+	ul.horizontal li {
+	  float: left;
+	  margin: 20px 40px;
+	}
+	.magnify{
+		background:url("../images/magnify.png") no-repeat;
+		padding: 5px 5px 5px 35px;
+		border-radius: 10px;
+		border: 1px solid #999;
+		width: 50%;
+	}
+	.arrow{background-image:url('../images/up-down.png');width:35px;height:33px;cursor:pointer;padding-top:7px}
+	.arrow span{padding-left:45px}
+	.down{background-position:34px -1px;}
+	.up{background-position:1px -1px;}
+	.hidivs{display:none;border:1px solid #e7e7e7;min-height:50px;margin-top:10px;padding:5px}
+	.subdiv{width:45%;margin:10px;float:left}
+	#hiddiv{display:none;position:absolute;border:1px solid #999;width:66%;text-align:left;z-index:999}
+	.subdivddd{padding:10px;width:100%}
+	#rightdiv{text-align:center;padding:10px;position:relative}
+	.tttdiv{margin:2px 0 0 38px}
+	#left_fac_div, #left_pra_div{display:none;} 
+	#headerspan{display:none}	.miniarrow{background-image:url('../images/up-down-mini.png');width:30px;height:28px;cursor:pointer;padding-top:7px}
+	.miniarrow span{padding-left:45px}
+	.minidown{background-position:28px -1px;}
+	.miniup{background-position:1px -1px;}
+	table{width:100%}
+	.pendd{margin-left:10px;cursor:pointer;color:#666;font-size:12px}
+	th{color:#FFF;background:#003595;padding:3px}
+.row
+	.col-md-3
+		include leftmenu_user.pug
+
+	.col-md-8#rightdiv(style='border:1px solid #e7e7e7;margin:12px')
+		form(method='get',onsubmit='return submitform()')
+			.form-group.text-center(style='position:relative')
+				h2 Add Facility				
+				input#facility_name.form-control(type='text' name='facility_name' placeholder='Enter Facility Name')
+				br
+				input#facility_website.form-control(type='text' name='facility_website' placeholder='Enter Website')
+				br
+				input#facility_phone.form-control(type='text' name='facility_phone' placeholder='Enter Phone')
+				br
+				input#facility_fax.form-control(type='text' name='facility_fax' placeholder='Enter Fax')
+				br
+				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
+				br
+script.
+	function o(id){return document.getElementById(id);}
+	function c(cname){return document.getElementsByClassName(cname)[0];}
+	function submitformpractise(){
+		
+		$.post('/admin/addpractise', {prac_name: o('first_name').value,website: o('website').value,fax: o('fax').value,cell: o('cell').value,email: o('email').value,npi: o('npi').value}, function(data){
+			console.log(data);
+			// results = data.results;
+			//o('rightdiv').innerHTML = data.html;
+			window.location.href=window.location;
+		});
+		return false;
+	}
+	function add_practise(){
+		o('rightdiv').innerHTML = '<h2>Add Practise</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter Practise Name"><input class="form-control subdiv" id="website" type="text" name="website" placeholder="Enter Website"><input class="form-control subdiv" id="fax" type="text" name="fax" placeholder="Enter Fax"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
+	}
+	function callswap(obj,className){
+		//console.log(className);
+		objc = o(className);
+		  _tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
+		positions = {
+			'left' : _tmp[0],
+			'top' : _tmp[1]
+		};
+		console.log(positions, positions.left, positions.top);
+		if(positions.left == '1px'){
+			console.log('arrow is up');
+			objc.style.display = 'block';
+			// open
+			obj.style.backgroundPosition = '34px -1px';
+			
+		}else{
+			obj.style.backgroundPosition = '1px -1px';
+			objc.style.display = 'none';
+		}
+		
+	}	
+	
+	function callswapp(obj,className){
+		//console.log(className);
+		objc = o(className+'ppp');
+		  _tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
+		positions = {
+			'left' : _tmp[0],
+			'top' : _tmp[1]
+		};
+		console.log(positions, positions.left, positions.top);
+		if(positions.left == '1px'){
+			console.log('arrow is up');
+			objc.style.display = 'block';
+			// open
+			obj.style.backgroundPosition = '34px -1px';
+			
+		}else{
+			obj.style.backgroundPosition = '1px -1px';
+			objc.style.display = 'none';
+		}		
+	}	
+	function update_practise(id){
+		$.post('/admin/updatepractise', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value,npi:o('npi').value}, function(data){
+			//console.log(data);
+			// results = data.results;
+			//o('rightdiv').innerHTML = data.html;
+			alert("Updated practise successfully");
+		});
+	}
+	function edit_facility(fac_id){
+		console.log(fac_id);
+		$.post('/admin/editfacility', {fac_id: fac_id}, function(data){
+			//console.log(data);
+			// results = data.results;
+			o('rightdiv').innerHTML = data.html;
+		});
+	}
+	//edit_practise
+	function edit_practise(pra_id){
+		console.log(pra_id);
+		$.post('/admin/editpractise', {pra_id: pra_id}, function(data){
+			//console.log(data);
+			// results = data.results;
+			o('rightdiv').innerHTML = data.html;
+		});
+	}
+	function remove_facility(id){
+		if(confirm('Do you really want to delete this facility!')){
+		$.post('/admin/removefacility', {fac_id: id}, function(data){
+			//console.log(data);
+			// results = data.results;
+			//o('rightdiv').innerHTML = data.html;
+			window.location.href = window.location;
+		});
+		}
+	}	
+	function remove_practise(id){
+		if(confirm('Do you really want to delete this Practise!')){
+		$.post('/admin/removepractise', {fac_id: id}, function(data){
+			//console.log(data);
+			// results = data.results;
+			//o('rightdiv').innerHTML = data.html;
+			window.location.href = window.location;
+		});
+		}
+	}	
+	function update_facility(id){
+		console.log(id );
+		$.post('/admin/updatefacili', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value }, function(data){
+		console.log(data);
+		window.location.href = window.location;
+		});
+	}
+	function catchWords(word){
+		$.post('/admin/showBinsList', {word: word}, function(data){
+			console.log(data);
+			results = data.results;
+			console.log(results); // model: "X", firmware: "khkhkhkh", uuid
+			o('hiddiv').innerHTML = '';
+			o('hiddiv').style.display = 'block';
+			for(i=0;i<results.length;i++)
+				o('hiddiv').innerHTML += '<div class="subdivddd"><input type="checkbox" name="secb" value="'+results[i].uuid+'" />&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].model +  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].macid + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].firmware  + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].mandate + '<div>';
+				// '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].binname +
+		});
+	}
+	function amore(ch,fac_id){
+		arr = document.getElementsByName('secb');
+		console.log(fac_id);
+		ff='';
+		for(i=0;i<arr.length;i++)
+			if(arr[i].checked)
+				ff += arr[i].value+'|';
+		$.post('/admin/assignbins', { ff:ff,fac_id:fac_id}, function(data){ // facid
+			//console.log(data);
+			o('rightdiv').innerHTML = data;
+			if(ch == 2) window.location.href = window.location; 
+		//	else o('subdivddd').innerHTML = '';
+		});
+	}
+	function amorei(ch){
+		arr = document.getElementsByName('secb');
+		ff='';facid = global_currid;
+		for(i=0;i<arr.length;i++)
+			if(arr[i].checked)
+				ff += arr[i].value+'|';
+		$.post('/admin/assignbins2', {id:o('binseahid').value, ff:ff}, function(data){ // facid
+			//console.log(data);
+			o('rightdiv').innerHTML = data;
+			if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+		});
+	}
+	function showbins(facid){
+		$.post('/admin/showpreBins', {id: facid}, function(data){
+			//console.log(data);
+			o('rightdiv').innerHTML = data + '<input type="hidden" id="facilityid" value="'+facid+'" />';
+		});
+	}
+	function submitformuser(){
+		if(o('cemail').value != o('email').value){
+			alert('Emails did not match');
+		}else{
+			$.post('/admin/adduser', {first_name: o('first_name').value, middle_name: o('middle_name').value, last_name: o('last_name').value, email: o('email').value, cell: o('cell').value, facid:o('facid').value}, function(data){
+				alert('User added successfully');
+				window.location.href = window.location;
+			});
+		}
+		return false;
+	}
+	function submitformsurgeon(){
+		if(o('cemail').value != o('email').value){
+			alert('Emails did not match');
+		}else{
+			$.post('/admin/addsurgeon', {npi: o('npi').value,first_name: o('first_name').value, middle_name: o('middle_name').value, last_name: o('last_name').value, email: o('email').value, cell: o('cell').value, facid:o('facid').value}, function(data){
+				alert('Surgeon added successfully');
+				window.location.href = window.location;
+			});
+		}
+		return false;
+	}
+	
+	function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
+	
+	function add_surgeon2(name,fname){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><div style="text-align:left;font-weight:bold;margin-left:10px">'+fname+'</div><input type="text" placeholder="Name/NPI" class="magnify" id="searchtext" onkeyup="search_surgeon('+name+')"  /><input class="btn cbut blue bbbutons" value="Search" style="left:35%;top:35%" onclick="save_search_surgeon('+name+')" />';}
+	
+	function search_surgeon(id){
+		console.log(id);
+		$.post('/admin/search_surgeon', {fid: id,text:o('searchtext').value}, function(data){
+			
+		});
+	}
+	
+	function add_surgeon(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformsurgeon()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;right: 30px;top: 50px;" value="Save"><br></div></form>';}
+	
+	function view_user(name){ // _pppp
+		cele=o(name+'_utd').classList; // Clearview1685192542303_utd
+		//console.log(cele);
+		nextFlag = '';
+		for(i=0;i<cele.length;i++){
+			if(cele[i] == 'minidown'){
+				nextFlag = 'miniup'; break; }
+			if(cele[i] == 'miniup'){
+				nextFlag = 'minidown'; break; }
+		}
+		
+		o(name+'_utd').className = '';
+		o(name+'_utd').classList.add('miniarrow');
+		o(name+'_utd').classList.add(nextFlag);
+		
+		console.log('adding miniarrow ' + nextFlag + ' to ' +name+'_utd');
+		//if(cele=='') // miniarrow minidown
+		objc = o(name+'_uuu');
+		objc.innerHTML = '';
+		//console.log('------1-------');return;
+		if(nextFlag != 'miniup')
+		$.post('/admin/showUsers', {id: name}, function(data){
+			console.log(data);
+			res = data.results;			
+			if(res.length > 0){
+				for(i=0;i<res.length;i++){
+					//if(i > 0) objc.innerHTML +='<br >';
+					objc.innerHTML += '<a href="javascript:openuser(\''+res[i].id+'\')">'+res[i]['first_name']+'</a><br>';
+				}
+			}			
+		});
+	}
+	
+	function view_surgeon(name){ // _pppp
+		obj=o(name+'_utdd');
+		cele=obj.classList; // Clearview1685192542303_utd
+		console.log('view_surgeon----------');
+		console.log(cele);
+		console.log('view_surgeon----------');
+		nextFlag = '';
+		for(i=0;i<cele.length;i++){
+			console.log('------------'+cele[i]+'----------');
+			if(cele[i] == 'minidown'){
+				nextFlag = 'miniup'; break; }
+			if(cele[i] == 'miniup'){
+				nextFlag = 'minidown'; break; }
+		}
+		console.log(nextFlag+'***');
+		obj.className = '';
+		obj.classList.add('miniarrow');
+		obj.classList.add(nextFlag); // miniarrow minidown
+		
+		//console.log('adding miniarrow ' + nextFlag + ' to ' +name+'_utd');
+		//if(cele=='') // miniarrow minidown
+		objc = o(name+'_pppp');
+		objc.innerHTML = '';
+		//console.log('------1-------');return;
+		if(nextFlag != 'miniup')
+		$.post('/admin/showSurgeons', {id: name}, function(data){
+			console.log(data);
+			res = data.results;			
+			if(res.length > 0){
+				for(i=0;i<res.length;i++){
+					objc.innerHTML += '<a href="javascript:opensurgeon(\''+res[i].id+'\')">'+res[i]['first_name']+'</a><br>';
+				}
+			}			
+		});
+	}
+	
+	function opensurgeon(userid){
+		o('rightdiv').innerHTML = '';
+		$.post('/admin/showRightSurgeon', {userid: userid}, function(data){
+			console.log(data);
+			res = data.results;			
+			if(res.length > 0){
+				o('rightdiv').innerHTML = res;
+			}			
+		});
+	}
+	
+	function openuser(userid){
+		o('rightdiv').innerHTML = '';
+		$.post('/admin/showRightUser', {userid: userid}, function(data){
+			console.log(data);
+			res = data.results;			
+			if(res.length > 0){
+				o('rightdiv').innerHTML = res;
+			}			
+		});
+	}
+	function removeuser(id){
+		if(confirm('Do you really want to delete the user?')){
+		
+		$.post('/admin/removeuser', {user_id: id}, function(data){
+			//console.log(data);
+			// results = data.results;
+			//o('rightdiv').innerHTML = data.html;
+			window.location.href = window.location;
+		});
+		}
+	}
+	function removesurgeon(id){
+		if(confirm('Do you really want to delete the Surgeon?')){
+		
+		$.post('/admin/removeuser', {user_id: id}, function(data){
+			//console.log(data);
+			// results = data.results;
+			//o('rightdiv').innerHTML = data.html;
+			window.location.href = window.location;
+		});
+		}
+	}
+	function reset_password(id,email){
+		console.log(id);
+		if(confirm('Do you really want to reset password')){
+			$.post('/admin/resetpassword', {user_id: id}, function(data){
+				window.location.href = window.location;
+			});
+		}
+	}
+	
+	function exit_screen(){
+		window.location = window.location.href;
+	}
+	var global_currid='';
+	function view_bin(name){
+		cele=o(name+'_btd').classList; // Clearview1685192542303_utd
+		global_currid = name;
+		//console.log(cele);
+		nextFlag = '';
+		for(i=0;i<cele.length;i++){
+			if(cele[i] == 'minidown'){
+				nextFlag = 'miniup'; break; }
+			if(cele[i] == 'miniup'){
+				nextFlag = 'minidown'; break; }
+		}
+		
+		o(name+'_btd').className = '';
+		o(name+'_btd').classList.add('miniarrow');
+		o(name+'_btd').classList.add(nextFlag);
+		
+		objc = o(name+'_bbb');
+		objc.innerHTML = '';
+		$.post('/admin/showBins', {id: name}, function(data){
+			console.log(data);
+			res = data.results;			
+			if(res.length > 0){
+				for(i=0;i<res.length;i++){
+					if(i > 0) objc.innerHTML +='<br >';
+					objc.innerHTML += '<a href="javascript:showhightedbin(`'+res[i].uuid+'`)">'+res[i]['binname']+'</a>';
+				}
+			}			
+		});
+	}
+	function showhightedbin(uuid){
+		console.log(uuid);
+		
+		$.post('/admin/showhightedbin', {uuid: uuid}, function(data){
+			o('rightdiv').innerHTML = data.html + '<input class="btn cbut grey bbbutons" type="button" value="Unassign " /><input class="btn cbut grey bbbutons" type="button" value="Exit" style="margin-left:45%" />';
+		});
+	}
+	function open_facility(){
+		// console.log('In the open_facility.................');
+		o('left_fac_div').style.display='block';
+	}
+	function open_practise(){
+		// console.log('In the open_facility.................');
+		o('left_pra_div').style.display='block';
+	}
+	function submitform(){
+		console.log('In the function');
+		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
+			o('facility_name').value = '';
+			o('facility_website').value = '';
+			o('facility_phone').value = '';
+			o('facility_fax').value = '';
+			window.location.href = window.location;
+		});
+		
+		return false;
+	}

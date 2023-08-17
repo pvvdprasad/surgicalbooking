@@ -1,0 +1,63 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(content='width=device-width, initial-scale=1.0' name='viewport')
+  title SurgicalBooking
+  meta(content='' name='description')
+  meta(content='' name='keywords')
+  // Favicons
+  link(href=BASE_PATH+'assets/img/favicon.png' rel='icon')
+  link(href=BASE_PATH+'assets/img/apple-touch-icon.png' rel='apple-touch-icon')
+  // Google Fonts
+  link(href='https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i' rel='stylesheet')
+  // Vendor CSS Files
+  link(href=BASE_PATH+'assets/vendor/aos/aos.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/bootstrap/css/bootstrap.min.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/bootstrap-icons/bootstrap-icons.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/boxicons/css/boxicons.min.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/glightbox/css/glightbox.min.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/remixicon/remixicon.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/swiper/swiper-bundle.min.css' rel='stylesheet')
+  // Template Main CSS File
+  link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
+  script.
+    function o(id){return document.getElementById(id);}
+    function showlog(){
+        o('div1').style.display = 'none';
+        o('div2').style.display = 'block';
+    }
+  style.
+    #div2{display:none}
+  header#header.header.fixed-top(data-scrollto-offset='0')
+  .container-fluid.d-flex.align-items-center.justify-content-between
+    a.logo.align-items-center(href='index.html',style='position:absolute;top:0')
+      // Uncomment the line below if you also wish to use an image logo
+      // <img src="img/logo.png" alt="">
+      h1
+        | SurgicalBooking
+    .container.align-items-center.justify-content-between
+        section#features.features(class="col-md-6",style="margin:15% auto")
+            form#loginform(action='/admin/postlogin' method='post')
+                .form-group.text-center
+                    #div1
+                        span= 'Login As'
+                        br
+                        br
+                        input#admin(type='radio' name='surgeonradio' onchange='showlog()' value='1')
+                        label(for='admin')= 'Admin'
+                        br
+                        br
+                        input#SurgeryCentre(type='radio' name='surgeonradio' onchange='showlog()' value='2')
+                        label(for='SurgeryCentre')= 'Surgery Centre'
+                        br
+                        br
+                        input#Surgeon(type='radio' name='surgeonradio' onchange='showlog()' value='3')
+                        label(for='Surgeon')= 'Surgeon'
+                        br
+                        br
+                    #div2
+                        input.form-control(type='text' name='loginid' placeholder='Login Id' required='')
+                        br
+                        input.form-control(type='password' name='passid' placeholder='Password' required='')
+                        br
+                        input.btn.btn-success( type='submit' value='Login')

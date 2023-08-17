@@ -1,0 +1,99 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(content='width=device-width, initial-scale=1.0' name='viewport')
+  title SurgicalBooking
+  meta(content='' name='description')
+  meta(content='' name='keywords')
+  // Favicons
+  link(href=BASE_PATH+'assets/img/favicon.png' rel='icon')
+  link(href=BASE_PATH+'assets/img/apple-touch-icon.png' rel='apple-touch-icon')
+  // Google Fonts
+  link(href='https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i' rel='stylesheet')
+  // Vendor CSS Files
+  link(href=BASE_PATH+'assets/vendor/aos/aos.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/bootstrap/css/bootstrap.min.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/bootstrap-icons/bootstrap-icons.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/boxicons/css/boxicons.min.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/glightbox/css/glightbox.min.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/remixicon/remixicon.css' rel='stylesheet')
+  link(href=BASE_PATH+'assets/vendor/swiper/swiper-bundle.min.css' rel='stylesheet')
+  // Template Main CSS File
+  link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
+  script.
+    function o(id){return document.getElementById(id);}
+    function showlog(){
+        o('div1').style.display = 'none';
+        o('div2').style.display = 'block';
+    }
+  style.
+    *{margin:0;padding:0;font-family: Helvetica}
+    .dropdown {
+    position: absolute;
+    display: inline-block;
+    top: 20px;
+    right: 130px;
+    z-index: 9999;
+    }
+    .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    }
+    .dropdown:hover .dropdown-content {
+    display: block;
+    }
+  script(src='https://code.jquery.com/jquery-3.6.0.js')
+  style.
+      .bbbutons {
+      z-index: 999;
+      bottom: 0;
+      left: 20px;
+    }
+    *{margin:0;padding:0}
+    .cbut{margin-left: 20px;
+    border-radius: 20px;
+    font-size: 15px;
+    min-width: 160px;}
+    .blue{background: #003595;
+    color: #FFF;}
+    .grey{background: #FAFAFA;
+    color: #333;border: 1px solid #999;}
+    ul{padding:0;margin:0}
+    li{list-style-type:none}
+    #div2{display:none}
+    .cbut{margin-left: 20px;
+            border-radius: 20px;
+            font-size: 15px;
+            min-width: 160px;}
+          .blue{background: #003595;
+            color: #FFF;}
+          .grey{background: #FAFAFA;
+            color: #333;border: 1px solid #999;}
+  header#header.header.fixed-top(data-scrollto-offset='0')
+  .container-fluid.d-flex.align-items-center.justify-content-between(style='height:90px')
+    a.logo.align-items-center(href='index.html',style='position:absolute;top:0')
+      // Uncomment the line below if you also wish to use an image logo
+      // <img src="img/logo.png" alt="">
+      h1
+        img(src=BASE_PATH+'images/125.png' style='width:150px;top:20px;position:absolute')
+      header#header.header.fixed-top(data-scrollto-offset='0',style='position:absolute')
+        a(href=BASE_PATH+'admin/logout')
+          img(src=BASE_PATH+'images/logout.png',title='Logout',style='width: 40px;float: right;margin-right: 20px;')
+        a(href=BASE_PATH+'admin/settings')
+          img(src=BASE_PATH+'images/profile.png',title='Logout',style='width: 30px;float: right;margin-right: 10px;')
+    .dropdown
+      img(src='/images/line.ico' style='width: 30px;top: 0px;right: 0px;position: absolute;')
+      .dropdown-content
+        a(href='/admin/iolsetup')= 'IOL Setup'
+        br
+        a(href='/admin/settings')= 'Settings'
+    .container.align-items-center.justify-content-between
+        section#features.features(class="col-md-6",style="margin: auto")
+            span#headerspan(style='position: absolute;z-index: 9999;width: 44%;')
+                a#neworder(href='/admin/neworder' style='float:left')= 'New Order'
+                a#orderhistory(href='/admin/order_history' style='float:right')= 'Order History'

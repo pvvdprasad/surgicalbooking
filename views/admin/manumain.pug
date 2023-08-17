@@ -1,0 +1,225 @@
+include header.pug
+.content#branddiv
+	#close-btn(onclick="togglePopup()")= 'X'		
+	br
+	input#mname(type="text" name="mname" placeholder="Enter Manufacturer Name" style="padding:10px")
+	br
+	br
+	input(type="button"  value="Add" onclick="addmanufacturer()" style="padding:5px")
+	
+ul.horizontal
+	li
+		a(href="../admin/admindash") User Management
+	//li
+		//a(href="../admin/equipmain") Equipment Management
+	li
+		a(href="../admin/manumain") Manufacturer Management
+style.
+	.dbutton{width:18px;cursor:pointer}
+	ul.horizontal {
+	  list-style-type: none;
+	  padding: 0;
+	  overflow: hidden;
+	  background-color: #f3f3f3;
+	  width: 100%;
+	  border: 1px solid #e7e7e7;
+	}
+	#headerspan{display:none}
+	ul.horizontal li {
+	  float: left;
+	  margin: 20px 40px;
+	}	
+	#side_menu{}
+	#rightdiv{border: 1px solid #CCC}
+	th{padding:10px;background:#F3F3F3}
+	 .content {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 500px;
+			height: 200px;
+			text-align: center;
+			background-color: #e8eae6;
+			box-sizing: border-box;
+			padding: 10px;
+			z-index: 100;
+			display: none;
+			/*to hide popup initially*/
+		}
+		  
+		#close-btn {
+			position: absolute;
+			right: 20px;
+			top: 15px;
+			background-color: black;
+			color: white;
+			border-radius: 50%;
+			padding: 4px;
+			cursor:pointer;
+		}
+h2(style='text-align: center;margin: 20px 0 0;') Manufacturer Management
+.row
+	.col-md-2
+		ul#side_menu
+			li
+				a(href="javascript:manufacturers()") Manufacturers
+			li
+				a(href="javascript:brands()") Brands
+			li
+				a(href="javascript:models()") Models
+	.col-md-9#rightdiv
+script.
+	function manufacturers(){
+		console.log( "ready!" );
+		$.post('/admin/allmanufacturers',{},function(data){
+			html = '<br><br><input type="button" onclick="showaddmanufacturers()" value="Add manufacturer" /><br><br><table class="table"><tr>';
+			html += '<th  scope="col">Id</th><th scope="col">Manufacturer Name</th><th scope="col">Action</th></tr>';
+			console.log(data);
+			results = data.results;
+			for(i=0;i<results.length;i++){
+				console.log(data[i]);
+				html += '<tr><td>'+results[i].id+'</td><td>'+results[i].mname+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(1,'+results[i].id+')" /></td></tr>';
+			}
+			html += '</table>';
+			o('rightdiv').innerHTML = html;
+		});
+	}
+	$( document ).ready(function() {
+		manufacturers();
+		
+	});
+	function deleteEntity(ch,id){
+		msg='';
+		if(ch==1){msg='Do you really want to delete manufacturer';}
+		else if(ch==2){msg='Do you really want to delete brand';}
+		else if(ch==3){msg='Do you really want to delete model';}
+		
+		if(confirm(msg))
+		$.post('/admin/deleteEntity',{ch:ch,id:id},function(data){
+			window.location=window.location.href;
+		});
+	}
+	function addmanufacturer(){$(".content").toggle();
+		$.post('/admin/addmanufacturer',{mname:o('mname').value,cell:''},function(data){
+			window.location=window.location.href;
+		});
+	}
+	function showaddbrands(){
+		 
+		html = '<div id="close-btn" onclick="togglePopup()">X</div>';
+		html += '<select id="manusele"></select>';
+		html += '<br>';
+		html += '<br>';
+		html += '<input id="mname" type="text" name="mname" placeholder="Enter Brand Name" style="padding:10px">';
+		html += '<br>';
+		html += '<br>';
+		html += '<input type="button"  value="Add" onclick="addbrand()" style="padding:5px">';
+		o('branddiv').innerHTML = html;
+		$(".content").toggle();
+		loadoptions('manu');
+	}
+	function addbrand(){
+		msel = o('manusele').value;
+		bnam = o('mname').value;
+		url = '/admin/addbrand';
+		
+		if(msel == '') alert('Select Manufacturer'); else
+		$.post(url,{mid:msel,bname:bnam},function(data){
+			alert('Brand created successfully');
+			brands();
+			$(".content").toggle();
+		});
+	}
+	function addmodel(){
+		msel = o('manusele').value;
+		bnam = o('mname').value;
+		url = '/admin/addmodel';
+		
+		if(msel == '') alert('Select Brand'); else
+		$.post(url,{bid:msel,bname:bnam},function(data){
+			alert('Model created successfully');
+			models();
+			$(".content").toggle();
+		});
+	}
+	function loadoptions(id){
+		url = '/admin/';
+		var option = document.createElement("option");
+		m = o('manusele');
+		
+		if(id =='manu'){
+			url += 'allmanufacturers';
+			option.text = "All Manufacturers";
+			option.value = "";
+			 
+		}else{
+			url += 'allbrands';			
+			option.text = "All Brands";
+			option.value = "";
+		}
+		m.add(option);
+		
+		$.post(url,{},function(data){
+			results = data.results;
+			for(i=0;i<results.length;i++){
+				option = document.createElement("option");
+				if(id =='manu'){
+					option.text = results[i].mname;
+					option.value = results[i].id;
+				//o('manusele').innerHtml += '<option value="'+results[i].id+'">'+results[i].mname+'</option>';
+				}else{
+					option.text = results[i].bname;
+					option.value = results[i].id;
+				//o('manusele').innerHtml += '<option value="'+results[i].id+'">'+results[i].bname+'</option>';
+				}
+				
+				m.add(option);
+			}
+		});		
+	}
+	function showaddmodels(){
+		html = '<div id="close-btn" onclick="togglePopup()">X</div>';
+		html += '<select id="manusele"></select>';
+		html += '<br>';
+		html += '<br>';
+		html += '<input id="mname" type="text" name="mname" placeholder="Enter Model Name" style="padding:10px">';
+		html += '<br>';
+		html += '<br>';
+		html += '<input type="button"  value="Add" onclick="addmodel()" style="padding:5px">';
+		o('branddiv').innerHTML = html;
+		$(".content").toggle();
+		loadoptions('brand');
+	}
+	function showaddmanufacturers(){$(".content").toggle();}
+	function togglePopup(){$(".content").toggle();}
+	function brands(){
+		console.log('In the brands---------');
+		$.post('/admin/allbrands',{},function(data){
+			html = '<br><br><input type="button" onclick="showaddbrands()" value="Add brand" /><br><br><table class="table"><tr>';
+			html += '<th scope="col">Id</th><th scope="col">Brand Name</th><th scope="col">Manufacturer</th><th scope="col">Action</th></tr>';
+			console.log(data);
+			results = data.results;
+			for(i=0;i<results.length;i++){
+				console.log(data[i]); // id, bname, mid
+				html += '<tr><td>'+results[i].id+'</td><td>'+results[i].bname+'</td><td>'+results[i].mname+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(2,'+results[i].id+')" /></td></tr>';
+			}
+			html += '</table>';
+			o('rightdiv').innerHTML = html;
+			});
+	}
+	function models(){
+		console.log('In the models---------');
+		$.post('/admin/allmodels',{},function(data){
+			html = '<br><br><input type="button" onclick="showaddmodels()" value="Add model" /><br><br><table class="table"><tr>';
+			html += '<th scope="col">Id</th><th scope="col">Model Name</th><th scope="col">Brand</th><th scope="col">Manufacturer</th><th>Action</th></tr>';
+			console.log(data);
+			results = data.results;
+			for(i=0;i<results.length;i++){ // id , model_name , bid
+				console.log(data[i]);
+				html += '<tr><td>'+results[i].id+'</td><td>'+results[i].model_name+'</td><td>'+results[i].bname+'</td><td>'+results[i].mname+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(3,'+results[i].id+')" /></td></tr>';
+			}
+			html += '</table>';
+			o('rightdiv').innerHTML = html;
+	});
+	}

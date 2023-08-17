@@ -1,0 +1,59 @@
+style.
+	#uuul li{background:#f3f3f3;padding: 10px 10px 0 10px;}
+	.bbbutons{position:absolute;z-index:999;bottom:0;left:20px}
+
+ul#uuul(style='margin-top:10px')
+	li
+		a(href='') Add Facility
+	li(style='')
+		a(href='javascript:open_facility()') View / Edit Facility
+		#left_fac_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
+			ul#uuul
+				each element in results
+					li
+						.arrow.up(style='float:left',onclick='callswap(this,"'+element.id+'")')
+						.tttdiv= element.fname
+							i(class='bi bi-pen pendd', onclick='edit_facility("'+element.id+'")') Edit
+						.hidivs(id=element.id)
+							table
+								tr
+									td
+										|
+									td
+										a(href='javascript:add_user("'+element.id+'")') Add User 
+								tr
+									td
+										|
+									td
+										a(href='javascript:add_surgeon2("'+element.id+'","'+element.fname+'")') Add Surgeon 
+								tr
+									td(style='vertical-align: top;')
+										.miniarrow.miniup(id=element.id+'_utd', onclick='view_user("'+element.id+'")')
+									td
+										a(href='javascript:view_user("'+element.id+'")') View / Edit User
+										.hidddd(id=element.id+'_uuu')
+	li
+		a(href='javascript:add_practise()') Add Practise
+	li(style='padding-bottom:10px')
+		a(href='javascript:open_practise()') View / Edit Practise
+		#left_pra_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
+			ul#uuul
+				each element in result2
+					li
+						.arrow.up(style='float:left',onclick='callswapp(this,"'+element.id+'")')
+						.tttdiv= element.pname
+							i(class='bi bi-pen pendd', onclick='edit_practise("'+element.id+'")') Edit
+						.hidivs(id=element.id+'ppp')
+							table
+								tr
+									td
+										|
+									td
+										a(href='javascript:add_surgeon("'+element.id+'")') Add Surgeon 
+								tr
+									td(style='vertical-align: top;')
+										.miniarrow.miniup(id=element.id+'_utdd', onclick='view_surgeon("'+element.id+'")')
+									td
+										a(href='javascript:view_surgeon("'+element.id+'")') View / Edit Surgeon
+										.hidddd(id=element.id+'_pppp')
+		
