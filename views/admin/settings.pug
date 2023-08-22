@@ -12,13 +12,9 @@ style.
     #ex1-tab-2:visited,#ex1-tab-1:visited { color: red;}
     #blackscr{background:#FFF;width:100%;height:100%;position:absolute;z-index:9998;display:none}
     h2{text-align:center}
+    .selected_class{width:100%;height:200px}
 link(rel='stylesheet' href='//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css')
-
-
 script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/js/bootstrap-multiselect.min.js" integrity="sha512-lxQ4VnKKW7foGFV6L9zlSe+6QppP9B2t+tMMaV4s4iqAv4iHIyXED7O+fke1VeLNaRdoVkVt8Hw/jmZ+XocsXQ==" crossorigin="anonymous" referrerpolicy="no-referrer")
-
-
-
 link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css')
 link(rel='stylesheet' href='https://mdbcdn.b-cdn.net/wp-content/themes/mdbootstrap4/docs-app/css/dist/mdb5/standard/core.min.css')
 script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
@@ -32,78 +28,85 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
             a#ex1-tab-2.nav-link(data-mdb-toggle='tab' role='tab' aria-controls='ex1-tabs-2' aria-selected='false') Change Password
         // Tabs navs
         // Tabs content
+        //each element1 in result2 
+          //  p= '|'+element1.selected_sc + '|'
         #ex1-content.tab-content
           #ex1-tabs-1(role='tabpanel')
             h2 Select Surgerycenters
             
-            select#selected-surgicenters(multiple="multiple")
+            select#surgicenters(multiple="multiple",class="selected_class",onchange="selected_surgy(1)")
                 option(value='')= 'select surgerycenter'
                 each element in result    
                     option(value=element.id)= element.fname
             br
-            input(type='button' onclick='savesg()' value='save')
+            | Selected Surgery centers
+            select#selected-surgicenters(multiple="multiple",class="selected_class",onchange="selected_surgy(0)")
+                option(value='')= 'select surgerycenter'
+                each element in result2
+                    option(value=element.id)= element.val
+            input.btn.cbut.blue(type='button' onclick='savesg()' value='save')
+            input(type='hidden',value=uid,id='uidhid')
           #ex1-tabs-2(role='tabpanel' style='display:none;text-align:center')
             h2 Change Password
         
         #megadiv()
             h2 Information
             #megadiv_body()
+style.
+    .cbut{margin-left: 20px;border-radius: 20px;font-size: 15px;min-width: 160px;}
+    .blue{background: #003595;color: #FFF;}
+    .grey{background: #FAFAFA;color: #333;border: 1px solid #999;}
 script.
-    function hideactive(divv,ch){
-        
-    }
     function savesg(){
+      console.log('In savesg..............');
     
+        select2=o('selected-surgicenters');
+        opArr = select2.options;
+        ttt='|';
+        
+        for(i=0;i<opArr.length;i++){
+            if(i>0){
+            op=opArr[i];
+            ttt+=op.value+":"+op.text+'|';
+            }
+        }
+        
+        url = '/admin/save_favsg';
+        if(ttt != '')
+        $.post(url,{ttt:ttt,id:o('uidhid').value},function(data){
+            alert('The favorite surgycenters are saved');
+            window.location = window.location.href;
+        });
     }
-    $('select[multiple]').multiselect({
-
-  columns: 1,     // how many columns should be use to show options
-  search : false, // include option search box
-
-  // search filter options
-  searchOptions : {
-      delay        : 250,                  // time (in ms) between keystrokes until search happens
-      showOptGroups: false,                // show option group titles if no options remaining
-      searchText   : true,                 // search within the text
-      searchValue  : false,                // search within the value
-      onSearch     : function( element ){} // fires on keyup before search on options happens
-  },
-
-  // plugin texts
-  texts: {
-      placeholder    : 'Select options', // text to use in dummy input
-      search         : 'Search',         // search input placeholder text
-      selectedOptions: ' selected',      // selected suffix text
-      selectAll      : 'Select all',     // select all text
-      unselectAll    : 'Unselect all',   // unselect all text
-      noneSelected   : 'None Selected'   // None selected text
-      },
-
-      // general options
-      selectAll          : false, // add select all option
-      selectGroup        : false, // select entire optgroup
-      minHeight          : 200,   // minimum height of option overlay
-      maxHeight          : null,  // maximum height of option overlay
-      maxWidth           : null,  // maximum width of option overlay (or selector)
-      maxPlaceholderWidth: null, // maximum width of placeholder button
-      maxPlaceholderOpts : 10, // maximum number of placeholder options to show until "# selected" shown instead
-      showCheckbox       : true,  // display the checkbox to the user
-      optionAttributes   : [],  // attributes to copy to the checkbox from the option element
-
-      // Callbacks
-      onLoad        : function( element ){},           // fires at end of list initialization
-      onOptionClick : function( element, option ){},   // fires when an option is clicked
-      onControlOpen : function( element ){},           // fires when the options list is opened
-      onControlClose: function( element ){},           // fires when the options list is closed
-      onSelectAll   : function( element, selected ){}, // fires when (un)select all is clicked
-      onPlaceholder : function( element, placeholder, selectedOpts ){}, // fires when the placeholder txt is up<a href="https://www.jqueryscript.net/time-clock/">date</a>d
-
-      // @NOTE: these are for future development
-      minSelect: false, // minimum number of items that can be selected
-      maxSelect: false, // maximum number of items that can be selected
-
-    });
-
+    function selected_surgy(ch){
+        s1=o('surgicenters');
+        s2=o('selected-surgicenters');
+        if(ch==1){
+            s1=o('surgicenters');
+            s2=o('selected-surgicenters');
+        }else{
+            s2=o('surgicenters');
+            s1=o('selected-surgicenters');
+        }
+        
+        vval=s1.selectedIndex;
+        console.log(vval);
+        removeByIndex(vval,ch);
+    }
+    
+    function removeAll(selectBox) {
+        while(selectBox.options.length > 0){
+            selectBox.remove(0);
+        }
+    }
+    function removeByIndex(id, ch){ 
+        select=o('surgicenters');
+        select2=o('selected-surgicenters');        if(id>0)
+        if(ch==1){opt = select.options[id]; select.removeChild(select.options[id]);select2.add(opt);}
+        else{opt = select2.options[id]; select2.removeChild(select2.options[id]);select.add(opt);}
+        select.selectedIndex = 0;select2.selectedIndex = 0;
+    }
+    
     $( document ).ready(function() {
         console.log( "ready!" );
         

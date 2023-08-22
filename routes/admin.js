@@ -13,14 +13,24 @@ router.get('/login', function(req, res, next) {
   res.render('admin/login', { BASE_PATH: '../' });
 });
 
-
+router.post('/save_favsg',async function(req, res, next) {
+	var reqs = req.body;
+	console.log(reqs);
+	var sql = 'update other_users set selected_sc = "'+reqs.ttt+'" where user_id='+reqs.id;
+	console.log(sql);
+	await conn.query(sql, function (err, result) {
+		if (err) throw err;
+		console.log("updated query");	
+		res.send({});
+	  });
+});
 
 router.get('/iolsetup',async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	
 	var sql = "select id,mname,cell from manufacturers";
 	//console.log(req.session);
-	console.log('userid:'+req.session.userid);
+	//console.log('userid:'+req.session.userid);
 	await conn.query(sql, function (err, result) {
 		if (err) throw err;
 		console.log("facilities query created");	
@@ -521,11 +531,85 @@ router.post('/removepractise', async function(req, res, next) {
 	});
 });
 
+router.post('/save_search_surgeon', async function(req, res, next) {
+	var reqs=req.body;
+	console.log(reqs);
+	//  fid,sids
+	// reqs.fid 
+	
+	sql = 'select id,surgeons from facilities where id='+reqs.fid;
+	await conn.query(sql, function (err, result) {
+    if (err) console.log(err);
+		obj=result[0];
+		surgeons=obj.surgeons;
+		surarr = mergeResult(surgeons, reqs.sids);
+		sql = 'update facilities set surgeons = "'+surarr+'" where id='+reqs.fid;
+		conn.query(sql, function (err, result) {
+			res.send({});
+		});
+	});
+});
+
+function mergeResult(surgeons, sids){
+	surarr = []; siarr = [];
+	if(surgeons=='' || surgeons == null) surarr = [];
+	else surarr = surgeons.split('|');
+	if(sids!='')
+	siarr = sids.split('|');
+	
+	for(i=0;i<siarr.length;i++)
+	if(!surarr.includes(siarr[i]))
+		surarr.push(siarr[i]);
+	
+	su = '|';
+	for(i=0;i<surarr.length;i++)
+		if(surarr[i] != '')
+		su += surarr[i] + '|';
+	
+	return su;
+}
+
+router.post('/showsurgeons', async function(req, res, next) {
+	var reqs=req.body;
+	console.log(reqs);
+	// var answer = color.slice(0, -1);
+	sql = 'select id,fname,surgeons from facilities where id='+reqs.fid;
+	html = '<h2 style="text-align:center">Surgeons</h2><br><p style="text-align:left">';
+	await conn.query(sql, function (err, result) {
+		for(i=0;i<result.length;i++){
+			obj = result[i];
+			html += obj.fname+'</p><table class="table><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th></th></tr>"';
+			console.log(obj.surgeons);
+			if(obj.surgeons != null && obj.surgeons != ''){
+				oarr = obj.surgeons.split('|');
+				console.log(oarr);o='';
+				for(j=0;j<oarr.length;j++){
+					o=oarr[j]+',';
+				}
+				console.log(o);
+				var answer = o.slice(0, -1);
+				console.log(answer);
+			}
+		}
+		res.send({html:html});
+	});
+});
+
 router.post('/search_surgeon', async function(req, res, next) {
 	var reqs=req.body;
 	console.log(reqs);
 	
-	res.send({});
+	id = reqs.fid;
+	txt = reqs.text;
+	
+	var sql = 'select id,first_name,last_name,middle_name,npi from other_users where selected_sc like "%|'+id+':%" AND( first_name like "%'+txt+'%" OR middle_name like "%'+txt+'%" OR last_name like "%'+txt+'%" OR npi like "%'+txt+'%")';
+	await conn.query(sql, function (err, result) {
+    if (err) console.log( err);
+	console.log(result);
+		
+	res.send({result:result});
+	});
+	
 });
 
 router.get('/settings', async function(req, res, next) {
@@ -535,11 +619,32 @@ router.get('/settings', async function(req, res, next) {
 	
 	var reqs=req.body;
 	console.log(reqs);
+	arr=[];varr=[];
 	
+	query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
+	//console.log(query2);
 	await conn.query(query, function (err, result) {
-    if (err) console.log( err);
-	res.render('admin/settings', { BASE_PATH: '../', result:result});
-	});
+		if (err) console.log( err);
+		conn.query(query2, function (err, result2) {
+			// |2:Mason Surgery Center|4:ttttttttttt||
+			console.log('query 2---------------');
+			sc = result2[0]['selected_sc'];
+			ss = sc.split('|');
+			for(i=1;i<ss.length-1;i++){						
+				ts=ss[i].split(':');				
+				arr.push(parseInt(ts[0]));
+				varr.push({id:ts[0],val:ts[1]});
+			}
+			
+			console.log('arr console 1------------------');
+			farr=[];console.log(arr);
+			for(i=0;i<result.length;i++){
+				if(!arr.includes(parseInt(result[i]['id']))){farr.push(result[i]);}
+			}
+			res.render('admin/settings', { BASE_PATH: '../', result:farr, uid:req.session.userid, result2:varr});
+			});
+		});
+	//});
 	
 	//res.render('admin/settings', { BASE_PATH: '../'});
 });
@@ -575,9 +680,7 @@ router.get('/admindash', async function(req, res, next) {
 	}
 	});
 	//console.log('outside.........');
-	//console.log(results);
-	
-	
+	//console.log(results);	
 });
 
 function generatePassword() {
@@ -855,9 +958,9 @@ router.post('/addmodel', async function(req, res, next) {
 router.post('/showSurgeons', async function(req, res, next) {
 	
 	//const docClient = new AWS.DynamoDB.DocumentClient();
-	id = req.body.id;
+	id = req.body.fid;
 	console.log(id+'<--->showSurgeons');
-	var sql = "select id,user_id,first_name,middle_name,last_name,cell,email,npi from other_users where fact_id = " + id +" and npi != 'undefined' and npi !=''";
+	var sql = "select id,user_id,first_name,middle_name,last_name,cell,email,npi from other_users where selected_sc like '%|" + id +":%'";
 	
 	await conn.query(sql, function (err, result) {
 		if (err) throw err;
