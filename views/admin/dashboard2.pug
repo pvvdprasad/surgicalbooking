@@ -77,6 +77,20 @@ script.
 		});
 		return false;
 	}
+	function dlink(fid){
+		//console.log(fid+':--------------:'+dlink);
+		dlis = document.getElementsByName('dlinkchs');
+		tarr = [];
+		for(i=0;i<dlis.length;i++){
+			if(dlis[i].checked) tarr.push(dlis[i].value);
+		}
+		console.log(tarr);
+		$.post('/admin/dlink', {fid: fid,tarr:tarr.toString()}, function(data){
+			console.log(data);
+				//o('rightdiv').innerHTML = data.html;
+				view_dlink(fid);
+		});
+	}
 	function view_dlink(id){console.log('In dlink:'+id);
 	
 		$.post('/admin/showsurgeons', {fid: id}, function(data){
@@ -138,21 +152,30 @@ script.
 			alert("Updated practise successfully");
 		});
 	}
+	ei=0;
 	function edit_facility(fac_id){
 		console.log(fac_id);
 		$.post('/admin/editfacility', {fac_id: fac_id}, function(data){
 			//console.log(data);
 			// results = data.results;
-			o('rightdiv').innerHTML = data.html;
+			if(ei==0){
+				edit_facility(fac_id);
+				ei=1;
+			}else{
+				ei=0;
+				o('rightdiv').innerHTML = data.html;
+			}			
 		});
 	}
+	ep=0;
 	//edit_practise
 	function edit_practise(pra_id){
 		console.log(pra_id);
 		$.post('/admin/editpractise', {pra_id: pra_id}, function(data){
 			//console.log(data);
 			// results = data.results;
-			o('rightdiv').innerHTML = data.html;
+			if(ep==0){ ep=1;edit_practise(pra_id); }else{ep=0;
+			o('rightdiv').innerHTML = data.html;}
 		});
 	}
 	function remove_facility(id){
@@ -361,6 +384,43 @@ script.
 			}			
 		});
 	}
+	
+	function view_surgeon(name){ // _pppp
+		obj=o(name+'_utdd');
+		cele=obj.classList; // Clearview1685192542303_utd
+		console.log('view_surgeon----------');
+		console.log(cele);
+		console.log('view_surgeon----------');
+		nextFlag = '';
+		for(i=0;i<cele.length;i++){
+			console.log('------------'+cele[i]+'----------');
+			if(cele[i] == 'minidown'){
+				nextFlag = 'miniup'; break; }
+			if(cele[i] == 'miniup'){
+				nextFlag = 'minidown'; break; }
+		}
+		console.log(nextFlag+'***');
+		obj.className = '';
+		obj.classList.add('miniarrow');
+		obj.classList.add(nextFlag); // miniarrow minidown
+		
+		//console.log('adding miniarrow ' + nextFlag + ' to ' +name+'_utd');
+		//if(cele=='') // miniarrow minidown
+		objc = o(name+'_pppp');
+		objc.innerHTML = '';
+		//console.log('------1-------');return;
+		if(nextFlag != 'miniup')
+		$.post('/admin/showleftSurgeons', {id: name}, function(data){
+			console.log(data);
+			res = data.results;			
+			if(res.length > 0){
+				for(i=0;i<res.length;i++){
+					objc.innerHTML += '<a href="javascript:opensurgeon(\''+res[i].id+'\')">'+res[i]['first_name']+'</a><br>';
+				}
+			}			
+		});
+	}
+	
 	
 	function opensurgeon(userid){
 		o('rightdiv').innerHTML = '';

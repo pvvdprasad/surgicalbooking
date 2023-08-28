@@ -60,8 +60,22 @@ router.get('/neworder',async function(req, res, next) {
 	*/
 	if(checkAuth(req,res)) return;
 	
-	var sql = 'select id,fname,fax,cell from facilities';
+	sql = 'select selected_sc from other_users where user_id='+req.session.userid;
 	conn.query(sql, function (err, result) {
+		selected_sc=result[0].selected_sc;
+	if(selected_sc != ''){
+		sf=selected_sc.split('|');
+		ttt = '';
+		for(i=0;i<sf.length;i++){
+			if(sf[i] != ''){
+				ttt += sf[i].split(':')[0]+',';
+			}
+		}
+		var ttt = ttt.slice(0, -1);
+	
+	sql = 'select id,fname,fax,cell from facilities where id in ('+ttt+')';
+	console.log(sql);
+	conn.query(sql, function (err, fresult) {
 		if (err) console.log( err);
 		else{console.log(result);
 		//res.render('admin/dashboard', { BASE_PATH: '../' });
@@ -70,9 +84,27 @@ router.get('/neworder',async function(req, res, next) {
 		conn.query(sql, function (err, result111) {
 		if (err) console.log( err);
 			console.log("User query created");
-			res.render('admin/new_order', { BASE_PATH: '../',results2:result111,results:result,uid:req.session.userid });
+			console.log(fresult);
+			res.render('admin/new_order', { BASE_PATH: '../',results2:result111,results:fresult,uid:req.session.userid });
 		});
 	  });
+	  }else{
+		//sql = 'select id,fname,fax,cell from facilities';
+		//conn.query(sql, function (err, fresult) {
+		//	if (err) console.log( err);
+		//	else{console.log(result);
+			//res.render('admin/dashboard', { BASE_PATH: '../' });
+		//}
+			sql = "select id, mname, cell from manufacturers";
+			conn.query(sql, function (err, result111) {
+			if (err) console.log( err);
+				console.log("User query created");
+				res.render('admin/new_order', { BASE_PATH: '../',results2:result111,results:[],uid:req.session.userid });
+			});
+		//  });
+	  }
+	  
+	});
 });
 
 
@@ -122,6 +154,7 @@ router.post('/get_order', async function(req, res, next) {
 
 router.post('/updatefacili', async function(req, res, next) {
 	reqs = req.body;
+	console.log(reqs);
 	sql = 'update facilities set fname="'+reqs.namee+'",fax="'+reqs.fax+'", cell="'+reqs.phone+'", website="'+reqs.website+'" where id='+reqs.id; //   
 	console.log('updatefacili---------------');
 	// id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value
@@ -576,22 +609,73 @@ router.post('/showsurgeons', async function(req, res, next) {
 	sql = 'select id,fname,surgeons from facilities where id='+reqs.fid;
 	html = '<h2 style="text-align:center">Surgeons</h2><br><p style="text-align:left">';
 	await conn.query(sql, function (err, result) {
+		if(result!=undefined){
 		for(i=0;i<result.length;i++){
 			obj = result[i];
-			html += obj.fname+'</p><table class="table><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th></th></tr>"';
+			html += obj.fname+'</p><table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Action</th></tr>';
 			console.log(obj.surgeons);
 			if(obj.surgeons != null && obj.surgeons != ''){
 				oarr = obj.surgeons.split('|');
 				console.log(oarr);o='';
 				for(j=0;j<oarr.length;j++){
-					o=oarr[j]+',';
+					if(oarr[j]!='')
+					o+=oarr[j]+',';
 				}
 				console.log(o);
 				var answer = o.slice(0, -1);
 				console.log(answer);
 			}
+			sql = 'select id,first_name,middle_name,last_name,npi from other_users where id in ('+answer+')';
+			console.log(sql);
+			conn.query(sql, function (err, result2) {
+				if(result2 != undefined){
+				for(i=0;i<result2.length;i++){
+					console.log(result2[i]);
+					html += '<tr><td>'+result2[i].first_name+'</td><td>'+result2[i].middle_name+'</td><td>'+result2[i].last_name+'</td><td>'+result2[i].npi+'</td><td><input type="checkbox" name="dlinkchs" value='+result2[i].id+' /></td></tr>';
+				}
+				console.log('End...........');
+				html += '</table><br><input type="button" class="btn cbut blue bbbutons" style="position:relative" onclick="dlink('+reqs.fid+')" value="Dlink" />';
+				}
+				res.send({html:html});
+			});
+			break;	
 		}
-		res.send({html:html});
+		}
+	});
+});
+
+router.post('/dlink', async function(req, res, next) {
+	var reqs=req.body;
+	console.log(reqs);
+	console.log('dlink-------------');
+	// reqs.fid reqs.tarr
+	
+	var ttt = reqs.tarr.split(',');
+	for(i=0;i<ttt.length;i++){
+	}
+	// sql = 'update facilities set id,surgeons from facilities where id ='+reqs.fid;
+	sql = 'select id,surgeons from facilities where id ='+reqs.fid;
+	await conn.query(sql, function (err, result) {
+		
+		if (err) console.log( err);
+		console.log('result-----------');
+		console.log(result);
+		oor=[];
+		obj = '';
+		 if(result.length > 0){
+			obj = result[0];
+			var ttt = reqs.tarr.split(',');
+			for(i=0;i<ttt.length;i++){
+				console.log(i+':--------------:'+ttt[i]+':');
+				obj.surgeons=obj.surgeons.replace(ttt[i], "");
+				console.log(obj.surgeons);
+			}
+		} 
+		sql = 'update facilities set surgeons = "'+obj.surgeons+'" where id ='+reqs.fid;
+		conn.query(sql, function (err, result) {
+			res.send({result:result});
+		});
+			
 	});
 });
 
@@ -766,7 +850,7 @@ router.post('/addsurgeon', async function(req, res, next) {
 			userid=result[0].id;
 			console.log('userid----------:'+userid);
 			
-			sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,fact_id) VALUES('"+userid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','"+reqs.npi+"','"+pass+"','"+reqs.facid+"')";
+			sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,fact_id,selected_sc,used_sc) VALUES('"+userid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','"+reqs.npi+"','"+pass+"','"+reqs.facid+"','','')";
 	
 			console.log(sql);
 	
@@ -778,9 +862,9 @@ router.post('/addsurgeon', async function(req, res, next) {
 
 	console.log(sql);	
 	
-		
+	/*	
 	sendEmail(reqs.email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.first_name+',<br></i></b>Your temporary password is '+pass);
-	
+	*/
 	
 });
 
@@ -791,13 +875,13 @@ router.post('/adduser', async function(req, res, next) {
 	reqs = req.body;
 	var pass = generatePassword();
 	
-	sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode) VALUES('"+reqs.facid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','','"+pass+"')";
+	sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,selected_sc,used_sc) VALUES('"+reqs.facid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','','"+pass+"','','')";
 	
 	console.log(sql);
 	
-		
+		/*
 	sendEmail(reqs.email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.first_name+',<br></i></b>Your temporary password is '+pass);
-	
+	*/
 	await conn.query(sql, function (err, result) {
 			if (err) throw err;
 			console.log("facilities query created");	
@@ -962,6 +1046,21 @@ router.post('/showSurgeons', async function(req, res, next) {
 	console.log(id+'<--->showSurgeons');
 	var sql = "select id,user_id,first_name,middle_name,last_name,cell,email,npi from other_users where selected_sc like '%|" + id +":%'";
 	
+	await conn.query(sql, function (err, result) {
+		if (err) throw err;
+		console.log("facilities query created");	
+		//res.send('respond with a resource'); 
+		res.send({results:result});
+	  });
+});
+
+router.post('/showleftSurgeons', async function(req, res, next) {
+	
+	//const docClient = new AWS.DynamoDB.DocumentClient();
+	id = req.body.id;
+	console.log(id+'<--->showSurgeons');
+	var sql = "select id,user_id,first_name,middle_name,last_name,cell,email,npi from other_users where fact_id = " + id;
+	console.log(sql);
 	await conn.query(sql, function (err, result) {
 		if (err) throw err;
 		console.log("facilities query created");	
