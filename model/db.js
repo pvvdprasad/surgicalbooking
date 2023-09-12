@@ -15,7 +15,7 @@ CREATE DATABASE surgy_latest
 ALTER USER 'RkoUf94no02iObF'@'localhost' IDENTIFIED WITH mysql_native_password by 'irMIpF8GT1ux-Ry';
 'surgyuser'@'localhost' IDENTIFIED BY 'SuRgyp@ss@123'
 */
-
+/*Testing file upload.......................*/
  var mysql=require('mysql');
  var connection=mysql.createConnection({
    host:'127.0.0.1',

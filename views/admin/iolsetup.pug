@@ -80,13 +80,14 @@ script.
         gman='';gmod='';gbra='';gid='';
         tt=document.getElementsByName('favhids');
         for(i=0;i<tt.length;i++){
-            // 1-fav2-1-man 3-model 1-brand 2
+            // 4-fav1-25-4-4-3
+            // 0   1   2 3 4 5
             ss=tt[i].value;
             sa=ss.split('-');
             if(id==sa[1]){
             gman=sa[3];gmod=sa[4];gbra=sa[5];gid=sa[0];
             console.log(gman);
-            document.getElementById("manusele").selectedIndex = gman;
+            // document.getElementById("manusele").selectedIndex = gman;
             manuselect(gman);
             break;}
         }/*
@@ -96,6 +97,14 @@ script.
     }
     function manuselect(id){
         if(id==''){return;}
+        x = document.getElementById("manusele");
+        for(i=0;i<x.options.length;i++){
+            if(x.options[i].value == id){
+                document.getElementById("manusele").selectedIndex = i;
+                break;
+            }
+        }
+        
         daySelect = o('brandsele');
         removeOptions(daySelect);
         console.log('id:'+id);
@@ -149,6 +158,7 @@ script.
                 ss=r[i].id+'-'+r[i].fav_type+'-'+r[i].surgeon_id+'-'+r[i].manufacture+'-'+r[i].model+'-'+r[i].brand;
                 ff = '<input type="hidden" name="favhids" value="'+ss+'"/>';
                 o('favhtml').innerHTML += ff;
+                console.log(ff);
             }
         });
     }

@@ -25,7 +25,7 @@ ul#uuul(style='margin-top:10px;')
 									td
 										|
 									td
-										a(href='javascript:add_surgeon2("'+element.id+'","'+element.fname+'")') Add Surgeon 
+										a(href='javascript:add_surgeon2("'+element.id+'","'+element.fname+'")') Link Surgeon 
 								tr
 									td(style='vertical-align: top;')
 										.miniarrow.miniup(id=element.id+'_uttd', onclick='view_dlink("'+element.id+'")')
@@ -37,29 +37,39 @@ ul#uuul(style='margin-top:10px;')
 										.miniarrow.miniup(id=element.id+'_utd', onclick='view_user("'+element.id+'")')
 									td
 										a(href='javascript:view_user("'+element.id+'")') View/Edit User
-										.hidddd(id=element.id+'_uuu')
-	li
-		a(href='javascript:add_practise()') Add Practise
-	li(style='padding-bottom:10px')
-		a(href='javascript:open_practise()') View / Edit Practise
-		#left_pra_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
-			ul#uuul
-				each element in result2
-					li
-						.arrow.up(style='float:left',onclick='callswapp(this,"'+element.id+'")')
-						.tttdiv= element.pname
-							i(class='bi bi-pen pendd', onclick='edit_practise("'+element.id+'")') Edit
-						.hidivs(id=element.id+'ppp')
-							table
-								tr
-									td
-										|
-									td
-										a(href='javascript:add_surgeon("'+element.id+'")') Add Surgeon 
-								tr
-									td(style='vertical-align: top;')
-										.miniarrow.miniup(id=element.id+'_utdd', onclick='view_surgeon("'+element.id+'")')
-									td
-										a(href='javascript:view_surgeon("'+element.id+'")') View/Edit Surgeon
-										.hidddd(id=element.id+'_pppp')
+									.hidddd(id=element.id+'_uuu')
 		
+ul
+	li
+		p= 'Manage Surgeons'
+	li
+		a(href='javascript:add_practise()') Add Surgeon
+	li(style='padding-bottom:10px')
+		a(href='javascript:open_practise()') View / Remove Surgeon
+	//	#left_pra_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
+	//li
+	//	a(href='javascript:add_practise()') Add Practise
+	//li(style='padding-bottom:10px')
+	//	a(href='javascript:open_practise()') View / Edit Practise
+	//	#left_pra_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
+	//		ul#uuul
+	//			each element in result2
+	//				li
+	//					.arrow.up(style='float:left',onclick='callswapp(this,"'+element.id+'")')
+	//					.tttdiv= element.pname
+	//						i(class='bi bi-pen pendd', onclick='edit_practise("'+element.id+'")') Edit
+	//					.hidivs(id=element.id+'ppp')
+	//						table
+	//						tr
+	//								td
+	//									|
+	//								td
+	//									a(href='javascript:add_surgeon("'+element.id+'")') Link Surgeon 
+	//							tr
+	//								td(style='vertical-align: top;')
+	//									.miniarrow.miniup(id=element.id+'_utdd', onclick='view_surgeon("'+element.id+'")')
+	//								td
+	//									a(href='javascript:view_surgeon("'+element.id+'")') View/Edit Surgeon
+	//									.hidddd(id=element.id+'_pppp')
+	//	
+	//

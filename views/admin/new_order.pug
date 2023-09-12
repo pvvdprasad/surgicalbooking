@@ -41,7 +41,7 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                     input#datepicker2.form-control(type="text" placeholder="Date of Birth")
                     i(class="fa fa-calendar" aria-hidden="true" style="position: absolute;top: 16px;right: 15px;")
                 td.col-md-3(style="padding:5px")
-                    select.form-select()#select_side(type="text" placeholder="Select side")
+                    select.form-select#select_side(type="text" placeholder="Select side")
                         option(value='')= 'Select side'
                         option(value='left')= 'left'
                         option(value='right')= 'right'
@@ -61,19 +61,19 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                     label()= 'Select Manually'
             tr#ddtr01
                 td(style="padding:5px")
-                    select.form-select()#select_manu(type="text" placeholder="Select Manufacturer" onchange="seleoptuion(this.value,'manu')")
+                    select.form-select#select_manu(type="text" placeholder="Select Manufacturer" onchange="seleoptuion(this.value,'manu')")
                         option(value='')= 'Select Manufacturer'
                         each result in results2
                             option(value=result.id)= result.mname
                 td(style="padding:5px")
-                    select.form-select()#select_brand(placeholder="Select Brand" onchange="seleoptuion(this.value,'brand')")
+                    select.form-select#select_brand(placeholder="Select Brand" onchange="seleoptuion(this.value,'brand')")
                         option(value='')= 'Select Brand'
             tr#ddtr02
                 td(style="padding:5px")
-                    select.form-select()#select_model(placeholder="Select Model")
+                    select.form-select#select_model(placeholder="Select Model")
                         option(value='')= 'Select Model'
                 td(style="padding:5px")
-                    select.form-select()#select_power(placeholder="Select Power")
+                    select.form-select#select_power(placeholder="Select Power")
                         option(value='')= 'Select Power'
             tr
                 td(colspan=2,style="text-align:center")
@@ -287,7 +287,7 @@ script.
         br=o('select_model');
         removeOptions(br);
         
-        $.post('/admin/modelbymid',{id:gmo},function(data){
+        $.post('/admin/modelbymid',{id:gbr},function(data){
             // id, bname, mid 
             result=data.results;
             myOption = document.createElement("option");

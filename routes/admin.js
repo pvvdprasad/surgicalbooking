@@ -54,14 +54,29 @@ router.post('/getfavs',async function(req, res, next) {
 	});
 });
 
+router.post('/save_password',async function(req, res, next) {	
+	// query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
+	reqs = req.body;
+	//reqs.p
+	//reqs.uid
+	sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
+	console.log(sql);
+	
+	conn.query(sql, function (err, result) {
+		res.send({});
+	});
+});
+
 router.get('/neworder',async function(req, res, next) {	
 	/*
 	facilities (id INT NOT NULL AUTO_INCREMENT, fname CHAR(200) NOT NULL,fax CHAR(50),cell CHAR(50),website CHAR(150), PRIMARY KEY (id))
 	*/
 	if(checkAuth(req,res)) return;
 	
-	sql = 'select selected_sc from other_users where user_id='+req.session.userid;
+	sql = 'select id,facility_id,status from surgeon_facility where surgeon_id='+req.session.userid;
+	console.log(sql);
 	conn.query(sql, function (err, result) {
+		/*
 		selected_sc=result[0].selected_sc;
 	if(selected_sc != ''){
 		sf=selected_sc.split('|');
@@ -72,8 +87,16 @@ router.get('/neworder',async function(req, res, next) {
 			}
 		}
 		var ttt = ttt.slice(0, -1);
+		*/
+		arr = [];
+		for(i=0;i<result.length;i++){
+			ff=result[i].facility_id;
+			if(!arr.includes(ff)){
+				arr.push(ff);
+			}
+		}
 	
-	sql = 'select id,fname,fax,cell from facilities where id in ('+ttt+')';
+	sql = 'select id,fname,fax,cell from facilities where id in ('+arr.toString()+')';
 	console.log(sql);
 	conn.query(sql, function (err, fresult) {
 		if (err) console.log( err);
@@ -88,21 +111,23 @@ router.get('/neworder',async function(req, res, next) {
 			res.render('admin/new_order', { BASE_PATH: '../',results2:result111,results:fresult,uid:req.session.userid });
 		});
 	  });
-	  }else{
+	  
+	 // }else{
 		//sql = 'select id,fname,fax,cell from facilities';
 		//conn.query(sql, function (err, fresult) {
 		//	if (err) console.log( err);
 		//	else{console.log(result);
 			//res.render('admin/dashboard', { BASE_PATH: '../' });
 		//}
-			sql = "select id, mname, cell from manufacturers";
-			conn.query(sql, function (err, result111) {
-			if (err) console.log( err);
-				console.log("User query created");
-				res.render('admin/new_order', { BASE_PATH: '../',results2:result111,results:[],uid:req.session.userid });
-			});
+		/*
+	sql = "select id, mname, cell from manufacturers";
+	conn.query(sql, function (err, result111) {
+	if (err) console.log( err);
+		console.log("User query created");
+		res.render('admin/new_order', { BASE_PATH: '../',results2:result111,results:[],uid:req.session.userid });
+	}); */
 		//  });
-	  }
+	  // }
 	  
 	});
 });
@@ -463,22 +488,85 @@ router.post('/deleteEntity', async function(req, res, next) {
 	//reqs.id
 	res.send({results:''});
 });
+
+router.post('/viewAllSurgeons', async function(req, res, next) {
+	var reqs = req.body;
+	console.log('In addpractise...........');
+	console.log(reqs);
+	sql = 'select id,user_id,first_name,middle_name,last_name,cell,email,npi,selected_sc,used_sc from other_users';
+	
+	await conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		else{
+			html = '<table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>Cell</th><th>Email</th><th>NPI</th><th>Action</th></tr>';
+			for(i=0;i<result.length;i++){
+				obj = result[i];
+				html += '<tr><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.cell+'</td><td>'+obj.email+'</td><td>'+obj.npi+'</td></tr>';
+			}
+			html += '</table>';
+		}
+		res.send({results:html});
+	});
+});
+
 router.post('/addpractise', async function(req, res, next) {
 	var reqs = req.body;
 	console.log('In addpractise...........');
 	console.log(reqs);
+	var pass = generatePassword();
+	var sql = 'INSERT INTO users (name,passcode,role) values("'+reqs.prac_name+'","'+pass+'",2)';
 	/*
-	pname CHAR(200) NOT NULL,fax CHAR(50),cell CHAR(50),website CHAR(150), npi char(50),
-	prac_name: o('first_name').value,website: o('website').value,fax: o('fax').value,cell: o('cell').value,email: o('email').value,npi: o('npi').value
+		{
+	  prac_name: 'uuhuhukhkhj',
+	  website: 'kjkhkhkkj.jhb',
+	  fax: '788676887',
+	  cell: '8787877876',
+	  email: 'jksfjhkjdsfkjdsf@sffdg.dff',
+	  npi: '908089'
+		}
 	*/
-	var sql = "INSERT INTO practises(pname,fax,cell,website, npi) VALUES('"+reqs.prac_name+"','"+reqs.fax+"','"+reqs.cell+"','"+reqs.website+"','"+reqs.npi+"')";
 	console.log(sql);
+	await conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		else{
+		}
+		sql = "select id, name from users where passcode = '"+pass+"'";
+		console.log(sql);
+		conn.query(sql, function (err, result1) {
+		if (err) console.log( err);
+		else{
+			if(result1){
+				for(i=0;i<result1.length;i++){
+					console.log(result1[i]);
+					var userid = result1[i].id;
+					sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,selected_sc,used_sc) VALUES('"+userid+"','"+reqs.prac_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','"+reqs.npi+"','"+pass+"','','')";
+					console.log(sql);
+					conn.query(sql, function (err, result1) {
+					if (err) console.log( err);
+					else{
+					}});
+					break;
+				}
+				res.send({results:''});
+			}
+		}
+		/*
+		sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,fact_id,selected_sc,used_sc) VALUES('"+userid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','"+reqs.npi+"','"+pass+"','"+reqs.facid+"','','')";
+		
+		console.log(result);
+		*/
+	});
+//	var sql = "INSERT INTO practises(pname,fax,cell,website, npi) VALUES('"+reqs.prac_name+"','"+reqs.fax+"','"+reqs.cell+"','"+reqs.website+"','"+reqs.npi+"')";
+//	console.log(sql);
 	
+	/*
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
 	else{
 	}
 	res.send({results:''});
+	});
+	*/
 	});
 });
 
@@ -570,7 +658,20 @@ router.post('/save_search_surgeon', async function(req, res, next) {
 	//  fid,sids
 	// reqs.fid 
 	
-	sql = 'select id,surgeons from facilities where id='+reqs.fid;
+	arr = reqs.sids.split('|');
+	console.log(arr);
+	for(i=0;i<arr.length;i++){		
+		sql = 'insert into surgeon_facility(surgeon_id,facility_id,status) values("'+arr[i]+'", "'+reqs.fid+'",0)';
+		console.log(sql);
+		if(arr[i] == '') continue;
+		await conn.query(sql, function (err, result) {
+		if (err) console.log(err);
+		});
+	}
+	res.send({});
+	
+	/*
+	sql = 'select id,surgeons from facilities where id='+reqs.fid;  surgeon_facility
 	await conn.query(sql, function (err, result) {
     if (err) console.log(err);
 		obj=result[0];
@@ -581,6 +682,7 @@ router.post('/save_search_surgeon', async function(req, res, next) {
 			res.send({});
 		});
 	});
+	*/
 });
 
 function mergeResult(surgeons, sids){
@@ -602,36 +704,67 @@ function mergeResult(surgeons, sids){
 	return su;
 }
 
+function getStatus(linkids,surarr,strrr,id){
+	console.log('id is:----:'+id);
+	console.log(surarr);
+	console.log(strrr);
+	for(j=0;j<surarr.length;j++){
+		if(surarr[j] == id){
+			return strrr[j]+'|'+linkids[j];
+		}
+	}
+}
+
 router.post('/showsurgeons', async function(req, res, next) {
 	var reqs=req.body;
 	console.log(reqs);
 	// var answer = color.slice(0, -1);
-	sql = 'select id,fname,surgeons from facilities where id='+reqs.fid;
+	sql = 'select id,surgeon_id,status from surgeon_facility where facility_id='+reqs.fid; 
+	console.log(sql);
+	sql2 = 'select id,fname,surgeons from facilities where id='+reqs.fid;
 	html = '<h2 style="text-align:center">Surgeons</h2><br><p style="text-align:left">';
-	await conn.query(sql, function (err, result) {
-		if(result!=undefined){
+	
+	await conn.query(sql2, function (err, result2) { 
+		if(result2!=undefined)
+			html += result2[0].fname;
+	});
+		
+	await conn.query(sql, function (err, result) { 
+		if(result!=undefined && result.length >= 1){
 		for(i=0;i<result.length;i++){
 			obj = result[i];
-			html += obj.fname+'</p><table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Action</th></tr>';
-			console.log(obj.surgeons);
-			if(obj.surgeons != null && obj.surgeons != ''){
-				oarr = obj.surgeons.split('|');
-				console.log(oarr);o='';
-				for(j=0;j<oarr.length;j++){
-					if(oarr[j]!='')
-					o+=oarr[j]+',';
-				}
-				console.log(o);
-				var answer = o.slice(0, -1);
-				console.log(answer);
+			html += '</p><table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Action</th><th>Status</th></tr>';
+			console.log(obj.surgeon_id);
+			sarr = [];str=[];linkids=[];
+			if(obj.surgeon_id != null && obj.surgeon_id != ''){
+				sarr.push(obj.surgeon_id);
+				str.push(obj.status);
+				linkids.push(obj.id);
 			}
-			sql = 'select id,first_name,middle_name,last_name,npi from other_users where id in ('+answer+')';
+			console.log(sarr);
+			sstr = sarr.toString();
+			sql = 'select id,user_id,first_name,middle_name,last_name,npi from other_users where id in ('+sstr+')';
 			console.log(sql);
 			conn.query(sql, function (err, result2) {
 				if(result2 != undefined){
 				for(i=0;i<result2.length;i++){
 					console.log(result2[i]);
-					html += '<tr><td>'+result2[i].first_name+'</td><td>'+result2[i].middle_name+'</td><td>'+result2[i].last_name+'</td><td>'+result2[i].npi+'</td><td><input type="checkbox" name="dlinkchs" value='+result2[i].id+' /></td></tr>';
+					status = getStatus(linkids,sarr,str,result2[i].id);
+					
+					console.log('status is:'+status);
+					sarr = status.split('|');
+					status = sarr[0];
+					ids = sarr[1];
+					
+					bhtl = '';
+					if(status ==0){ // No answer yet
+						bhtl = '<img src="../images/exclamation.jpg" />';
+					}else if(status ==1){ // Yes
+						bhtl = '<img src="../images/tick_icon.png" />';
+					}if(status ==2){ // No
+						bhtl = '<img src="../images/cross.png" />';
+					}
+					html += '<tr><td>'+result2[i].first_name+'</td><td>'+result2[i].middle_name+'</td><td>'+result2[i].last_name+'</td><td>'+result2[i].npi+'</td><td><input type="checkbox" name="dlinkchs" value='+ids+' /></td><td>'+bhtl+'</td></tr>';
 				}
 				console.log('End...........');
 				html += '</table><br><input type="button" class="btn cbut blue bbbutons" style="position:relative" onclick="dlink('+reqs.fid+')" value="Dlink" />';
@@ -640,6 +773,8 @@ router.post('/showsurgeons', async function(req, res, next) {
 			});
 			break;	
 		}
+		}else{
+			res.send({html:'<h1>No Surgeons</h1>'});
 		}
 	});
 });
@@ -650,7 +785,14 @@ router.post('/dlink', async function(req, res, next) {
 	console.log('dlink-------------');
 	// reqs.fid reqs.tarr
 	
-	var ttt = reqs.tarr.split(',');
+	sql = 'DELETE FROM surgeon_facility where id in ('+reqs.tarr+')';
+	console.log(sql);
+	await conn.query(sql, function (err, result) {		
+		if (err) console.log(err);
+		res.send({result:''});
+	});
+	
+	/* var ttt = reqs.tarr.split(',');
 	for(i=0;i<ttt.length;i++){
 	}
 	// sql = 'update facilities set id,surgeons from facilities where id ='+reqs.fid;
@@ -674,9 +816,8 @@ router.post('/dlink', async function(req, res, next) {
 		sql = 'update facilities set surgeons = "'+obj.surgeons+'" where id ='+reqs.fid;
 		conn.query(sql, function (err, result) {
 			res.send({result:result});
-		});
-			
-	});
+		});			
+	}); */
 });
 
 router.post('/search_surgeon', async function(req, res, next) {
@@ -686,7 +827,10 @@ router.post('/search_surgeon', async function(req, res, next) {
 	id = reqs.fid;
 	txt = reqs.text;
 	
-	var sql = 'select id,first_name,last_name,middle_name,npi from other_users where selected_sc like "%|'+id+':%" AND( first_name like "%'+txt+'%" OR middle_name like "%'+txt+'%" OR last_name like "%'+txt+'%" OR npi like "%'+txt+'%")';
+	// var sql = 'select id,first_name,last_name,middle_name,npi from other_users where selected_sc like "%|'+id+':%" AND( first_name like "%'+txt+'%" OR middle_name like "%'+txt+'%" OR last_name like "%'+txt+'%" OR npi like "%'+txt+'%")';
+	
+	sql = 'select id,first_name,last_name,middle_name,npi from other_users where first_name like "%'+txt+'%" or last_name like "%'+txt+'%" or middle_name like "%'+txt+'%" or npi like "%'+txt+'%"';
+	console.log(sql);
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
 	console.log(result);
@@ -725,7 +869,7 @@ router.get('/settings', async function(req, res, next) {
 			for(i=0;i<result.length;i++){
 				if(!arr.includes(parseInt(result[i]['id']))){farr.push(result[i]);}
 			}
-			res.render('admin/settings', { BASE_PATH: '../', result:farr, uid:req.session.userid, result2:varr});
+			res.render('admin/settings', { BASE_PATH: '../', result:farr, uid:req.session.userid, result2:varr, uid:req.session.userid});
 			});
 		});
 	//});

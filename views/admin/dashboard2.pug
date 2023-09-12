@@ -38,7 +38,7 @@ style.
 	.tttdiv{margin:2px 0 0 38px}
 	#left_fac_div, #left_pra_div{display:none;} 
 	#headerspan{display:none}
-	#searchpopup{display:none;border:1px solid #000;padding:5px;position:absolute;z-index:9999;width:98%;top:118px;background:#FFF}
+	#searchpopup{display:none;border:1px solid #D0D0D0;padding:5px;position:absolute;z-index:9999; width:98%; top:118px; background:#FFF}
 	.miniarrow{background-image:url('../images/up-down-mini.png');width:30px;height:28px;cursor:pointer;padding-top:7px}
 	.miniarrow span{padding-left:45px}
 	.minidown{background-position:28px -1px;}
@@ -68,8 +68,8 @@ script.
 	function o(id){return document.getElementById(id);}
 	function c(cname){return document.getElementsByClassName(cname)[0];}
 	function submitformpractise(){
-		
-		$.post('/admin/addpractise', {prac_name: o('first_name').value,website: o('website').value,fax: o('fax').value,cell: o('cell').value,email: o('email').value,npi: o('npi').value}, function(data){
+		if(o('first_name').value == '') {alert('Enter the surgeon name');return;}
+		$.post('/admin/addpractise', {prac_name: o('first_name').value,middle_name: o('middle_name').value,last_name: o('last_name').value,website: o('website').value,fax: o('fax').value,cell: o('cell').value,email: o('email').value,npi: o('npi').value}, function(data){
 			console.log(data);
 			// results = data.results;
 			//o('rightdiv').innerHTML = data.html;
@@ -100,7 +100,7 @@ script.
 		
 	}
 	function add_practise(){
-		o('rightdiv').innerHTML = '<h2>Add Practise</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter Practise Name"><input class="form-control subdiv" id="website" type="text" name="website" placeholder="Enter Website"><input class="form-control subdiv" id="fax" type="text" name="fax" placeholder="Enter Fax"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
+		o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" required id="first_name" type="text" name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" required placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="website" type="text" name="website" required placeholder="Enter Website" /><input class="form-control subdiv" id="fax" type="text" name="fax" required placeholder="Enter Fax" /><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell" required /><input class="form-control subdiv" id="email" type="text" required name="email" placeholder="Enter Email" /><input class="form-control subdiv" id="npi" type="text" name="npi" required placeholder="Enter NPI" /><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
 	}
 	function callswap(obj,className){
 		//console.log(className);
@@ -273,7 +273,7 @@ script.
 		return false;
 	}
 	
-	function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
+	function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" required name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" required name="middle_name" placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="cell" type="text" name="cell" required placeholder="Enter Cell" /><input class="form-control subdiv" id="email" type="text" name="email" required placeholder="Enter Email" /><input class="form-control subdiv" required id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email" /><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
 	
 	function add_surgeon2(name,fname){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><div style="text-align:left;font-weight:bold;margin-left:10px">'+fname+'</div><input type="text" placeholder="Name/NPI" class="magnify" id="searchtext" onkeyup="search_surgeon('+name+',this.value)" /><br><input class="btn cbut blue bbbutons" type="button" style="left:-4%;margin-top:10px;position:relative;" value="Search" /><div id="searchpopup"></div>';}
 	
@@ -283,12 +283,14 @@ script.
 	
 	function save_search_surgeon(fid){
 		chs=document.getElementsByName('chsurgeons');
-		vv='|';
+		vv='';
 		if(chs.length <= 0){ alert('Select a surgeon'); return; }
 		for(i=0;i<chs.length;i++){
 			if(chs[i].checked)
 				vv += chs[i].value+'|';			
 		}		
+		
+		console.log(vv);
 		
 		$.post('/admin/save_search_surgeon', {fid: fid,sids:vv}, function(data){
 			alert('Surgeons are saved');
@@ -306,9 +308,7 @@ script.
 			for(i=0;i<data.result.length;i++){
 				obj=data.result[i]; // id,first_name,last_name,middle_name,npi
 				
-					html += '<tr><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td><td><input type="checkbox" name="chsurgeons" value="'+obj.id+'"  /></td></tr>';
-				
-				
+				html += '<tr><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td><td><input type="checkbox" name="chsurgeons" value="'+obj.id+'"  /></td></tr>';
 			}
 			o('searchpopup').innerHTML = html + '</table><input class="btn cbut blue bbbutons" value="Add" onclick="save_search_surgeon('+id+')" style="position:relative" />';
 		});
@@ -519,8 +519,15 @@ script.
 		o('left_fac_div').style.display='block';
 	}
 	function open_practise(){
-		// console.log('In the open_facility.................');
-		o('left_pra_div').style.display='block';
+		console.log('In the open_facility.................');
+		// o('left_pra_div').style.display='block';
+		
+		$.post('/admin/viewAllSurgeons', {}, function(data){
+			console.log(data);
+			o('rightdiv').innerHTML = o('rightdiv').innerHTML = '<h2>View Surgeon</h2>'+data.results;
+
+		});
+		
 	}
 	function submitform(){
 		console.log('In the function');

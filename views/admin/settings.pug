@@ -22,16 +22,14 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
 .container
     .row
         ul#ex1.nav.nav-tabs.mb-3(role='tablist')
-          li.nav-item(role='presentation' style='width: 50%;text-align:center')
-            a#ex1-tab-1.nav-link(data-mdb-toggle='tab' role='tab' aria-controls='ex1-tabs-1' aria-selected='true') Select Surgery center
-          li.nav-item(role='presentation' style='width: 50%;text-align:center')
+          li.nav-item(role='presentation' style='width: 100%;text-align:center')
             a#ex1-tab-2.nav-link(data-mdb-toggle='tab' role='tab' aria-controls='ex1-tabs-2' aria-selected='false') Change Password
         // Tabs navs
         // Tabs content
         //each element1 in result2 
           //  p= '|'+element1.selected_sc + '|'
         #ex1-content.tab-content
-          #ex1-tabs-1(role='tabpanel')
+          #ex1-tabs-1(role='tabpanel' style='display:none')
             h2 Select Surgerycenters
             
             select#surgicenters(multiple="multiple",class="selected_class",onchange="selected_surgy(1)")
@@ -46,9 +44,16 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                     option(value=element.id)= element.val
             input.btn.cbut.blue(type='button' onclick='savesg()' value='save')
             input(type='hidden',value=uid,id='uidhid')
-          #ex1-tabs-2(role='tabpanel' style='display:none;text-align:center')
+          #ex1-tabs-2(role='tabpanel' style='display:block;text-align:center')
             h2 Change Password
-        
+                div(style='margin:0 30%')
+                    br
+                    input.form-control#password(type="password" placeholder="Enter Password")
+                    br
+                    input.form-control#cpassword(type="password" placeholder="Enter Confirm Password")
+                    br
+                    input.form-control(type="button" style="margin:0" value="Submit" class="btn cbut blue" onclick="changepassword()")
+                    input(type='hidden', id='uid', value=uid)
         #megadiv()
             h2 Information
             #megadiv_body()
@@ -57,6 +62,19 @@ style.
     .blue{background: #003595;color: #FFF;}
     .grey{background: #FAFAFA;color: #333;border: 1px solid #999;}
 script.
+    function changepassword(){
+        url = '/admin/save_password';
+        p = o('password').value;
+        c = o('cpassword').value;
+        if(p != c){
+            alert('Passwords mismatch');
+        }else{
+            $.post(url,{p:p,uid:o('uid').value},function(data){
+                alert('Password saved successfully');
+                window.location = window.location.href;
+            });
+        }
+    }
     function savesg(){
       console.log('In savesg..............');
     

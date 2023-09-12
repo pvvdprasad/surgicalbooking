@@ -22,19 +22,39 @@ head
   link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
   script.
     function o(id){return document.getElementById(id);}
+    function back(){
+        o('div1').style.display = 'block';
+        o('div2').style.display = 'none';
+    }
     function showlog(){
         o('div1').style.display = 'none';
         o('div2').style.display = 'block';
+        // surgeonradio ptag
+        sr = document.getElementsByName('surgeonradio');
+        for(i=0;i<sr.length;i++){
+            if(sr[i].checked){
+                if(sr[i].value == 1){
+                    o('ptag').innerHTML = 'Admin Login';
+                }else if(sr[i].value == 2){
+                    o('ptag').innerHTML = 'Surgery Center Login';
+                }else if(sr[i].value == 3){
+                    o('ptag').innerHTML = 'Surgeon Login';
+                }
+                break;
+            }
+        }
     }
   style.
     #div2{display:none}
+    .labels{background: #F3F3F3;padding: 10px 20px;width: 200px;border-radius: 20px;margin-left: 10px;cursor:pointer}
   header#header.header.fixed-top(data-scrollto-offset='0')
   .container-fluid.d-flex.align-items-center.justify-content-between
     a.logo.align-items-center(href='index.html',style='position:absolute;top:0')
       // Uncomment the line below if you also wish to use an image logo
       // <img src="img/logo.png" alt="">
       h1
-        | SurgicalBooking
+        img(src=BASE_PATH+'images/125.png' style='width:150px;top:20px;position:absolute')
+        // | SurgicalBooking
     .container.align-items-center.justify-content-between
         section#features.features(class="col-md-6",style="margin:15% auto")
             form#loginform(action='/admin/postlogin' method='post')
@@ -44,20 +64,22 @@ head
                         br
                         br
                         input#admin(type='radio' name='surgeonradio' onchange='showlog()' value='1')
-                        label(for='admin')= 'Admin'
+                        label(for='admin',class='labels')= 'Admin'
                         br
                         br
                         input#SurgeryCentre(type='radio' name='surgeonradio' onchange='showlog()' value='2')
-                        label(for='SurgeryCentre')= 'Surgery Centre'
+                        label(for='SurgeryCentre',class='labels')= 'Surgery Centre'
                         br
                         br
                         input#Surgeon(type='radio' name='surgeonradio' onchange='showlog()' value='3')
-                        label(for='Surgeon')= 'Surgeon'
+                        label(for='Surgeon',class='labels')= 'Surgeon'
                         br
                         br
                     #div2
+                        p#ptag()
                         input.form-control(type='text' name='loginid' placeholder='Login Id' required='')
                         br
                         input.form-control(type='password' name='passid' placeholder='Password' required='')
                         br
+                        input.btn.btn-warning( type='button' value='< Back' onclick='back()' style='float:left')
                         input.btn.btn-success( type='submit' value='Login')

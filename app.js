@@ -13,18 +13,11 @@ var usersRouter = require('./routes/users');
 
 var db = require('./model/db');
 
-
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(bodyParser.json());
 app.use(bodyParser.json({ limit: '500mb' })); // parse application/json 
@@ -36,6 +29,15 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+//app.use(express.static('public'));
+//app.use(express.static(path.join(__dirname, '/public')));
+//app.use('/static', express.static(__dirname + 'public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
