@@ -95,9 +95,12 @@ script.
 	
 		$.post('/admin/showsurgeons', {fid: id}, function(data){
 			console.log(data);
+			if (data.noSurgeons) {
+				alert("No surgeons found.");
+			} else {
 				o('rightdiv').innerHTML = data.html;
-		});
-		
+			}
+		});	
 	}
 	function add_practise(){
 		o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" required id="first_name" type="text" name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" required placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="website" type="text" name="website" required placeholder="Enter Website" /><input class="form-control subdiv" id="fax" type="text" name="fax" required placeholder="Enter Fax" /><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell" required /><input class="form-control subdiv" id="email" type="text" required name="email" placeholder="Enter Email" /><input class="form-control subdiv" id="npi" type="text" name="npi" required placeholder="Enter NPI" /><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
@@ -283,14 +286,14 @@ script.
 	
 	function save_search_surgeon(fid){
 		chs=document.getElementsByName('chsurgeons');
-		vv='';
+		vv='|';
 		if(chs.length <= 0){ alert('Select a surgeon'); return; }
 		for(i=0;i<chs.length;i++){
 			if(chs[i].checked)
 				vv += chs[i].value+'|';			
 		}		
 		
-		console.log(vv);
+		//- console.log(vv);
 		
 		$.post('/admin/save_search_surgeon', {fid: fid,sids:vv}, function(data){
 			alert('Surgeons are saved');
@@ -304,7 +307,7 @@ script.
 		$.post('/admin/search_surgeon', {fid: id,text:val}, function(data){
 			//console.log(data.result);
 			o('searchpopup').style.display='block';
-			html = '<table class="table"><thead><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>#</th></tr></thead>';
+			html = '<table class="table"><thead><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Select</th></tr></thead>';
 			for(i=0;i<data.result.length;i++){
 				obj=data.result[i]; // id,first_name,last_name,middle_name,npi
 				
@@ -316,39 +319,57 @@ script.
 	
 	function add_surgeon(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformsurgeon()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;right: 30px;top: 50px;" value="Save"><br></div></form>';}
 	
-	function view_user(name){ // _pppp
-		cele=o(name+'_utd').classList; // Clearview1685192542303_utd
-		//console.log(cele);
-		nextFlag = '';
-		for(i=0;i<cele.length;i++){
-			if(cele[i] == 'minidown'){
-				nextFlag = 'miniup'; break; }
-			if(cele[i] == 'miniup'){
-				nextFlag = 'minidown'; break; }
-		}
-		
-		o(name+'_utd').className = '';
-		o(name+'_utd').classList.add('miniarrow');
-		o(name+'_utd').classList.add(nextFlag);
-		
-		console.log('adding miniarrow ' + nextFlag + ' to ' +name+'_utd');
-		//if(cele=='') // miniarrow minidown
-		objc = o(name+'_uuu');
-		objc.innerHTML = '';
-		//console.log('------1-------');return;
-		if(nextFlag != 'miniup')
-		$.post('/admin/showUsers', {id: name}, function(data){
-			console.log(data);
-			res = data.results;			
-			if(res.length > 0){
-				for(i=0;i<res.length;i++){
-					//if(i > 0) objc.innerHTML +='<br >';
-					objc.innerHTML += '<a href="javascript:openuser(\''+res[i].id+'\')">'+res[i]['first_name']+'</a><br>';
-				}
-			}			
+	//- function view_user(name){ // _pppp
+	//- 	console.log("In the view facility User =============")
+	//- 	console.log(name)
+	//- 	$.post('/admin/viewAllFacilityUser', {id: name}, function(data){
+	//- 		console.log(data.data);
+	//- 		var userListHTML = '<h2>Users</h2><table>';
+	//- 		userListHTML += '<tr><th>Select</th><th>Status</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>Cell</th><th>Email</th></tr>';
+	//- 		for(var i = 0; i < data.data.length; i++) {
+	//- 			var user = data.data[i];
+	//- 			userListHTML += '<tr><td><input type="checkbox" name="selectedUser" value="' + user.id + '"></td><td style="text-align: center">[Status]</td><td>' + user.first_name + '</td><td>' + user.middle_name + '</td><td>' + user.last_name + '</td><td>' + user.cell + '</td><td>' + user.email + '</td></tr>';
+	//- 		}
+	//- 		userListHTML += '</table>';
+	//- 		o('rightdiv').innerHTML = userListHTML;
+	//- 		});
+	//- 		}
+
+	function view_user(name){ 
+		console.log("In the view facility User =============")
+		console.log(name)
+		$.post('/admin/viewAllFacilityUser', {id: name}, function(data){
+			console.log(data.data);
+			if (data.data.length === 0) {
+				alert("No users found."); // Display alert if no data is received
+				return;
+			}
+			var userListHTML = '<h2>Users</h2><table>';
+			userListHTML += '<tr><th>Select</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>Cell</th><th>Email</th></tr>';
+			for(var i = 0; i < data.data.length; i++) {
+				var user = data.data[i];
+				userListHTML += '<tr><td><input type="checkbox" class="userCheckbox" name="selectedUser" value="' + user.id + '"></td><td>' + user.first_name + '</td><td>' + user.middle_name + '</td><td>' + user.last_name + '</td><td>' + user.cell + '</td><td>' + user.email + '</td></tr>';
+			}
+			userListHTML += '</table>';
+			userListHTML += '<button onclick="deleteSelectedUsers()">Remove Selected Users</button>'; // Added delete button
+			o('rightdiv').innerHTML = userListHTML;
 		});
 	}
-	
+
+	function deleteSelectedUsers() {
+		var selectedUserIds = []; // Array to store selected user IDs
+		// Iterate through checkboxes and add selected IDs to the array
+		$('.userCheckbox:checked').each(function() {
+		selectedUserIds.push($(this).val());
+		});
+		// Send selected IDs to the server for deletion
+		$.post('/admin/removefacilityuser', {user_ids: selectedUserIds}, function(data) {
+			// Handle response from server if needed
+			// For example, display a success message or update the UI
+		});
+	}
+
+
 	function view_surgeon(name){ // _pppp
 		obj=o(name+'_utdd');
 		cele=obj.classList; // Clearview1685192542303_utd
@@ -433,18 +454,8 @@ script.
 		});
 	}
 	
-	function openuser(userid){
-		o('rightdiv').innerHTML = '';
-		$.post('/admin/showRightUser', {userid: userid}, function(data){
-			console.log(data);
-			res = data.results;			
-			if(res.length > 0){
-				o('rightdiv').innerHTML = res;
-			}			
-		});
-	}
 	function removeuser(id){
-		if(confirm('Do you really want to delete the user?')){
+		if(confirm('Do you really want to remove the user?')){
 		
 		$.post('/admin/removeuser', {user_id: id}, function(data){
 			//console.log(data);
@@ -455,7 +466,7 @@ script.
 		}
 	}
 	function removesurgeon(id){
-		if(confirm('Do you really want to delete the Surgeon?')){
+		if(confirm('Do you really want to remove the Surgeon?')){
 		
 		$.post('/admin/removeuser', {user_id: id}, function(data){
 			//console.log(data);

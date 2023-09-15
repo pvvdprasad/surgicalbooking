@@ -658,20 +658,7 @@ router.post('/save_search_surgeon', async function(req, res, next) {
 	//  fid,sids
 	// reqs.fid 
 	
-	arr = reqs.sids.split('|');
-	console.log(arr);
-	for(i=0;i<arr.length;i++){		
-		sql = 'insert into surgeon_facility(surgeon_id,facility_id,status) values("'+arr[i]+'", "'+reqs.fid+'",0)';
-		console.log(sql);
-		if(arr[i] == '') continue;
-		await conn.query(sql, function (err, result) {
-		if (err) console.log(err);
-		});
-	}
-	res.send({});
-	
-	/*
-	sql = 'select id,surgeons from facilities where id='+reqs.fid;  surgeon_facility
+	sql = 'select id,surgeons from facilities where id='+reqs.fid;
 	await conn.query(sql, function (err, result) {
     if (err) console.log(err);
 		obj=result[0];
@@ -682,7 +669,6 @@ router.post('/save_search_surgeon', async function(req, res, next) {
 			res.send({});
 		});
 	});
-	*/
 });
 
 function mergeResult(surgeons, sids){
@@ -716,83 +702,58 @@ function getStatus(linkids,surarr,strrr,id){
 }
 
 router.post('/showsurgeons', async function(req, res, next) {
-	var reqs=req.body;
-	console.log(reqs);
-	// var answer = color.slice(0, -1);
-	sql = 'select id,surgeon_id,status from surgeon_facility where facility_id='+reqs.fid; 
-	console.log(sql);
-	sql2 = 'select id,fname,surgeons from facilities where id='+reqs.fid;
-	html = '<h2 style="text-align:center">Surgeons</h2><br><p style="text-align:left">';
-	
-	await conn.query(sql2, function (err, result2) { 
-		if(result2!=undefined)
-			html += result2[0].fname;
-	});
-		
-	await conn.query(sql, function (err, result) { 
-		if(result!=undefined && result.length >= 1){
-		for(i=0;i<result.length;i++){
-			obj = result[i];
-			html += '</p><table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Action</th><th>Status</th></tr>';
-			console.log(obj.surgeon_id);
-			sarr = [];str=[];linkids=[];
-			if(obj.surgeon_id != null && obj.surgeon_id != ''){
-				sarr.push(obj.surgeon_id);
-				str.push(obj.status);
-				linkids.push(obj.id);
-			}
-			console.log(sarr);
-			sstr = sarr.toString();
-			sql = 'select id,user_id,first_name,middle_name,last_name,npi from other_users where id in ('+sstr+')';
-			console.log(sql);
-			conn.query(sql, function (err, result2) {
-				if(result2 != undefined){
-				for(i=0;i<result2.length;i++){
-					console.log(result2[i]);
-					status = getStatus(linkids,sarr,str,result2[i].id);
-					
-					console.log('status is:'+status);
-					sarr = status.split('|');
-					status = sarr[0];
-					ids = sarr[1];
-					
-					bhtl = '';
-					if(status ==0){ // No answer yet
-						bhtl = '<img src="../images/exclamation.jpg" />';
-					}else if(status ==1){ // Yes
-						bhtl = '<img src="../images/tick_icon.png" />';
-					}if(status ==2){ // No
-						bhtl = '<img src="../images/cross.png" />';
-					}
-					html += '<tr><td>'+result2[i].first_name+'</td><td>'+result2[i].middle_name+'</td><td>'+result2[i].last_name+'</td><td>'+result2[i].npi+'</td><td><input type="checkbox" name="dlinkchs" value='+ids+' /></td><td>'+bhtl+'</td></tr>';
-				}
-				console.log('End...........');
-				html += '</table><br><input type="button" class="btn cbut blue bbbutons" style="position:relative" onclick="dlink('+reqs.fid+')" value="Dlink" />';
-				}
-				res.send({html:html});
-			});
-			break;	
-		}
-		}else{
-			res.send({html:'<h1>No Surgeons</h1>'});
-		}
-	});
+    var reqs = req.body;
+    console.log(reqs);
+
+    sql = 'select id,fname,surgeons from facilities where id=' + reqs.fid;
+    html = '<h2 style="text-align:center">Surgeons</h2><br><p style="text-align:left">';
+    
+    await conn.query(sql, function(err, result) {
+        if (result != undefined && result.length > 0) {
+            var obj = result[0]; // Assuming you only expect one result
+            html += obj.fname + '</p><table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Action</th></tr>';
+            
+            if (obj.surgeons != null && obj.surgeons != '') {
+                oarr = obj.surgeons.split('|');
+                o = '';
+                for (j = 0; j < oarr.length; j++) {
+                    if (oarr[j] != '')
+                        o += oarr[j] + ',';
+                }
+                var answer = o.slice(0, -1);
+                
+                sql = 'select id,first_name,middle_name,last_name,npi from other_users where id in (' + answer + ')';
+                
+                conn.query(sql, function(err, result2) {
+                    if (result2 != undefined && result2.length > 0) {
+                        for (i = 0; i < result2.length; i++) {
+                            console.log(result2[i]);
+                            html += '<tr><td>' + result2[i].first_name + '</td><td>' + result2[i].middle_name + '</td><td>' + result2[i].last_name + '</td><td>' + result2[i].npi + '</td><td><input type="checkbox" name="dlinkchs" value=' + result2[i].id + ' /></td></tr>';
+                        }
+                        console.log('End...........');
+                        html += '</table><br><input type="button" class="btn cbut blue bbbutons" style="position:relative" onclick="dlink(' + reqs.fid + ')" value="Dlink" />';
+                    } else {
+                        html += '<tr><td colspan="5">No surgeons found</td></tr>';
+                    }
+                    res.send({ html: html });
+                });
+            } else {
+                html += '<tr><td colspan="5">No surgeons found</td></tr>';
+                res.send({ html: html });
+            }
+        } else {
+            res.send({ noSurgeons: true }); // Send a flag indicating no surgeons were found
+        }
+    });
 });
+
 
 router.post('/dlink', async function(req, res, next) {
 	var reqs=req.body;
 	console.log(reqs);
 	console.log('dlink-------------');
 	// reqs.fid reqs.tarr
-	
-	sql = 'DELETE FROM surgeon_facility where id in ('+reqs.tarr+')';
-	console.log(sql);
-	await conn.query(sql, function (err, result) {		
-		if (err) console.log(err);
-		res.send({result:''});
-	});
-	
-	/* var ttt = reqs.tarr.split(',');
+	 var ttt = reqs.tarr.split(',');
 	for(i=0;i<ttt.length;i++){
 	}
 	// sql = 'update facilities set id,surgeons from facilities where id ='+reqs.fid;
@@ -817,7 +778,7 @@ router.post('/dlink', async function(req, res, next) {
 		conn.query(sql, function (err, result) {
 			res.send({result:result});
 		});			
-	}); */
+	}); 
 });
 
 router.post('/search_surgeon', async function(req, res, next) {
@@ -1058,38 +1019,43 @@ router.post('/showRightSurgeon', async function(req, res, next) {
 		res.send({results:html});
 	  });
 });
+
+router.post('/viewAllFacilityUser', async function(req, res, next) {
+	const id = req.body.id;
+	console.log("Facility ID is:::::::::::" + id + "===============");
+	console.log("In the facility Users View=================");
+	sql= `SELECT id, user_id, first_name, middle_name, last_name, cell, email, npi, selected_sc, used_sc FROM other_users WHERE user_id = ${id} && npi= ''`;
+	console.log(sql);
+
+	await conn.query(sql, function (err, result){
+		if(err){
+			console.log(err);
+			res.status(500).send({ error: 'Internal Server Error' }); // Send an error response
+		}
+			console.log(result)
+			res.status(200).send({ data: result }); // Send a success response with the data
+		
+	})
+})
+
+router.post('/removefacilityuser', async function(req, res, next) {
+    const user_ids = req.body.user_ids;
+    await conn.query('DELETE FROM other_users WHERE id IN (?)', [user_ids], function (err, result) {
+        if(err){
+            console.log(err);
+            res.status(500).send({ error: 'Internal Server Error' });
+        } else {
+            res.send({ success: true });
+        }
+    });
+});
+
 router.post('/removeuser', async function(req, res, next) {
+	console.log("Remove user facility is created")
 	reqs=req.body;
 	await conn.query('delete from other_users where id='+reqs.user_id, function (err, result) {
 		res.send({});
 	});
-});
-
-router.post('/showRightUser', async function(req, res, next) {
-	//AWS.config.update(config.aws_remote_config);
-	//const docClient = new AWS.DynamoDB.DocumentClient();
-	id = req.body.userid;
-	console.log(id+'<--->');
-	
-	var sql = 'select id,user_id,first_name,middle_name,last_name,cell,email,npi,passcode from other_users where id='+id;
-	
-	html = '';
-	await conn.query(sql, function (err, result) {
-		if (err) throw err;
-		console.log("facilities query created");	
-		
-		// html += '<div style="background:grey;width:20px;height:20px;margin:0 auto"></div>';
-		userresults = result[0];
-		sbox = '<div style="background:green;width:20px;height:20px;margin:0 auto"></div>';
-		html = '<table><tr><th>Status</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>Cell</th><th>Email</th></tr>';
-		html += '<tr><td style="text-align:center">'+sbox+'</td><td>'+userresults['first_name']+'</td><td>'+userresults['middle_name']+'</td><td>'+userresults['last_name']+'</td><td>'+userresults.cell+'</td><td>'+userresults.email+'</td></tr></table>';
-			
-		html += '<br><br><br><br><br>';
-		html += '<a style="float:right" href="javascript:removeuser(\''+id+'\')">Remove User</a>';
-		html += '<br><br><br><br><br>';
-		html += '<input class="btn cbut grey" type="button" onclick="reset_password(\''+id+'\',\''+userresults.email+'\')" value="Reset Password" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button"  class="cbut btn blue" onclick="exit_screen()" value="Exit" />';
-		res.send({results:html});
-	  });
 });
 
 router.post('/allmanufacturers', async function(req, res, next) {
