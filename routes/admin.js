@@ -711,7 +711,7 @@ router.post('/showsurgeons', async function(req, res, next) {
     await conn.query(sql, function(err, result) {
         if (result != undefined && result.length > 0) {
             var obj = result[0]; // Assuming you only expect one result
-            html += obj.fname + '</p><table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Action</th></tr>';
+            html += obj.fname + '</p><table class="table"><tr><th>Select</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th></tr>';
             
             if (obj.surgeons != null && obj.surgeons != '') {
                 oarr = obj.surgeons.split('|');
@@ -728,7 +728,7 @@ router.post('/showsurgeons', async function(req, res, next) {
                     if (result2 != undefined && result2.length > 0) {
                         for (i = 0; i < result2.length; i++) {
                             console.log(result2[i]);
-                            html += '<tr><td>' + result2[i].first_name + '</td><td>' + result2[i].middle_name + '</td><td>' + result2[i].last_name + '</td><td>' + result2[i].npi + '</td><td><input type="checkbox" name="dlinkchs" value=' + result2[i].id + ' /></td></tr>';
+                            html += '<tr><td><input type="checkbox" name="dlinkchs" value=' + result2[i].id + ' /></td><td>' + result2[i].first_name + '</td><td>' + result2[i].middle_name + '</td><td>' + result2[i].last_name + '</td><td>' + result2[i].npi + '</td></tr>';
                         }
                         console.log('End...........');
                         html += '</table><br><input type="button" class="btn cbut blue bbbutons" style="position:relative" onclick="dlink(' + reqs.fid + ')" value="Dlink" />';
@@ -790,7 +790,7 @@ router.post('/search_surgeon', async function(req, res, next) {
 	
 	// var sql = 'select id,first_name,last_name,middle_name,npi from other_users where selected_sc like "%|'+id+':%" AND( first_name like "%'+txt+'%" OR middle_name like "%'+txt+'%" OR last_name like "%'+txt+'%" OR npi like "%'+txt+'%")';
 	
-	sql = 'select id,first_name,last_name,middle_name,npi from other_users where first_name like "%'+txt+'%" or last_name like "%'+txt+'%" or middle_name like "%'+txt+'%" or npi like "%'+txt+'%"';
+	sql = ` select id,first_name,last_name,middle_name,npi from other_users where (first_name like "%'+txt+'%" or last_name like "%'+txt+'%" or middle_name like "%'+txt+'%" or npi like "%'+txt+'%" ) || npi != '' `;
 	console.log(sql);
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
@@ -1045,7 +1045,7 @@ router.post('/removefacilityuser', async function(req, res, next) {
             console.log(err);
             res.status(500).send({ error: 'Internal Server Error' });
         } else {
-            res.send({ success: true });
+            res.send({ success: true,  successMessage: 'User removed successfully'  });
         }
     });
 });

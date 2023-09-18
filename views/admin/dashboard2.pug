@@ -88,6 +88,7 @@ script.
 		$.post('/admin/dlink', {fid: fid,tarr:tarr.toString()}, function(data){
 			console.log(data);
 				//o('rightdiv').innerHTML = data.html;
+				alert('Surgeons Dlinks successfully')
 				view_dlink(fid);
 		});
 	}
@@ -351,7 +352,7 @@ script.
 				userListHTML += '<tr><td><input type="checkbox" class="userCheckbox" name="selectedUser" value="' + user.id + '"></td><td>' + user.first_name + '</td><td>' + user.middle_name + '</td><td>' + user.last_name + '</td><td>' + user.cell + '</td><td>' + user.email + '</td></tr>';
 			}
 			userListHTML += '</table>';
-			userListHTML += '<button onclick="deleteSelectedUsers()">Remove Selected Users</button>'; // Added delete button
+			userListHTML += '<button class="btn cbut blue bbbutons" style="position:relative; margin-top: 40px;" onclick="deleteSelectedUsers()">Remove Selected Users</button>'; // Added delete button
 			o('rightdiv').innerHTML = userListHTML;
 		});
 	}
@@ -364,8 +365,8 @@ script.
 		});
 		// Send selected IDs to the server for deletion
 		$.post('/admin/removefacilityuser', {user_ids: selectedUserIds}, function(data) {
-			// Handle response from server if needed
-			// For example, display a success message or update the UI
+			alert('User Removed Successfully.')
+			window.location.href = window.location;
 		});
 	}
 
