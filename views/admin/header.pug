@@ -62,6 +62,18 @@ head
     .cbut{margin-left: 20px;border-radius: 20px;font-size: 15px;min-width: 160px;}
     .blue{background: #003595;color: #FFF;}
     .grey{background: #FAFAFA;color: #333;border: 1px solid #999;}
+    ul.horizontal {
+      list-style-type: none;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f3f3f3;
+      width: 100%;
+      border: 1px solid #e7e7e7;
+    }
+    ul.horizontal li {
+      float: left;
+      margin: 20px 40px;
+    }
   header#header.header.fixed-top(data-scrollto-offset='0')
   .container-fluid.d-flex.align-items-center.justify-content-between(style='height:90px')
     a.logo.align-items-center(href='index.html',style='position:absolute;top:0')
@@ -74,9 +86,9 @@ head
           img(src=BASE_PATH+'images/logout.png',title='Logout',style='width: 40px;float: right;margin-right: 20px;')
         a(href=BASE_PATH+'admin/settings')
           img(src=BASE_PATH+'images/profile.png',title='Logout',style='width: 30px;float: right;margin-right: 10px;')
-    .dropdown
+    .dropdown#linemenu
       img(src='/images/line.ico' style='width: 30px;top: 0px;right: 0px;position: absolute;')
-      .dropdown-content
+      .dropdown-content#surgeonmenu
         a(href='/admin/iolsetup')= 'IOL Setup'
         br
         a(href='/admin/settings')= 'Settings'
@@ -85,3 +97,4 @@ head
             span#headerspan(style='position: absolute;z-index: 9999;width: 44%;')
                 a#neworder(href='/admin/neworder' style='float:left')= 'New Order'
                 a#orderhistory(href='/admin/order_history' style='float:right')= 'Order History'
+                

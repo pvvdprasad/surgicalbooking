@@ -1,0 +1,79 @@
+include header.pug
+ul.horizontal
+	li
+		a(href="../admin/admindash") User Management
+	li
+		a(href="../admin/equipmain") Equipment Management
+	li
+		a(href="../admin/manumain") Manufacturer Management
+style.
+	#linemenu, #headerspan{display:none}
+	#uuul{padding:0;margin:0}
+	.arrow{background-image:url('../images/up-down.jpg');width:35px;height:33px;cursor:pointer;padding-top:7px}
+	.arrow span{padding-left:45px}
+	.down{background-position:35px -1px;}
+	.up{background-position:-4px -1px;}
+	.hidivs{display:none;border:1px solid #e7e7e7;min-height:50px}
+	.subdiv{width:45%;margin:10px;float:left}
+link(rel='stylesheet' href='//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css')
+
+
+script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
+
+.row
+	.col-md-3
+		include equip_leftmenu.pug
+		
+	.col-md-8#rightdiv(style='border:1px solid #e7e7e7;margin:12px')
+		h2(style='text-align: center;') Add Bins
+		form(method='get',onsubmit='return submitform(1)',style='position:relative')
+			.form-group.text-center
+				br
+				input#model_name.form-control(type='text' name='model_name' placeholder='Enter Model')
+				br
+				input#mac_id.form-control(type='text' name='mac_id' placeholder='Enter Mac ID')
+				br
+				input#firmware.form-control(type='text' name='firmware' placeholder='Enter Firmware vcv')
+				br
+				input#man_date.form-control(type='text' name='man_date' placeholder='Enter Manufacture Date')
+				div(style='position:absolute;right: -50px;bottom: 50px;')
+					div(style='height:0px;overflow:hidden')
+						input#fileInput(type='file' name='fileInput')
+					|Import File 
+					img(src=BASE_PATH+'images/Fileicon.png',style='width:30px;cursor:pointer',title='File upload for Bins', onclick="chooseFile();")
+					img(src=BASE_PATH+'images/qr.png',style='width:30px;cursor:pointer;margin-left:10px',title='Scan QR of Bin')
+				br
+				br
+				input.btn.cbut.grey(type="button" value='Add More', onclick="submitform(1)")
+				input.btn.cbut.blue(type="button" value='Save and Exit', onclick="submitform(2)",style='margin-left:20px')
+				br
+script.
+	 function chooseFile() {
+		$("#fileInput").click();
+	}
+	function recommission(uuid){
+		$.post('/admin/moveBinTo',{id:uuid}, function(data){
+			console.log(data);
+			
+			alert('Saved successfully');
+			showdecommissioned();
+		});
+	}
+	$( function() {
+	$( "#man_date" ).datepicker();
+	});
+	function showslots(){
+		alert('this is show slots');
+	}
+	function submitform(ch){	
+		//console.log('kkkkkkkkkk');
+		$.post('/admin/addbin',{model:o('model_name').value,macid:o('mac_id').value,firmware:o('firmware').value,mandate:o('man_date').value,ch:ch}, function(data){
+			//console.log(data);
+			
+			alert('Saved successfully');
+		});
+		o('model_name').value = '';
+			o('mac_id').value = '';
+			o('firmware').value = '';
+			o('man_date').value = '';
+	}

@@ -429,7 +429,68 @@ router.post('/save_fav_iol', async function(req, res, next) {
   
   res.send('respond with a resource');
 });
-
+router.post('/assignbins3', async function(req, res, next) {
+	reqs = req.body;
+	sql = 'select * from bins where binstatus = 1 and fact_id = '+reqs.id;
+	await conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		
+		res.send({ results: result});
+		/*
+		for(i=0;i<result.length;i++){
+			
+		}
+		*/
+	});	
+});
+router.post('/loadFacDropdown', async function(req, res, next) {
+	
+	tarr = [];
+	sql = 'select fact_id from bins where binstatus = 1 group by fact_id;';
+	await conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		for(i=0;i<result.length;i++){
+			tarr.push(result[i].fact_id);
+		}
+	});
+	
+	sql = 'select * from facilities where id like "%'+tarr+'%"';
+	await conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		
+		res.send({ results: result});
+	});	
+	
+	//var facresults = await scanTable(config.aws_facility_table_name);
+	//html = '<option value="">Select Facility</option>';
+	
+	res.send({facresults:facresults});
+});
+router.post('/assignbins2', async function(req, res, next) {
+	reqs = req.body;
+	
+	console.log('In the assign bins serrvice.........');
+	console.log(reqs);
+	
+	
+	sparr = reqs.ff.split('|');
+	id = reqs.id;tarr = [];
+	
+	for(i=0;i<sparr.length;i++){
+		if(sparr[i] != '')
+		tarr.push(sparr[i]);
+	}
+	sql = 'update bins set  binstatus = 1,fact_id = '+id+' where uid in ('+tarr+')';
+	console.log(sql);
+		
+	//}
+	
+	await conn.query(sql, function (err, result) {
+			if (err) console.log( err);
+		});	
+	
+	res.render('admin/binsearch', { BASE_PATH: '../', results: {}});
+});
 router.get('/manumain', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	res.render('admin/manumain', { BASE_PATH: '../', results:[] });
@@ -837,6 +898,25 @@ router.get('/settings', async function(req, res, next) {
 	
 	//res.render('admin/settings', { BASE_PATH: '../'});
 });
+
+router.post('/showBinsList', async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	// var results = await scanTable(config.aws_bins_table_name);
+	sql = 'select * from bins where binstatus = 0 and (model like "%'+reqs.word+'%" or firmware like "%'+reqs.word+'%" or mac_id like "%'+reqs.word+'%")';
+	console.log(sql);
+	temparr = [];
+	await conn.query(sql, function (err, result) {
+		console.log('results.length:'+result.length);
+		for(i=0;i<result.length;i++){
+			// if(results[i].binstatus == 0)
+			temparr.push(result[i]);
+		}
+		
+		res.send({ BASE_PATH: '../', results: temparr});
+	});
+});
+
 
 router.get('/admindash', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
@@ -1292,6 +1372,207 @@ router.post('/postlogin', function(req, res, next) {
   }});
   
   
+});
+
+router.post('/unassignedBins', async function(req, res, next) {
+	
+	//var results = await scanTable(config.aws_users_table_name);
+	//var binresults = await scanTable(config.aws_bins_table_name);
+	
+	arrbin = [];
+	sql = 'select * from bins where binstatus = 0';
+	html = '<h2>Unassigned Bins</h2><table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th></tr>';
+	conn.query(sql, function (err, binresults) {
+		for(i=0;i<binresults.length;i++){
+			//if(binresults[i].binstatus == 0)
+				//arrbin.push(binresults[i]);
+			html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td>'+binresults[i].mandate+'</td></tr>';
+		}
+		html += '</table>';
+		
+		res.send({html:html});
+	});
+	
+	
+	
+	
+});
+router.post('/moveBinTo', async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	
+	sql = 'update bins set binstatus=0 where uid='+reqs.id;
+	
+	conn.query(sql, function (err, results) {
+	//for(i=0;i<results.length;i++){
+		res.send({});		
+	});
+	//AWS.config.update(config.aws_remote_config);
+	/*
+	const docClient = new AWS.DynamoDB.DocumentClient();
+	const params = {
+        TableName: config.aws_bins_table_name,
+        Key: {
+            "uuid": reqs.id
+        },
+       UpdateExpression: "set binstatus=:binstatus ",
+    ExpressionAttributeValues:{
+        ":binstatus":0
+    },
+    ReturnValues:"UPDATED_NEW"
+    };
+
+    docClient.update(params, function(err, data) {
+		console.log('Update query executed.........');
+        if (err) console.log(err);
+        else console.log(data);
+		res.send({});
+		//domultiupdatee(index+1,sparr,results);
+    });
+	*/
+});
+router.post('/changefacildd', async function(req, res, next) {
+	//var binresults = await scanTable(config.aws_bins_table_name);
+	
+	arrbin = []; fff = true;
+	console.log('req.body.id---------------:'+req.body.id);
+	sql = 'select * from bins where fact_id = '+req.body.id;
+	//html = '<h2>Decommissioned Bins</h2><table><tr><th>Model / Bin no</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th><th>Comments</th><th>Action</th></tr>';
+	
+	html = '<table><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+	conn.query(sql, function (err, binresults) {
+	for(i=0;i<binresults.length;i++)
+		//if(binresults[i].fac_id == req.body.id){
+			//arrbin.push(binresults[i]);
+				html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:22px" src="../images/signal.png" onclick="showslots()" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';				
+		//}
+	
+	html += '</table>';
+	res.send({html:html});
+	});
+});
+
+
+router.post('/showdecommissioned', async function(req, res, next) {
+	//AWS.config.update(config.aws_remote_config);
+	//var results = await scanTable(config.aws_bins_table_name);
+	sql = 'select * from bins where binstatus = 3';
+	html = '<h2>Decommissioned Bins</h2><table><tr><th>Model / Bin no</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th><th>Comments</th><th>Action</th></tr>';
+	conn.query(sql, function (err, results) {
+	for(i=0;i<results.length;i++){
+		if(results[i].binstatus == 3){
+			html += '<tr><td>'+ results[i].model + '/'+results[i].binname+'</td><td>'+ results[i].mac_id +'</td><td>'+ results[i].firmware +'</td><td>'+ results[i].mandate +'</td><td>Comment '+i+'</td><td><a href="javascript:recommission(\''+results[i].uid+'\')">Recommission</a></td></tr>';
+			
+			// break;
+		}
+	}html += '</table>';
+	res.send({ html:html });
+	});
+	
+	
+});
+
+router.post('/changetodecom', async function(req, res, next) {
+	// AWS.config.update(config.aws_remote_config);
+	reqs = req.body;
+	console.log(reqs);
+	
+	sql = 'update bins set binstatus = 3,comments="'+reqs.ans+'" where uid = '+reqs.id;
+	conn.query(sql, function (err, binresults) {
+		res.send({});
+	});
+	// const docClient = new AWS.DynamoDB.DocumentClient();
+	/*
+	const params = {
+        TableName: config.aws_bins_table_name,
+        Key: {
+            "uuid": reqs.id
+        },
+       UpdateExpression: "set binstatus=:bstatus , comments=:comment",
+    ExpressionAttributeValues:{
+        ":bstatus":3,
+		":comment":reqs.ans
+    },
+    ReturnValues:"UPDATED_NEW"
+    };
+
+    docClient.update(params, function(err, data) {
+		console.log('Update query executed.........');
+        if (err) console.log(err);
+        else console.log(data);
+		res.send({});
+		//domultiupdatee(index+1,sparr,results);
+    });
+	*/
+});
+
+router.post('/assignedBins', async function(req, res, next) {
+	
+	arrbin = []; fff = true;
+	sql = 'select * from bins where binstatus = 1';
+	html = '<h2>Assigned Bins</h2><select id="dynfacilsele" onchange="changefacildd(this.value)" style="margin-bottom: 20px"></select><table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+	conn.query(sql, function (err, binresults) {
+	for(i=0;i<binresults.length;i++){
+		//if(binresults[i].binstatus == 1)
+			//arrbin.push(binresults[i]);
+			if(fff){
+				html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:22px" src="../images/signal.png" onclick="showslots()" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';
+				fff = false;
+			}else{
+				html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:25px" src="../images/nosignal.png" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uuid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uuid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';				
+			}
+		}
+		html += '</table>';
+		
+		res.send({html:html});
+	});
+	
+	
+	
+});
+
+router.post('/addbin', async function(req, res, next) {
+	// {model:o('model_name'),mac_id:o('mac_id'),firmware:o('firmware'),mandate:o('man_date')
+	reqs = req.body;
+	// model:o('model_name'),mac_id:o('mac_id'),firmware:o('firmware'),mandate:
+	//AWS.config.update(config.aws_remote_config);
+	/*
+	var params = {
+    TableName: config.aws_bins_table_name,
+	
+	Item: {
+      'uuid' :  ''+Date.now(),
+		'model' :  reqs.model,
+		'mac_id' :  reqs.mac_id,
+		'firmware' : reqs.firmware,
+		'mandate' :  reqs.mandate,
+		'binstatus':0
+	}
+    };
+	
+	const docClient = new AWS.DynamoDB.DocumentClient();
+	*/
+	sql = 'insert into bins (binstatus, comments,fact_id, firmware , mac_id ,mandate ,model) values(0,'+
+	'"",0,"'+reqs.firmware+'","'+reqs.mac_id+'","'+reqs.mandate+'","'+reqs.model+'")';
+	//docClient.put(params, function(err, data) {
+		console.log(sql);
+	conn.query(sql, function (err, binresults) {
+	  if (err) {
+		console.log("Error", err);
+	  } else {
+		console.log("Success", binresults);
+	  }
+	});
+});
+
+
+router.get('/equipmain', async function(req, res, next) {
+	// AWS.config.update(config.aws_remote_config);
+	// const docClient = new AWS.DynamoDB.DocumentClient();
+	if(checkAuth(req,res)) return;
+ // var results = await scanTable(config.aws_facility_table_name);
+ // console.log(results);
+  res.render('admin/equipmain', { BASE_PATH: '../', results: {}});
 });
 
 module.exports = router;
