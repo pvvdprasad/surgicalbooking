@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: surgy_latest
 -- ------------------------------------------------------
--- Server version       8.0.34-0ubuntu0.20.04.1
+-- Server version	8.0.34-0ubuntu0.22.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,8 +16,41 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `bins`
+--
+
+DROP TABLE IF EXISTS `bins`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bins` (
+  `uid` int NOT NULL AUTO_INCREMENT,
+  `binname` text,
+  `uniquename` text,
+  `binstatus` int DEFAULT NULL,
+  `comments` text,
+  `fact_id` int DEFAULT NULL,
+  `firmware` text,
+  `mac_id` text,
+  `mandate` text,
+  `model` text,
+  PRIMARY KEY (`uid`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bins`
+--
+
+LOCK TABLES `bins` WRITE;
+/*!40000 ALTER TABLE `bins` DISABLE KEYS */;
+INSERT INTO `bins` VALUES (1,NULL,NULL,1,'Damaged',1,'mjajdahhsdkf','hiuuhkhuu','09/13/2023','kgjuuhu'),(2,NULL,NULL,0,'',0,'dfergrhrt','dfgdgdgdg','09/04/2023','kuhkjkjk'),(3,NULL,NULL,0,'Damaged',2,'kfssfjkdf456','undefined','09/07/2023','Test Model');
+/*!40000 ALTER TABLE `bins` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `brands`
 --
+
 DROP TABLE IF EXISTS `brands`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -26,7 +59,7 @@ CREATE TABLE `brands` (
   `bname` char(200) NOT NULL,
   `mid` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,7 +68,7 @@ CREATE TABLE `brands` (
 
 LOCK TABLES `brands` WRITE;
 /*!40000 ALTER TABLE `brands` DISABLE KEYS */;
-INSERT INTO `brands` VALUES (3,'brand 3',4),(4,'gdffgfgdfg',4);
+INSERT INTO `brands` VALUES (3,'brand 3',4),(4,'gdffgfgdfg',4),(6,'Test 3 Brand1',3),(7,'Brand 4',3);
 /*!40000 ALTER TABLE `brands` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -54,12 +87,16 @@ CREATE TABLE `facilities` (
   `website` char(150) DEFAULT NULL,
   `surgeons` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `facilities`
+--
 
 LOCK TABLES `facilities` WRITE;
 /*!40000 ALTER TABLE `facilities` DISABLE KEYS */;
-INSERT INTO `facilities` VALUES (1,'Test facility','68778686778','7667876887','dfgdgdfgdgdgd.dgfd',''),(2,'Mason Surgery Center','900980908888','099000880989','www.mason.com','|3|'),(6,'Gold medical facility','2123630114','7183030752','goldmedical.com',NULL),(9,'White Medical Facility','7183030758','7183030758','whitemedical.com',NULL);
+INSERT INTO `facilities` VALUES (1,'Test facility','68778686778','7667876887','dfgdgdfgdgdgd.dgfd',''),(2,'Mason Surgery Center','900980908888','099000880989','www.mason.com','|3|'),(6,'Gold medical facility','2123630114','7183030752','goldmedical.com',NULL),(9,'White Medical Facility','7183030758','7183030758','whitemedical.com',NULL),(10,'NYC Medical','6567656776','6567656776','nyc.com',NULL);
 /*!40000 ALTER TABLE `facilities` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -78,7 +115,7 @@ CREATE TABLE `fav_iols` (
   `model` char(50) DEFAULT NULL,
   `brand` char(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,13 +124,14 @@ CREATE TABLE `fav_iols` (
 
 LOCK TABLES `fav_iols` WRITE;
 /*!40000 ALTER TABLE `fav_iols` DISABLE KEYS */;
-INSERT INTO `fav_iols` VALUES (1,'fav1',1,'2','1','1'),(2,'fav2',1,'2','5','2'),(3,'fav3',1,'2','3','2');
+INSERT INTO `fav_iols` VALUES (1,'fav1',1,'2','1','1'),(2,'fav2',1,'2','5','2'),(3,'fav3',1,'2','3','2'),(4,'fav1',25,'4','4','3'),(5,'fav2',25,'3','9','6'),(6,'fav1',2,'3','8','6'),(7,'fav3',25,'4','4','3');
 /*!40000 ALTER TABLE `fav_iols` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
 -- Table structure for table `manufacturers`
 --
+
 DROP TABLE IF EXISTS `manufacturers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -127,7 +165,7 @@ CREATE TABLE `models` (
   `model_name` char(200) NOT NULL,
   `bid` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,9 +174,10 @@ CREATE TABLE `models` (
 
 LOCK TABLES `models` WRITE;
 /*!40000 ALTER TABLE `models` DISABLE KEYS */;
-INSERT INTO `models` VALUES (4,'model 654',3),(6,'WF',5);
+INSERT INTO `models` VALUES (4,'model 654',3),(7,'Model 33',7),(8,'Test B444',6),(9,'TTT3',6),(10,'Test brand3',3);
 /*!40000 ALTER TABLE `models` ENABLE KEYS */;
 UNLOCK TABLES;
+
 --
 -- Table structure for table `orders`
 --
@@ -162,7 +201,7 @@ CREATE TABLE `orders` (
   `surgeon_id` int DEFAULT NULL,
   `practise_id` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,9 +210,13 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (6,2,'07/07/2023','kuuuh','ihkkhohhkhkj','hkhkkkhk','07/28/2023','left',2,1,1,'8',0,0),(7,1,'07/11/2023','test','p','patient','04/03/2023','left',2,1,1,'20',0,0),(8,1,'08/11/2023','patient 1','middle name','last name','03/14/2023','left',4,3,4,'9',0,0),(9,2,'08/30/2023','hvhgvn','gghhg','hhfhgfh','08/23/2023','right',4,3,4,'10',0,0);
+INSERT INTO `orders` VALUES (6,2,'07/07/2023','kuuuh','ihkkhohhkhkj','hkhkkkhk','07/28/2023','left',2,1,1,'8',0,0),(7,1,'07/11/2023','test','p','patient','04/03/2023','left',2,1,1,'20',0,0),(8,1,'08/11/2023','patient 1','middle name','last name','03/14/2023','left',4,3,4,'9',0,0),(9,2,'08/30/2023','hvhgvn','gghhg','hhfhgfh','08/23/2023','right',4,3,4,'10',0,0),(10,1,'09/01/2023','llkjlkj','lkjlkjlkjlkj','lkjlkjlkjl','09/02/2023','left',4,3,4,'7',0,0),(11,2,'09/22/2023','Test','Patient','John','06/01/2022','left',4,3,4,'9.5',0,0);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `other_users`
+--
 
 DROP TABLE IF EXISTS `other_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -192,7 +235,7 @@ CREATE TABLE `other_users` (
   `selected_sc` text NOT NULL,
   `used_sc` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -201,10 +244,13 @@ CREATE TABLE `other_users` (
 
 LOCK TABLES `other_users` WRITE;
 /*!40000 ALTER TABLE `other_users` DISABLE KEYS */;
-INSERT INTO `other_users` VALUES (3,1,'jjhjhkhk','khkhkjkhj','hkhkjhk','88878786','gjgjgj@kjjhdf.gfg','','6UJ67Q7c',NULL,'|2:Mason Surgery Center|4:ttttttttttt|',''),(4,2,'Test','user','lklfkj','897978979','tuser@gmail.com','','9xsDRRtv',NULL,'',''),(5,0,'tr pra1','tr middle','tr last','76887788687','pvvdprasad@gmail.com','undefined','8LIc8K8d',2,'',''),(6,0,'tp fname','tp mname','tp lname','97989898778','pvvdprasad@gmail.com','undefined','MWXgvgmY',2,'',''),(7,0,'kjkjk','hjjyg','dgdffg','87886876','pvvdprasad@gmail.com','undefined','4ft5N1xy',2,'',''),(8,0,'klo','kjjnknnkj','kjnkjnnkjnkj','997798979','pvvdprasad@gmail.com','undefined','X9odzbxb',2,'',''),(9,0,'uhuiu','hiuhiihiu','igugyg','878787','pvvdprasad@gmail.com','undefined','gaNwPxjm',2,'',''),(10,9,'oihuuhuuuh','hkuhkhkjhj','hkhkjhkhkh','888878686','pvvdprasad@gmail.com','78787867','fzPbvnIw',2,'',''),(11,10,'d','prasad','pvvd','0808090','pvvdprasad@gmail.com','8787877','kKic6VXn',2,'',''),(15,13,'tttsss','ssss','kkjljklkj','86887867876','pvvdprasad@gmail.com','7867687678','9xN7Boiq',1,'',''),(18,8,'kjhkkhjhk','hkjhkhkj','kjhkjkh','86878787','testing@gmail.com','','XjT8l8Jx',NULL,'',''),(19,16,'testsurgeon','kjhkjkjh','khkjhkkj','6887687','testing@gmail.com','88878686','DzUkB2pg',3,'',''),(20,6,'Shaheer','Mohammad','Khan','9876543210','shaheer@gmail.com','','TcZIomsJ',NULL,'',''),(21,6,'John','M','Doe','9876543222','john@gmail.com','','eYkHYatG',NULL,'',''),(22,17,'Sajjad','Akhtar','','44535534','sakhtar@gmail.com','1912919457','Y5fRso8L',4,'',''),(23,9,'Jonty','Rhode','Jr','9876754678','jontyrhode@gmail.com','','BCTCH704',NULL,'','');
+INSERT INTO `other_users` VALUES (24,24,'ioioiuioiuo','iuhhjhjhjkh','kkhkhjkhkjh','6577556','gdgdfgdfdg@gnfg.fgh','45435435','mzdRdeBu',NULL,'',''),(25,25,'John','B','Ross','7887878787','bmsdksdhhksd@dfgdfg.gfd','564564','1Cj53dtt',NULL,'',''),(26,1,'','','','','','','7eM0S781',NULL,'',''),(27,10,'Baqir','Abbas','M','9876543210','baqir@pmtac.com','','628ciIqH',NULL,'',''),(28,26,'PVV','Prasad','D','564566465','pvvdprasad@gmail.com','12345678','hk8g4LTV',NULL,'','');
 /*!40000 ALTER TABLE `other_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Table structure for table `practises`
+--
 
 DROP TABLE IF EXISTS `practises`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -231,6 +277,32 @@ INSERT INTO `practises` VALUES (4,'Clearview','676567656','8787776','clearview20
 UNLOCK TABLES;
 
 --
+-- Table structure for table `surgeon_facility`
+--
+
+DROP TABLE IF EXISTS `surgeon_facility`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `surgeon_facility` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `surgeon_id` int NOT NULL,
+  `facility_id` int NOT NULL,
+  `status` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `surgeon_facility`
+--
+
+LOCK TABLES `surgeon_facility` WRITE;
+/*!40000 ALTER TABLE `surgeon_facility` DISABLE KEYS */;
+INSERT INTO `surgeon_facility` VALUES (15,25,1,0),(16,28,10,0),(17,25,1,0),(18,25,2,0);
+/*!40000 ALTER TABLE `surgeon_facility` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
 --
 
@@ -243,7 +315,7 @@ CREATE TABLE `users` (
   `passcode` char(30) NOT NULL,
   `role` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -252,7 +324,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'surgeon','surgeon',2),(2,'admin','admin',1),(3,'tr pra1','8LIc8K8d',2),(4,'tp fname','MWXgvgmY',2),(5,'kjkjk','4ft5N1xy',2),(6,'klo','X9odzbxb',2),(7,'uhuiu','gaNwPxjm',2),(8,'oiijjlklkj','4Os5sbGj',2),(9,'oihuuhuuuh','fzPbvnIw',2),(10,'d','kKic6VXn',2),(11,'uhkhhhkjkjk','3B0QZptK',2),(12,'slkjlksf','naA5kt4X',2),(13,'tttsss','9xN7Boiq',2),(14,'Sajjad','BKHaZqAH',2),(15,'test doc','I661Bpke',2),(16,'testsurgeon','test',2),(17,'Sajjad','Y5fRso8L',2);
+INSERT INTO `users` VALUES (1,'surgeon','surgeon',2),(2,'admin','admin',1),(24,'ioioiuioiuo','mzdRdeBu',2),(25,'John','John',2),(26,'PVV','prasad',2);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -265,6 +337,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-
-
-
+-- Dump completed on 2023-09-19 10:12:53
