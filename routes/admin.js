@@ -554,19 +554,17 @@ router.post('/viewAllSurgeons', async function(req, res, next) {
 	var reqs = req.body;
 	console.log('In addpractise...........');
 	console.log(reqs);
-	sql = 'select id,user_id,first_name,middle_name,last_name,cell,email,npi,selected_sc,used_sc from other_users';
+	sql = `select id,user_id,first_name,middle_name,last_name,cell,email,npi,selected_sc,used_sc,removed_users from other_users where npi != '' && removed_users= False`;
 	
 	await conn.query(sql, function (err, result) {
-		if (err) console.log( err);
-		else{
-			html = '<table class="table"><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>Cell</th><th>Email</th><th>NPI</th><th>Action</th></tr>';
-			for(i=0;i<result.length;i++){
-				obj = result[i];
-				html += '<tr><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.cell+'</td><td>'+obj.email+'</td><td>'+obj.npi+'</td></tr>';
-			}
-			html += '</table>';
+		if (err){
+			console.log( err);
+			res.status(500).send({ error: 'Internal Server Error' });
+		} else{
+			console.log(result)
+			res.status(200).send({ data: result }); // Send a success response with the data
 		}
-		res.send({results:html});
+		
 	});
 });
 
@@ -724,6 +722,10 @@ router.post('/save_search_surgeon', async function(req, res, next) {
     if (err) console.log(err);
 		obj=result[0];
 		surgeons=obj.surgeons;
+		if(reqs.sids == '|'){
+			res.send({ message: 'Please Select a Surgeon'});  // Send message in response
+			return; // Return to prevent further execution
+		}
 		surarr = mergeResult(surgeons, reqs.sids);
 		sql = 'update facilities set surgeons = "'+surarr+'" where id='+reqs.fid;
 		conn.query(sql, function (err, result) {
@@ -773,6 +775,7 @@ router.post('/showsurgeons', async function(req, res, next) {
         if (result != undefined && result.length > 0) {
             var obj = result[0]; // Assuming you only expect one result
             html += obj.fname + '</p><table class="table"><tr><th>Select</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th></tr>';
+			html += '<style>table{width:100% !important;} th{color:#FFF !important; background:#003595 !important; padding:6px !important;}</style>';
             
             if (obj.surgeons != null && obj.surgeons != '') {
                 oarr = obj.surgeons.split('|');
@@ -1060,7 +1063,7 @@ router.post('/adduser', async function(req, res, next) {
 	reqs = req.body;
 	var pass = generatePassword();
 	
-	sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,selected_sc,used_sc) VALUES('"+reqs.facid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','','"+pass+"','','')";
+	sql = "INSERT INTO other_users(user_id,first_name,middle_name,last_name,cell,email,npi,passcode,selected_sc,used_sc,removed_users) VALUES('"+reqs.facid+"','"+reqs.first_name+"','"+reqs.middle_name+"','"+reqs.last_name+"','"+reqs.cell+"','"+reqs.email+"','','"+pass+"','','',False)";
 	
 	console.log(sql);
 	
@@ -1104,7 +1107,7 @@ router.post('/viewAllFacilityUser', async function(req, res, next) {
 	const id = req.body.id;
 	console.log("Facility ID is:::::::::::" + id + "===============");
 	console.log("In the facility Users View=================");
-	sql= `SELECT id, user_id, first_name, middle_name, last_name, cell, email, npi, selected_sc, used_sc FROM other_users WHERE user_id = ${id} && npi= ''`;
+	sql= `SELECT id, user_id, first_name, middle_name, last_name, cell, email, npi, selected_sc, used_sc FROM other_users WHERE user_id = ${id} && npi= '' && removed_users= False`;
 	console.log(sql);
 
 	await conn.query(sql, function (err, result){
@@ -1120,7 +1123,8 @@ router.post('/viewAllFacilityUser', async function(req, res, next) {
 
 router.post('/removefacilityuser', async function(req, res, next) {
     const user_ids = req.body.user_ids;
-    await conn.query('DELETE FROM other_users WHERE id IN (?)', [user_ids], function (err, result) {
+	console.log(user_ids)
+    await conn.query('UPDATE other_users SET removed_users= True WHERE id IN (?)', [user_ids], function (err, result) {
         if(err){
             console.log(err);
             res.status(500).send({ error: 'Internal Server Error' });

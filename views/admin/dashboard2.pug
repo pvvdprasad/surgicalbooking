@@ -33,9 +33,9 @@ style.
 	.miniarrow span{padding-left:45px}
 	.minidown{background-position:28px -1px;}
 	.miniup{background-position:1px -1px;}
-	table{width:100%}
+	table{width:100% !important}
 	.pendd{margin-left:10px;cursor:pointer;color:#666;font-size:12px}
-	th{color:#FFF;background:#003595;padding:3px}
+	th{color:#FFF !important; background:#003595 !important; padding:6px !important;}
 .row
 	.col-md-3
 		include leftmenu_user.pug
@@ -337,8 +337,12 @@ script.
 		//- console.log(vv);
 		
 		$.post('/admin/save_search_surgeon', {fid: fid,sids:vv}, function(data){
-			alert('Surgeons are saved');
-			window.location = window.location.href;
+			if(data.message){
+				alert(data.message)
+			}else{
+				alert('Surgeons are saved');
+			}
+			window.location.href = '/admin/admindash';
 		});
 	}
 	
@@ -348,11 +352,11 @@ script.
 		$.post('/admin/search_surgeon', {fid: id,text:val}, function(data){
 			//console.log(data.result);
 			o('searchpopup').style.display='block';
-			html = '<table class="table"><thead><tr><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th><th>Select</th></tr></thead>';
+			html = '<table class="table"><thead><tr><th>Select</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th></tr></thead>';
 			for(i=0;i<data.result.length;i++){
 				obj=data.result[i]; // id,first_name,last_name,middle_name,npi
 				
-				html += '<tr><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td><td><input type="checkbox" name="chsurgeons" value="'+obj.id+'"  /></td></tr>';
+				html += '<tr><td><input type="checkbox" name="chsurgeons" value="'+obj.id+'"  /></td><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td></tr>';
 			}
 			o('searchpopup').innerHTML = html + '</table><input class="btn cbut blue bbbutons" value="Add" onclick="save_search_surgeon('+id+')" style="position:relative" />';
 		});
@@ -376,6 +380,28 @@ script.
 	//- 		});
 	//- 		}
 
+	function open_practise(name){
+		console.log("In the view/edit Surgeons =============")
+		console.log(name)
+		
+		$.post('/admin/viewAllSurgeons', {}, function(data){
+			console.log(data.data);
+			if (data.data.length === 0) {
+				alert("No Surgeon found."); // Display alert if no data is received
+				return;
+			}
+			var userListHTML = '<h2>Surgeons</h2><table>';
+			userListHTML += '<tr><th>Select</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>Cell</th><th>Email</th><th>NPI</th></tr>';
+			for(var i = 0; i < data.data.length; i++) {
+				var user = data.data[i];
+				userListHTML += '<tr><td><input type="checkbox" class="userCheckbox" name="selectedUser" value="' + user.id + '"></td><td>' + user.first_name + '</td><td>' + user.middle_name + '</td><td>' + user.last_name + '</td><td>' + user.cell + '</td><td>' + user.email + '</td><td>' + user.npi + '</td></tr>';
+			}
+			userListHTML += '</table>';
+			userListHTML += '<button class="btn cbut blue bbbutons" style="position:relative; margin-top: 40px;" onclick="deleteSelectedUsers()">Remove Selected Surgeon</button>'; // Added delete button
+			o('rightdiv').innerHTML = userListHTML;
+		});
+		
+	}
 	function view_user(name){ 
 		console.log("In the view facility User =============")
 		console.log(name)
@@ -404,7 +430,9 @@ script.
 		selectedUserIds.push($(this).val());
 		});
 		// Send selected IDs to the server for deletion
+		console.log("================== CAlling removefacilityuser ============")
 		$.post('/admin/removefacilityuser', {user_ids: selectedUserIds}, function(data) {
+			console.log("================ In Response of removeFacilityuser ==============")
 			alert('User Removed Successfully.')
 			window.location.href = window.location;
 		});
@@ -570,17 +598,7 @@ script.
 		// console.log('In the open_facility.................');
 		o('left_fac_div').style.display='block';
 	}
-	function open_practise(){
-		console.log('In the open_facility.................');
-		// o('left_pra_div').style.display='block';
-		
-		$.post('/admin/viewAllSurgeons', {}, function(data){
-			console.log(data);
-			o('rightdiv').innerHTML = o('rightdiv').innerHTML = '<h2>View Surgeon</h2>'+data.results;
 
-		});
-		
-	}
 	function submitform(){
 		console.log('In the function');
 		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
