@@ -1,11 +1,11 @@
 style.
-	#uuul li{background:#f3f3f3;padding: 10px 10px 0 10px;}
+	.uuul li{background:#f3f3f3;padding: 10px 10px 0 10px;}
 	.bbbutons{position:absolute;z-index:999;bottom:0;left:20px}
 
-ul#uuul(style='margin-top:10px;')
+ul.uuul(style='margin-top:10px;')
 	li
 		a(href='') Add Facility
-	li(style='')
+	li(style='padding-bottom:10px')
 		a(href='javascript:open_facility()') View / Edit Facility
 		#left_fac_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
 			ul#uuul(style='padding-left:0')
@@ -25,7 +25,12 @@ ul#uuul(style='margin-top:10px;')
 									td
 										|
 									td
-										a(href='javascript:add_surgeon2("'+element.id+'","'+element.fname+'")') Link Surgeon 
+										a(href='javascript:add_surgeon2("'+element.id+'","'+element.fname+'")') Link Surgeon
+								tr
+									td
+										|
+									td
+										a(href='javascript:assign_bins("'+element.id+'","'+element.fname+'")') Assign Bin
 								tr
 									td(style='vertical-align: top;')
 										.miniarrow.miniup(id=element.id+'_uttd', onclick='view_dlink("'+element.id+'")')
@@ -38,14 +43,23 @@ ul#uuul(style='margin-top:10px;')
 									td
 										a(href='javascript:view_user("'+element.id+'")') View/Edit User
 									.hidddd(id=element.id+'_uuu')
+								tr
+									td(style='vertical-align: top;')
+										.miniarrow.miniup(id=element.id+'_', onclick='view_edit_bins("'+element.id+'")')
+									td
+										a(href='javascript:view_edit_bins("'+element.id+'")') View/Edit Bins
+										.hidddds(id=element.id+'_')
 		
-ul
+ul.uuul(style='margin-top:10px;')
 	li
-		h3= 'Manage Surgeons'
+		p(style='margin:0')= 'Manage Surgeons'
 	li
 		a(href='javascript:add_practise()') Add Surgeon
 	li(style='padding-bottom:10px')
 		a(href='javascript:open_practise()') View / Remove Surgeon
+		
+		
+		
 	//	#left_pra_div.col-md-11(style='border:1px solid #e7e7e7;margin:0 0 0 20px;padding:0')
 	//li
 	//	a(href='javascript:add_practise()') Add Practise

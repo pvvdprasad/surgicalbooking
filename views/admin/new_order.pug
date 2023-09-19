@@ -23,8 +23,9 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                     hr
                     select.form-select#surgery_center()
                         option(value='')= 'Select Surgery Center'
-                        each result in results
-                            option(value=result.id)= result.fname
+                        if results != undefined
+                            each result in results
+                                option(value=result.id)= result.fname
             tr
                 td.col-md-3(style="padding:5px;position:relative")
                     input#datepicker.form-control(type="text" placeholder="Select Date")

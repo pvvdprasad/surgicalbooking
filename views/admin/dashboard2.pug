@@ -2,23 +2,13 @@ include header.pug
 ul.horizontal
 	li
 		a(href="../admin/admindash") User Management
-	//li
-		//a(href="../admin/equipmain") Equipment Management
+	li
+		a(href="../admin/equipmain") Equipment Management
 	li
 		a(href="../admin/manumain") Manufacturer Management
 style.
-	ul.horizontal {
-	  list-style-type: none;
-	  padding: 0;
-	  overflow: hidden;
-	  background-color: #f3f3f3;
-	  width: 100%;
-	  border: 1px solid #e7e7e7;
-	}
-	ul.horizontal li {
-	  float: left;
-	  margin: 20px 40px;
-	}
+	#linemenu, #headerspan{display:none}
+	#uuul{padding:0;margin:0}	
 	.magnify{
 		background:url("../images/magnify.png") no-repeat 2px 3px;
 		padding: 5px 5px 5px 35px;
@@ -65,6 +55,22 @@ style.
 				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
 				br
 script.
+	function assign_bins(id,name){
+		console.log('in the assign bins........');
+		arr = document.getElementsByName('secb');
+		global_currid = id;
+		ff='';facid = global_currid;
+		console.log('global_currid:'+global_currid);
+		for(i=0;i<arr.length;i++)
+			if(arr[i].checked)
+				ff += arr[i].value+'|';
+		$.post('/admin/assignbins2', {id:id, ff:ff}, function(data){ // facid
+			console.log(data);
+			o('rightdiv').innerHTML = data;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+		});
+	}
 	function o(id){return document.getElementById(id);}
 	function c(cname){return document.getElementsByClassName(cname)[0];}
 	function submitformpractise(){
@@ -209,15 +215,21 @@ script.
 		window.location.href = window.location;
 		});
 	}
+	/*
+	binname | uniquename | binstatus | comments | fact_id | firmware     | mac_id    | mandate    | model    |
+	+-----+---------+------------+-----------+----------+---------+--------------
+	*/
 	function catchWords(word){
+		console.log(word);
 		$.post('/admin/showBinsList', {word: word}, function(data){
-			console.log(data);
+			//console.log(data);
 			results = data.results;
-			console.log(results); // model: "X", firmware: "khkhkhkh", uuid
+			//console.log(results); // model: "X", firmware: "khkhkhkh", uuid
 			o('hiddiv').innerHTML = '';
 			o('hiddiv').style.display = 'block';
-			for(i=0;i<results.length;i++)
-				o('hiddiv').innerHTML += '<div class="subdivddd"><input type="checkbox" name="secb" value="'+results[i].uuid+'" />&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].model +  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].macid + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].firmware  + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].mandate + '<div>';
+			for(i=0;i<results.length;i++){
+				//console.log(results[i]);
+				o('hiddiv').innerHTML += '<div class="subdivddd"><input type="checkbox" name="secb" value="'+results[i].uid+'" />&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].model +  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].mac_id + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].firmware  + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].mandate + '<div>';}
 				// '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + results[i].binname +
 		});
 	}
@@ -235,16 +247,44 @@ script.
 		//	else o('subdivddd').innerHTML = '';
 		});
 	}
+	/*
+	| uid | binname | uniquename | binstatus | comments | fact_id | firmware     | mac_id    | mandate    | model
+	*/
+	function view_edit_bins(factid){
+		$.post('/admin/assignbins3', {id:factid}, function(data){ // facid
+			
+			results = data.results;
+			console.log(results);
+			html = '<h2>Bins</h2><br><table><tr><th>#</th><th>Model</th><th>Mac Id</th><th>Firmware</th><th>Manufacture Date</th></tr>';
+			for(i=0;i<results.length;i++){ // results[i].uid
+				html += '<tr><td>'+(i+1)+'</td><td>'+results[i].model+'</td><td>'+results[i].mac_id+'</td><td>'+results[i].firmware+'</td><td>'+results[i].mandate+'</td></tr>';
+			}
+			html += '</table>';
+			o('rightdiv').innerHTML = html;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+		});
+	}
+	function changefacildd(id){
+		console.log(id);
+	
+		$.post('/admin/changefacildd', {id:id}, function(data){
+			console.log(data);
+			o('righttable').innerHTML = data.html;
+		});
+	}
 	function amorei(ch){
 		arr = document.getElementsByName('secb');
 		ff='';facid = global_currid;
 		for(i=0;i<arr.length;i++)
 			if(arr[i].checked)
 				ff += arr[i].value+'|';
-		$.post('/admin/assignbins2', {id:o('binseahid').value, ff:ff}, function(data){ // facid
+		console.log('binseahid:---------:'+o('binseahid').value+':'+facid);
+		console.log(ff);
+		$.post('/admin/assignbins2', {id:facid, ff:ff}, function(data){ // facid
 			//console.log(data);
 			o('rightdiv').innerHTML = data;
-			if(ch == 2) window.location.href = window.location; 
+			//if(ch == 2) window.location.href = window.location; 
 			//else o('subdivddd').innerHTML = '';
 		});
 	}

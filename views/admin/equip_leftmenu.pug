@@ -1,0 +1,79 @@
+style.
+	#uuul li{background:#f3f3f3;padding: 10px 10px 0 10px;}
+	table{width:100%}
+	th{color:#FFF;background:#003595;padding:3px;text-align:center}
+	td, h2{text-align:center}
+	.hidassdiv{display:none;position:absolute;border:1px solid #000;width: 150px;height: 100px;background: #FFF}
+	.spanclose{position:absolute;color:red;right:10px;cursor:pointer}
+.col-md-11(style='border:1px solid #e7e7e7;margin:10px 0 0 20px;padding:0')
+	ul#uuul
+		li(style='padding-bottom:10px')
+			a(href='') Add Bins
+		li(style='padding-bottom:10px')
+			a(href='javascript:showassigned()') Assigned Bins
+		li(style='padding-bottom:10px')
+			a(href='javascript:showunassigned()') UnAssigned Bins
+		li(style='padding-bottom:10px')
+			a(href='javascript:showdecommissioned()') Decompressed Bins
+script.
+	function o(id){return document.getElementById(id)}
+	function showunassigned(){
+		$.post('/admin/unassignedBins', {}, function(data){
+			console.log(data);
+			o('rightdiv').innerHTML = data.html;
+		});
+	}
+	function closediv(id){
+		o(id).style.display='none';
+	}
+	function seleop(ch, id){
+		ans = (ch == 1)?"Malfunction":(ch==2)?"Damaged":"Other"
+		$.post('/admin/changetodecom', {ans:ans,id:id}, function(data){
+			console.log(data);
+			//o('rightdiv').innerHTML = data.html;
+			window.location=window.location.href;
+		});
+	}
+	function showassigned(){
+		$.post('/admin/assignedBins', {}, function(data){
+			console.log(data);
+			o('rightdiv').innerHTML = data.html;
+			loadDD();
+		});
+	}
+	function decommi(bbid){
+		console.log(bbid);
+		o(bbid+'_hid').style.display='block';
+	}
+	function loadDD(){
+		daySelect = o('dynfacilsele');
+		daySelect.options[daySelect.options.length] = new Option('Select facility', '');
+		$.post('/admin/loadFacDropdown', {}, function(data){
+			console.log(data); // 
+			facresults = data.results;
+			for(i=0;i<facresults.length;i++){
+				daySelect.options[daySelect.options.length] = new Option(facresults[i].fname, facresults[i].id);
+			}
+			//o('rightdiv').innerHTML = data.html;
+			//loadDD();
+		});
+	}
+	
+	// dynfacilsele
+	function changefacildd(id){
+	console.log(id);
+	
+		$.post('/admin/changefacildd', {id:id}, function(data){
+			console.log(data);
+			o('righttable').innerHTML = data.html;
+		});
+	}
+	
+	function showdecommissioned(){
+		$.post('/admin/showdecommissioned', {}, function(data){
+			console.log(data);
+			o('rightdiv').innerHTML = data.html;
+		});
+	}
+	
+	
