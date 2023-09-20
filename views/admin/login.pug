@@ -59,27 +59,18 @@ head
         section#features.features(class="col-md-6",style="margin:15% auto")
             form#loginform(action='/admin/postlogin' method='post')
                 .form-group.text-center
-                    #div1
+                    
+                    #div1 
+                        p#ptag()
                         span= 'Login As'
                         br
                         br
-                        input#admin(type='radio' name='surgeonradio' onchange='showlog()' value='1')
-                        label(for='admin',class='labels')= 'Admin'
-                        br
-                        br
-                        input#SurgeryCentre(type='radio' name='surgeonradio' onchange='showlog()' value='2')
-                        label(for='SurgeryCentre',class='labels')= 'Surgery Centre'
-                        br
-                        br
-                        input#Surgeon(type='radio' name='surgeonradio' onchange='showlog()' value='3')
-                        label(for='Surgeon',class='labels')= 'Surgeon'
-                        br
-                        br
-                    #div2
-                        p#ptag()
                         input.form-control(type='text' name='loginid' placeholder='Login Id' required='')
                         br
                         input.form-control(type='password' name='passid' placeholder='Password' required='')
                         br
-                        input.btn.btn-warning( type='button' value='< Back' onclick='back()' style='float:left')
+                        br
                         input.btn.btn-success( type='submit' value='Login')
+        if message
+            script.
+                alert("#{message}");
