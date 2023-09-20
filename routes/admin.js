@@ -463,8 +463,8 @@ router.post('/loadFacDropdown', async function(req, res, next) {
 	
 	//var facresults = await scanTable(config.aws_facility_table_name);
 	//html = '<option value="">Select Facility</option>';
-	
-	res.send({facresults:facresults});
+	// console.log(facresults)
+	// res.send({facresults:facresults});
 });
 router.post('/assignbins2', async function(req, res, next) {
 	reqs = req.body;
@@ -869,12 +869,10 @@ router.get('/settings', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	
 	query = "select id,fname,fax,cell,website from facilities";
-	
-	var reqs=req.body;
-	console.log(reqs);
+
 	arr=[];varr=[];
-	
 	query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
+	console.log(req.session.userid, query2)
 	//console.log(query2);
 	await conn.query(query, function (err, result) {
 		if (err) console.log( err);
@@ -1337,42 +1335,49 @@ router.post('/postlogin', function(req, res, next) {
   var reqs = req.body;
   var loginid =	reqs.loginid;
   var passid =	reqs.passid;
-  var surgeonradio = reqs.surgeonradio;
   console.log(reqs);
  
   
   var sql = "select id,role from users where name ='"+loginid+"' and passcode='"+passid+"'";
   //VALUES('surgeon','surgeon',2)";
   conn.query(sql, function (err, result) {
-    if (err) console.log( err);
-	else{//console.log(result);
+    if (err){
+		
+		res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
+	}else{//console.log(result);
 	
-	for(i=0;i<result.length;i++){
-		//console.log(result[i]);
-		req.session.userid = result[i].id;
-		break;
-	}
-	console.log(req.session);
-	try{
-	if(!req.session || !req.session.userid){res.render('admin/login', { BASE_PATH: '../' });
-	}else{
-	console.log('user id exists');
-	//req.session.role_id = 2;
-	if(surgeonradio==3){
-		req.session.role_name = 'surgeon';
-		res.render('admin/dashboard', { BASE_PATH: '../' });
-	}else if(surgeonradio==1){
-		req.session.role_name = 'admin';
-		//res.render('admin/dashboard2', { BASE_PATH: '../' });
-		res.redirect('admindash');
-	}else if(surgeonradio==2){
-		req.session.role_name = 'surgycenter';
-	
-		res.render('admin/dashboard', { BASE_PATH: '../' });
+		for(i=0;i<result.length;i++){
+			//console.log(result[i]);
+			req.session.userid = result[i].id;
+			req.session.role = result[i].role;
+			console.log(req.session.role)
+			break;
 		}
-	}
-	}catch(e){}
-    console.log("User query created");
+		console.log(req.session);
+		try{
+			if(!req.session || !req.session.userid ){
+			res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
+			}else{
+				console.log('user id exists');
+				//req.session.role_id = 2;
+				if(req.session.role==3){
+					req.session.role_name = 'surgeon';
+					res.render('admin/dashboard', { BASE_PATH: '../' });
+				}else if(req.session.role==1){
+					req.session.role_name = 'admin';
+					//res.render('admin/dashboard2', { BASE_PATH: '../' });
+					res.redirect('admindash');
+				}else if(req.session.role==2){
+					req.session.role_name = 'surgycenter';
+					res.render('admin/dashboard', { BASE_PATH: '../' });
+				}else{
+					res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });	
+				}
+			}
+		}catch(e){
+			console.log("User query cannot be created");
+		}
+   		console.log("PostLogin Completed");
   }});
   
   
