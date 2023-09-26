@@ -1138,11 +1138,16 @@ router.get('/sc_reports', async function(req, res, next) {
 router.get('/settings', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	
+	sid = req.session.userid;
+	role = req.session.role;
+	
 	if(req.session.role == 3){ // surgy center
-		sid = req.session.userid;
+		
 		console.log('sid:-----:'+sid);
 		
-		res.render('admin/dashboard3', { BASE_PATH: '../', pageid:'settings', uid:sid});
+		res.render('admin/dashboard3', { BASE_PATH: '../', pageid:'settings', uid:sid, role:role});
+	}else if(req.session.role == 1){
+		res.render('admin/settings', { BASE_PATH: '../', pageid:'settings', uid:sid, role:role, result:[],  result2:[]});
 	}else{
 	query = "select id,fname,fax,cell,website from facilities";
 
@@ -1174,7 +1179,7 @@ router.get('/settings', async function(req, res, next) {
 				}
 			}
 			
-			res.render('admin/settings', { BASE_PATH: '../', result:farr, uid:req.session.userid, result2:varr, uid:req.session.userid});
+			res.render('admin/settings', { BASE_PATH: '../', result:farr,  result2:varr,  uid:sid, role:role});
 			});
 		});
 	//});
@@ -1208,6 +1213,15 @@ router.get('/admindash', async function(req, res, next) {
 	results = '';
 	console.log(sql);
 	
+	var role = req.session.role;
+	var uid = req.session.userid;
+	
+	/*
+	req.session.role == 3){ // surgy center
+		sid = req.session.userid;
+		console.log('sid:-----:'+sid);
+		*/
+	
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
 	else{
@@ -1226,7 +1240,7 @@ router.get('/admindash', async function(req, res, next) {
 	else{
 	
 	console.log(result2);
-	res.render('admin/dashboard2', { BASE_PATH: '../', results:results, result2:result2 });
+	res.render('admin/dashboard2', { BASE_PATH: '../', results:results, result2:result2, uid:uid, role:role });
 	}
 	});
 	}

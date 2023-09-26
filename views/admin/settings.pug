@@ -1,4 +1,14 @@
 include header.pug
+if role == 1
+    ul.horizontal
+        li
+            a(href="../admin/admindash") User Management
+        li
+            a(href="../admin/equipmain") Equipment Management
+        li
+            a(href="../admin/manumain") Manufacturer Management
+    style.
+        #features{display:none}
 style.
     #neworder{text-decoration:underline;}
     #orderhistory{color:#333}
@@ -34,7 +44,7 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
             
             select#surgicenters(multiple="multiple",class="selected_class",onchange="selected_surgy(1)")
                 option(value='')= 'select surgerycenter'
-                each element in result    
+                each element in result
                     option(value=element.id)= element.fname
             br
             | Selected Surgery centers

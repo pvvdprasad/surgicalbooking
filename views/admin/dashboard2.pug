@@ -1,11 +1,14 @@
 include header.pug
-ul.horizontal
-	li
-		a(href="../admin/admindash") User Management
-	li
-		a(href="../admin/equipmain") Equipment Management
-	li
-		a(href="../admin/manumain") Manufacturer Management
+if role == 1
+	ul.horizontal
+		li
+			a(href="../admin/admindash") User Management
+		li
+			a(href="../admin/equipmain") Equipment Management
+		li
+			a(href="../admin/manumain") Manufacturer Management
+	style.
+		#features{display:none}
 style.
 	#linemenu, #headerspan{display:none}
 	#uuul{padding:0;margin:0}	
