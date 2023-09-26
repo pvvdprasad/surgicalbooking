@@ -693,8 +693,8 @@ router.post('/editfacility', async function(req, res, next) {
 	html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].fname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="facility_email" type="text" name="facility_email" placeholder="Enter Email" value="'+ (undefined ==results[0].email?"":results[0].email) +'" />';
 		
 	html += '<br /><br /><input class="btn cbut grey" type="button" onclick="remove_facility(\''+reqs.fac_id+'\')" value="Remove"><input class="btn cbut blue" style="margin-left:40px" type="button" onclick="update_facility(\''+reqs.fac_id+'\')" value="Save">';
-	});
 	res.send({ html:html });
+	});
 	
 });
 
@@ -713,7 +713,7 @@ router.post('/editpractise', async function(req, res, next) {
 	var results = await scanTable(config.aws_facility_table_name);
 	*/
 	html = '<h2>Edit Practise</h2>';
-	html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].pname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="npi" type="text" name="npi" placeholder="Enter NPI" value="'+ results[0].npi +'" />';
+	html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].pname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" oninput="validateURL(this)" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="npi" type="text" name="npi" placeholder="Enter NPI" value="'+ results[0].npi +'" />';
 		
 	html += '<br /><br /><input class="btn cbut grey" type="button" onclick="remove_practise(\''+reqs.pra_id+'\')" value="Remove"><input class="btn cbut blue" style="margin-left:40px" type="button" onclick="update_practise(\''+reqs.pra_id+'\')" value="Save">';
 	});
@@ -1601,8 +1601,6 @@ router.post('/addFacility', async function(req, res, next) {
 		if (err) throw err;
 	
 	// Send email with temp password
-	
-	//console.log(reqs.facility_name);
 	
 
 	try{
