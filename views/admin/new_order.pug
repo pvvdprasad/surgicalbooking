@@ -56,9 +56,9 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                     input(type="radio" value="fav2" name="fav_sele" style="margin-left: 20%;" onchange="hightlight(this.value)")
                     label()= 'Fav IOL 02'
                 td
-                    input(type="radio" value="fav3" name="fav_sele" style="margin-left: 15%;" onchange="hightlight(this.value)")
-                    label()= 'Fav IOL 02'
-                    input(type="radio" value="manually" name="fav_sele" style="margin-left: 20%;" onchange="showoptt(this.checked)")
+                    input(type="radio" value="fav3" name="fav_sele1" style="margin-left: 15%;" onchange="hightlight(this.value)")
+                    label()= 'Backup IOL 01'
+                    input(type="radio" value="manually" name="fav_sele1" style="margin-left: 20%;" onchange="showoptt(this.checked)")
                     label()= 'Select Manually'
             tr#ddtr01
                 td(style="padding:5px")
@@ -95,6 +95,16 @@ script.
             }
             val=val.replaceAll('_', ' ');
         }
+        
+        names1 = document.getElementsByName('fav_sele1');
+        val1='';
+        for(i=0;i<names1.length;i++){
+            if(names1[i].checked){
+                val1=names1[i].value;
+            }
+            val1=val1.replaceAll('_', ' ');
+        }
+        
         // sel.options[sel.selectedIndex].text
         body = '<table><tr>';
         body += '<td class="tdlabel">Surgery Centre</td><td class="td2label">'+o('surgery_center').options[o('surgery_center').selectedIndex].text+'</td></tr>';
@@ -107,6 +117,9 @@ script.
         bb = o('select_brand');
         mo = o('select_model');
         po = o('select_power');
+        
+        body += '<tr><td class="tdlabel">Primary IOL</td><td class="td2label">'+val+'</td></tr>';
+        body += '<tr><td class="tdlabel">Backup IOL</td><td class="td2label">'+val1+'</td></tr>';
         
         body += '<tr><td class="tdlabel">Date of Birth</td><td class="td2label">'+o('datepicker2').value+'</td></tr>';
         body += '<tr><td class="tdlabel">Side</td><td class="td2label">'+o('select_side').value+'</td></tr>';
@@ -140,9 +153,19 @@ script.
             }
         }
         
+        fav_sele1=document.getElementsByName('fav_sele1');
+        val1='';
+        
+        for(i=0;i<fav_sele1.length;i++){
+            if(fav_sele1[i].checked){
+            val1=fav_sele1[i].value;
+            break;
+            }
+        }
+        
         console.log('----------------:'+o('surgery_center').value);
         $.post(url,{sucenter:o('surgery_center').value,start_dt:o('datepicker').value,fn:o('pat_first_name').value,
-        mn:o('pat_middle_name').value,ln:o('pat_last_name').value,dob:o('datepicker2').value,side:o('select_side').value,sele:val,manu:o('select_manu').value,brand:o('select_brand').value,model:o('select_model').value,power:o('select_power').value},function(data){
+        mn:o('pat_middle_name').value,ln:o('pat_last_name').value,dob:o('datepicker2').value,side:o('select_side').value,sele:val,manu:o('select_manu').value,brand:o('select_brand').value,model:o('select_model').value,pri_iol:val,back_iol:val1, power:o('select_power').value},function(data){
             alert('The Order is been placed successfully');
             window.location.href=window.location;
         });

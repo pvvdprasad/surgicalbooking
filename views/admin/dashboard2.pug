@@ -15,7 +15,8 @@ style.
 		border-radius: 10px;
 		border: 1px solid #999;
 		width: 50%;
-	}
+	}	
+	#rightdiv{position:relative}
 	.arrow{background-image:url('../images/up-down.png');width:35px;height:33px;cursor:pointer;padding-top:7px}
 	.arrow span{padding-left:45px}
 	.down{background-position:34px -1px;}
@@ -52,6 +53,8 @@ style.
 				br
 				input#facility_fax.form-control(type='text' name='facility_fax' placeholder='Enter Fax')
 				br
+				input#facility_email.form-control(type='text' name='facility_email' placeholder='Enter Email')
+				br
 				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
 				br
 script.
@@ -83,8 +86,8 @@ script.
 		});
 		return false;
 	}
-	function dlink(fid){
-		//console.log(fid+':--------------:'+dlink);
+	function mmmdlink(fid){
+		console.log(fid+':-------dlink-------:');
 		dlis = document.getElementsByName('dlinkchs');
 		tarr = [];
 		for(i=0;i<dlis.length;i++){
@@ -100,7 +103,7 @@ script.
 	}
 	function view_dlink(id){console.log('In dlink:'+id);
 	
-		$.post('/admin/showsurgeons', {fid: id}, function(data){
+		$.post('/admin/showSurgeons', {fid: id}, function(data){
 			console.log(data);
 			if (data.noSurgeons) {
 				alert("No surgeons found.");
@@ -155,7 +158,7 @@ script.
 		}		
 	}	
 	function update_practise(id){
-		$.post('/admin/updatepractise', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value,npi:o('npi').value}, function(data){
+		$.post('/admin/updatepractise', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value, website:o('facility_website').value,namee:o('facility_name').value,npi:o('npi').value,email:o('facility_email').value }, function(data){
 			//console.log(data);
 			// results = data.results;
 			//o('rightdiv').innerHTML = data.html;
@@ -210,7 +213,7 @@ script.
 	}	
 	function update_facility(id){
 		console.log(id );
-		$.post('/admin/updatefacili', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value }, function(data){
+		$.post('/admin/updatefacili', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value,email:o('facility_email').value }, function(data){
 		console.log(data);
 		window.location.href = window.location;
 		});
@@ -356,7 +359,7 @@ script.
 			for(i=0;i<data.result.length;i++){
 				obj=data.result[i]; // id,first_name,last_name,middle_name,npi
 				
-				html += '<tr><td><input type="checkbox" name="chsurgeons" value="'+obj.id+'"  /></td><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td></tr>';
+				html += '<tr><td><input type="checkbox" name="chsurgeons" value="'+obj.user_id+'"  /></td><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td></tr>';
 			}
 			o('searchpopup').innerHTML = html + '</table><input class="btn cbut blue bbbutons" value="Add" onclick="save_search_surgeon('+id+')" style="position:relative" />';
 		});
@@ -601,11 +604,13 @@ script.
 
 	function submitform(){
 		console.log('In the function');
-		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
+		$.post('/admin/addFacility', {facility_name: o('facility_name').value,email:o('facility_email').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
 			o('facility_name').value = '';
 			o('facility_website').value = '';
 			o('facility_phone').value = '';
 			o('facility_fax').value = '';
+			o('facility_email').value = '';
+			alert('Surgery center created successfully');
 			window.location.href = window.location;
 		});
 		
