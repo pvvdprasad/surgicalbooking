@@ -1,2 +1,6 @@
 
-views/admin/leftmenu_user.pug
+
+node_modules/
+db.sql
+package-lock.json
+package.json
