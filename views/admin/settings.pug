@@ -65,7 +65,8 @@ script.
     function changepassword(){
         url = '/admin/save_password';
         p = o('password').value;
-        c = o('cpassword').value;
+        c = o('cpassword').value; 
+        
         if(p != c){
             alert('Passwords mismatch');
         }else{

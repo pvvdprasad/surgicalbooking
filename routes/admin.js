@@ -57,14 +57,25 @@ router.post('/getfavs',async function(req, res, next) {
 router.post('/save_password',async function(req, res, next) {	
 	// query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
 	reqs = req.body;
+	console.log(reqs);
 	//reqs.p
-	//reqs.uid
-	sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
-	console.log(sql);
+	//reqs.uid   sid = req.session.userid;   p:p,uid:o('uid').value,path:'sc'
 	
-	conn.query(sql, function (err, result) {
-		res.send({});
-	});
+	if(reqs.path && reqs.path == 'sc'){
+		sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
+		console.log(sql);
+		
+		conn.query(sql, function (err, result) {
+			res.send({});
+		});
+	}else{
+		sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
+		console.log(sql);
+		
+		conn.query(sql, function (err, result) {
+			res.send({});
+		});
+	}
 });
 
 router.get('/neworder',async function(req, res, next) {	
@@ -1127,11 +1138,18 @@ router.get('/sc_reports', async function(req, res, next) {
 router.get('/settings', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	
+	if(req.session.role == 3){ // surgy center
+		sid = req.session.userid;
+		console.log('sid:-----:'+sid);
+		
+		res.render('admin/dashboard3', { BASE_PATH: '../', pageid:'settings', uid:sid});
+	}else{
 	query = "select id,fname,fax,cell,website from facilities";
 
 	arr=[];varr=[];
 	query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
-	console.log(req.session.userid, query2)
+	//console.log(req.session.userid, query2) req.session.userid = result[i].id;
+	//		req.session.role = result[i].role;
 	//console.log(query2);
 	await conn.query(query, function (err, result) {
 		if (err) console.log( err);
@@ -1160,7 +1178,7 @@ router.get('/settings', async function(req, res, next) {
 			});
 		});
 	//});
-	
+	}
 	//res.render('admin/settings', { BASE_PATH: '../'});
 });
 
