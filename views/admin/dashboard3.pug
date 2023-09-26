@@ -1,0 +1,102 @@
+include header.pug
+script.
+	function o(id){console.log(id);return document.getElementById(id);}
+ul.horizontal
+	li
+		a(href="../admin/sc_neworders") New Orders
+	li
+		a(href="../admin/sc_orderhistory") Order History
+	li
+		a(href="../admin/sc_reports") Reports
+style.
+	#linemenu, #headerspan{display:none}
+	#uuul{padding:0;margin:0}	
+	.thdd{background-color:#003595 !important;color:#FFF !important;}
+	.cp{cursor:pointer !important}
+.row
+	input(type='hidden' id='hidid' name='hidid' value=pageid)
+	input(type='hidden' id='surgyid' name='surgyid' value=uid)
+	.col-md-3
+	if pageid == 'neworder'
+		.col-md-8#rightdiv_neworder(style='border:1px solid #e7e7e7;margin:12px;')
+	else if pageid == 'orderhistory'
+		.col-md-8#rightdiv_orderhistory(style='border:1px solid #e7e7e7;margin:12px' onload='loadorderhistory('+uid+')')
+	else if pageid == 'reports'
+		.col-md-8#rightdiv_reports(style='border:1px solid #e7e7e7;margin:12px' onload='loadreports('+uid+')')
+script.	
+	$(document).ready(function(){
+		id = o('hidid').value;
+		sid = o('surgyid').value;
+		
+		if(id == 'neworder'){
+			loadneworder(sid);
+		}else if(id == 'orderhistory'){
+			loadorderhistory(sid);
+		}
+		
+		try{
+		
+		}catch(e){console.log(e);}
+		console.log(id+':--------:'+sid);
+	});	
+	function openorder(oid){
+		$.post('/admin/openorder', {oid:oid}, function(data){ // facid
+			console.log(data);
+			o('rightdiv_neworder').innerHTML = data.html;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+		});
+	}
+	function approveorder(oid){
+		
+		$.post('/admin/approveorder', {oid:oid}, function(data){ // facid
+			//console.log(data);
+			//o('rightdiv_neworder').innerHTML = data.html;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+			alert('Approved Successfully');
+			 window.location.href = window.location;
+		});
+	}
+	function loadneworder(fid){
+		$.post('/admin/scneworders', {fid:fid}, function(data){ // facid
+			console.log(data);
+			o('rightdiv_neworder').innerHTML = data.html;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+		});
+	}
+	function printorder2(oid){
+	
+		html = o('rightdiv_orderhistory').innerHTML;
+		
+		url = window.location.href;
+		var divContents = html;
+		var a = window.open(url, '', 'height=500, width=500');
+		a.document.write('<html>');
+		a.document.write('<body>');
+		a.document.write(divContents);
+		a.document.write('</body></html>');
+		a.document.close();
+		a.print();
+	}
+	function printorder(oid){
+		
+		$.post('/admin/printorder', {oid:oid}, function(data){ // facid
+			//console.log(data);
+			o('rightdiv_orderhistory').innerHTML = data.html;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+			//alert('Approved Successfully');
+			 //window.location.href = window.location;
+		});
+	}
+	function loadorderhistory(fid){
+		$.post('/admin/scorderhistory', {fid:fid}, function(data){ // facid
+			console.log(data);
+			o('rightdiv_orderhistory').innerHTML = data.html;
+			//if(ch == 2) window.location.href = window.location; 
+			//else o('subdivddd').innerHTML = '';
+		});
+	}
+	function loadreports(fid){}
