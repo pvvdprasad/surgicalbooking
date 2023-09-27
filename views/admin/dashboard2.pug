@@ -58,6 +58,8 @@ style.
 				br
 				input#facility_fax.form-control(type='tel' name='facility_fax' placeholder='Enter Fax'  required oninput='validateFaxNumber(this)')
 				br
+				input#facility_email.form-control(type='text' name='facility_email' placeholder='Enter email address'  required oninput='validateEmail(this)')
+				br
 				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
 				br
 script.
@@ -216,6 +218,7 @@ script.
 		});
 	}
 	ep=0;
+
 	//edit_practise
 	function edit_practise(pra_id){
 		console.log(pra_id);
@@ -427,10 +430,8 @@ script.
 	//- 		});
 	//- 		}
 
-	function open_practise(name){
+	function open_practise(){
 		console.log("In the view/edit Surgeons =============")
-		console.log(name)
-		
 		$.post('/admin/viewAllSurgeons', {}, function(data){
 			console.log(data.data);
 			if (data.data.length === 0) {
@@ -648,12 +649,13 @@ script.
 
 	function submitform(){
 		console.log('In the Add Facility function');
-		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
+		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value, facility_email: o('facility_email').value }, function(data){
 		console.log('In the function');
 			o('facility_name').value = '';
 			o('facility_website').value = '';
 			o('facility_phone').value = '';
 			o('facility_fax').value = '';
+			o('facility_email').value = '';
 			alert('Facility added successfully');
 			window.location.href = window.location;
 		});

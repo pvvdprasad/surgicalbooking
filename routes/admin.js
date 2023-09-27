@@ -1618,7 +1618,7 @@ router.post('/addFacility', async function(req, res, next) {
 	
 
 	try{
-		sql = "INSERT INTO facilities(fname,fax,cell,website) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"')";
+		sql = "INSERT INTO facilities(fname,fax,cell,website) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.email+"')";
 		
 		conn.query(sql, function (err, result) {
 			if (err) throw err;
@@ -1670,10 +1670,12 @@ router.post('/postlogin', function(req, res, next) {
   
   var sql = "select id,role from users where name ='"+loginid+"' and passcode='"+passid+"'";
   //VALUES('surgeon','surgeon',2)";
-  conn.query(sql, function (err, result) {
+  //prepared statements to prevent SQL injection attacks
+  conn.query(sql, [loginid, passid], function (err, result) {
     if (err){
 		
 		res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
+		return;
 	}else{//console.log(result);
 	
 		for(i=0;i<result.length;i++){
@@ -1685,7 +1687,7 @@ router.post('/postlogin', function(req, res, next) {
 		}
 		console.log(req.session);
 		try{
-			if(!req.session || !req.session.userid ){
+			if(req.session.userid === undefined){
 			res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
 			}else{
 				console.log('user id exists');
@@ -1710,8 +1712,6 @@ router.post('/postlogin', function(req, res, next) {
 		}
    		console.log("PostLogin Completed");
   }});
-  
-  
 });
 
 router.post('/unassignedBins', async function(req, res, next) {
