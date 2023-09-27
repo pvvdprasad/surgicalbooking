@@ -650,7 +650,6 @@ script.
 		console.log('In the Add Facility function');
 		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
 		console.log('In the function');
-		$.post('/admin/addFacility', {facility_name: o('facility_name').value,email:o('facility_email').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
 			o('facility_name').value = '';
 			o('facility_website').value = '';
 			o('facility_phone').value = '';
@@ -658,6 +657,5 @@ script.
 			alert('Facility added successfully');
 			window.location.href = window.location;
 		});
-		
 		return false;
 	}
