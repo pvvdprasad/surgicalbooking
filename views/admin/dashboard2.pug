@@ -58,6 +58,8 @@ style.
 				br
 				input#facility_fax.form-control(type='tel' name='facility_fax' placeholder='Enter Fax'  required oninput='validateFaxNumber(this)')
 				br
+				input#facility_email.form-control(type='tel' name='facility_email' placeholder='Enter Email'  required)
+				br
 				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
 				br
 script.
@@ -648,8 +650,9 @@ script.
 
 	function submitform(){
 		console.log('In the Add Facility function');
+		/*
 		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
-		console.log('In the function');
+		console.log('In the function'); */
 		$.post('/admin/addFacility', {facility_name: o('facility_name').value,email:o('facility_email').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value}, function(data){
 			o('facility_name').value = '';
 			o('facility_website').value = '';

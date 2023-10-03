@@ -582,7 +582,7 @@ router.post('/viewAllSurgeons', async function(req, res, next) {
 	var reqs = req.body;
 	console.log('In addpractise...........');
 	console.log(reqs);
-	sql = `select id,user_id,first_name,middle_name,last_name,cell,email,npi,selected_sc,used_sc,removed_users from other_users where npi != '' && removed_users= False`;
+	sql = `select id,user_id,first_name,middle_name,last_name,cell,email,npi,selected_sc,used_sc from other_users where npi != '' && removed_users= False`;
 	
 	await conn.query(sql, function (err, result) {
 		if (err){
@@ -1893,7 +1893,7 @@ router.post('/addbin', async function(req, res, next) {
 	const docClient = new AWS.DynamoDB.DocumentClient();
 	*/
 	sql = 'insert into bins (binstatus, comments,fact_id, firmware , mac_id ,mandate ,model) values(0,'+
-	'"",0,"'+reqs.firmware+'","'+reqs.mac_id+'","'+reqs.mandate+'","'+reqs.model+'")';
+	'"",0,"'+reqs.firmware+'","'+reqs.macid+'","'+reqs.mandate+'","'+reqs.model+'")';
 	//docClient.put(params, function(err, data) {
 		console.log(sql);
 	conn.query(sql, function (err, binresults) {
