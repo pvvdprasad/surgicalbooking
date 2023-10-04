@@ -20,6 +20,7 @@ head
   link(href=BASE_PATH+'assets/vendor/swiper/swiper-bundle.min.css' rel='stylesheet')
   // Template Main CSS File
   link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
+  
   script.
     function o(id){return document.getElementById(id);}
     function back(){
@@ -65,12 +66,22 @@ head
                         span= 'Login As'
                         br
                         br
-                        input.form-control(type='text' name='loginid' placeholder='Login Id' required='')
+                        div.form-floating.mb-3
+                            input.form-control(type='text'  id='floatingInput' name='loginid' placeholder='Username/Email' required='')
+                            label(for='floatingInput') Email address
                         br
-                        input.form-control(type='password' name='passid' placeholder='Password' required='')
+                        div.form-floating
+                            input.form-control(type='password' id='floatingInput' name='passid' placeholder='Password' required='')
+                            label(for='floatingInput') Password
                         br
                         br
                         input.btn.btn-success( type='submit' value='Login')
-        if message
-            script.
-                alert("#{message}");
+                    //- div.form-floating.mb-3
+                    //-     input.form-control(type='email', id='floatingInput', placeholder='name@example.com')
+                    //-     label(for='floatingInput') Email address
+                    //- div.form-floating
+                    //-     input.form-control(type='password', id='floatingPassword', placeholder='Password')
+                    //-     label(for='floatingPassword') Password
+                if message
+                    script.
+                        alert("#{message}");

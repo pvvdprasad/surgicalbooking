@@ -1618,7 +1618,7 @@ router.post('/addFacility', async function(req, res, next) {
 	
 
 	try{
-		sql = "INSERT INTO facilities(fname,fax,cell,website,email) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.email+"')";
+		sql = "INSERT INTO facilities(fname,fax,cell,website,email) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.facility_email+"')";
 		
 		conn.query(sql, function (err, result) {
 			if (err) throw err;
@@ -1672,46 +1672,49 @@ router.post('/postlogin', function(req, res, next) {
   //VALUES('surgeon','surgeon',2)";
   conn.query(sql, function (err, result) {
     if (err){
-		
-		res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
-	}else{//console.log(result);
-	
-		for(i=0;i<result.length;i++){
-			//console.log(result[i]);
-			req.session.userid = result[i].id;
-			req.session.role = result[i].role;
-			console.log(req.session.role)
-			break;
-		}
-		console.log(req.session);
-		try{
-			if(!req.session || !req.session.userid ){
-			res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
-			}else{
-				console.log('user id exists');
-				//req.session.role_id = 2;
-				if(req.session.role==2){
-					req.session.role_name = 'surgeon';
-					res.render('admin/dashboard', { BASE_PATH: '../' });
-				}else if(req.session.role==1){
-					req.session.role_name = 'admin';
-					// res.render('admin/dashboard2', { BASE_PATH: '../' });
-					res.redirect('admindash');
-				}else if(req.session.role==3){
-					req.session.role_name = 'surgycenter';
-					res.redirect('sc_neworders');
-					// res.render('admin/dashboard3', { BASE_PATH: '../' });
-				}else{
-					res.render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });	
-				}
+		res.render('admin/login', { BASE_PATH: '../', message: 'Database error. Please try again later.' });
+	}else{
+		 if(!result || result.length === 0){
+			// If no user with the given credentials is found, render the login view with an error message
+			res.status(401).render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
+			//console.log(result);
+		}else{
+			for(i=0;i<result.length;i++){
+				//console.log(result[i]);
+				req.session.userid = result[i].id;
+				req.session.role = result[i].role;
+				console.log(req.session.role)
+				break;
 			}
-		}catch(e){
-			console.log("User query cannot be created");
+			console.log(req.session);
+			try{
+				if(!req.session || !req.session.userid ){
+					res.status(401).render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
+				}else{
+					console.log('user id exists');
+					//req.session.role_id = 2;
+					if(req.session.role==2){
+						req.session.role_name = 'surgeon';
+						res.status(200).render('admin/dashboard', { BASE_PATH: '../' });
+					}else if(req.session.role==1){
+						req.session.role_name = 'admin';
+						// res.render('admin/dashboard2', { BASE_PATH: '../' });
+						res.status(200).redirect('admindash');
+					}else if(req.session.role==3){
+						req.session.role_name = 'surgycenter';
+						res.status(200).redirect('sc_neworders');
+						// res.render('admin/dashboard3', { BASE_PATH: '../' });
+					}else{
+						res.status(401).render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });	
+					}
+				}
+			}catch(e){
+				console.log("User query cannot be created");
+			}
+   			console.log("PostLogin Completed");
 		}
-   		console.log("PostLogin Completed");
-  }});
-  
-  
+	}
+	});
 });
 
 router.post('/unassignedBins', async function(req, res, next) {

@@ -18,7 +18,101 @@ style.
 		border-radius: 10px;
 		border: 1px solid #999;
 		width: 50%;
-	}	
+	}
+	.did-floating-label-content {
+		position:relative;
+		margin-bottom:20px;
+	}
+	.did-floating-label {
+		color:#000000;
+		font-size:13px;
+		font-weight:normal;
+		position:absolute;
+		pointer-events:none;
+		left:15px;
+		top:11px;
+		padding:0 5px;
+		background:#fff;
+		transition:0.2s ease all;
+		-moz-transition:0.2s ease all;
+		-webkit-transition:0.2s ease all;
+	}
+
+	.did-floating-input, .did-floating-select {
+		font-size:12px;
+		display:block;
+		width:100%;
+		height:36px;
+		padding: 0 20px;
+		background: #fff;
+		color: #323840;
+		border: 1px solid #3D85D8;
+		border-radius: 4px;
+		box-sizing: border-box;
+		&:focus{
+			outline:none;
+			~ .did-floating-label{
+				top:-8px;
+				font-size:13px;
+			}
+		}
+	}
+	select.did-floating-select {
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+	}
+	select.did-floating-select::-ms-expand {
+		display: none;
+	}
+	.did-floating-input:not(:placeholder-shown) ~ .did-floating-label {
+		top:-8px;
+		font-size:13px;
+	}
+	.did-floating-select:not([value=""]):valid ~ .did-floating-label {
+		top:-8px;
+		font-size:13px;
+	}
+	.did-floating-select[value=""]:focus ~ .did-floating-label {
+		top:11px;
+		font-size:13px;
+	}
+
+	.did-floating-label{
+		font-weight: 600;
+		color:#003595;
+	}
+	.did-floating-select:not([multiple]):not([size]) {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6'%3E%3Cpath id='Path_1' data-name='Path 1' d='M371,294l4,6,4-6Z' transform='translate(-371 -294)' fill='%239d3b3b'/%3E%3C/svg%3E%0A");
+	}
+	.input-group {
+	    display: flex;
+		.did-floating-input{
+			border-radius:0 4px 4px 0;
+			border-left:0;
+			padding-left:0;
+		}
+	}
+	.input-group-append {
+		display:flex;
+		align-items:center;
+		/*   margin-left:-1px; */
+	}
+
+	.input-group-text {
+		display: flex;
+		align-items: center;
+		font-weight: 400;
+		height:34px;
+		color: #323840;
+		padding: 0 5px 0 20px;
+		font-size:12px;
+		text-align: center;
+		white-space: nowrap;
+		border: 1px solid #3D85D8;
+		border-radius: 4px 0 0 4px;
+		border-right:none;
+	}
 	#rightdiv{position:relative}
 	.arrow{background-image:url('../images/up-down.png');width:35px;height:33px;cursor:pointer;padding-top:7px}
 	.arrow span{padding-left:45px}
@@ -49,18 +143,28 @@ style.
 	.col-md-8#rightdiv(style='border:1px solid #e7e7e7;margin:12px')
 		form(method='get',onsubmit='return submitform()')
 			.form-group.text-center(style='position:relative')
-				h2 Add Facility				
-				input#facility_name.form-control(type='text' name='facility_name' placeholder='Enter Facility Name' required )
+				h2 Add Facility
+				div.did-floating-label-content
+					input#facility_name.form-control.did-floating-input(type='text' name='facility_name' placeholder=' ')
+					label.did-floating-label Enter Facility Name
+				//- input#facility_name.form-control(type='text' name='facility_name' placeholder='Enter Facility Name' required )
 				br
-				input#facility_website.form-control(type='text' name='facility_website' placeholder='Enter Website' oninput='validateURL(this)' required)
+				div.did-floating-label-content
+					input#facility_website.form-control.did-floating-input(type='text' name='facility_website' placeholder=' ' oninput='validateURL(this)' required)
+					label.did-floating-label Enter Website
+				//- input#facility_website.form-control(type='text' name='facility_website' placeholder='Enter Website' oninput='validateURL(this)' required)
 				br
-				input#facility_phone.form-control(type='tel' name='facility_phone' placeholder='Enter Phone'  required oninput='validatePhoneNumber(this)')
+				div.did-floating-label-content
+					input#facility_phone.form-control.did-floating-input(type='tel' name='facility_phone' placeholder=' '  required oninput='validatePhoneNumber(this)')
+					label.did-floating-label Enter Phone Number
 				br
-				input#facility_fax.form-control(type='tel' name='facility_fax' placeholder='Enter Fax'  required oninput='validateFaxNumber(this)')
+				div.did-floating-label-content
+					input#facility_fax.form-control.did-floating-input(type='tel' name='facility_fax' placeholder=' '  required oninput='validateFaxNumber(this)')
+					label.did-floating-label Enter Fax Number
 				br
-
-				input#facility_email.form-control(type='text' name='facility_email' placeholder='Enter email address'  required oninput='validateEmail(this)')
-
+				div.did-floating-label-content
+					input#facility_email.form-control.did-floating-input(type='text' name='facility_email' placeholder=' '  required oninput='validateEmail(this)')
+					label.did-floating-label Enter email address
 				br
 				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
 				br
