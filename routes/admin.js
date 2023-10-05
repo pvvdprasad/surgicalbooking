@@ -689,11 +689,15 @@ router.post('/editfacility', async function(req, res, next) {
 	/*
 	var results = await scanTable(config.aws_facility_table_name);
 	*/
-	html = '<h2>Edit Facility</h2>';
-	html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].fname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="facility_email" type="text" name="facility_email" placeholder="Enter Email" value="'+ (undefined ==results[0].email?"":results[0].email) +'" />';
-		
-	html += '<br /><br /><input class="btn cbut grey" type="button" onclick="remove_facility(\''+reqs.fac_id+'\')" value="Remove"><input class="btn cbut blue" style="margin-left:40px" type="button" onclick="update_facility(\''+reqs.fac_id+'\')" value="Save">';
-	res.send({ html:html });
+		var facilityData = {
+			id: results[0].id,
+			fname: results[0].fname,
+			fax: results[0].fax,
+			email: results[0].email || '', // Handle undefined case
+			cell: results[0].cell,
+			website: results[0].website
+	  };
+	  res.status(200).send({ facility: facilityData });
 	});
 	
 });
@@ -723,7 +727,7 @@ router.post('/editpractise', async function(req, res, next) {
 router.post('/removefacility', async function(req, res, next) {
 	var reqs = req.body;
 	
-	var sql = 'delete from facilities where id='+reqs.fac_id;
+	var sql = 'UPDATE facilities SET removed_users= True where id='+reqs.fac_id ;
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
 	res.send({});
@@ -902,7 +906,7 @@ router.post('/search_surgeon', async function(req, res, next) {
 	
 	// var sql = 'select id,first_name,last_name,middle_name,npi from other_users where selected_sc like "%|'+id+':%" AND( first_name like "%'+txt+'%" OR middle_name like "%'+txt+'%" OR last_name like "%'+txt+'%" OR npi like "%'+txt+'%")';
 	
-	sql = 'select id,user_id,first_name,last_name,middle_name,npi from other_users where (first_name like "%'+txt+'%" or last_name like "%'+txt+'%" or middle_name like "%'+txt+'%" or npi like "%'+txt+'%" )';
+	sql = 'select id,user_id,first_name,last_name,middle_name,npi from other_users where (first_name like "%'+txt+'%" or last_name like "%'+txt+'%" or middle_name like "%'+txt+'%" or npi like "%'+txt+'%" ) AND (npi != \'\')';
 	console.log(sql);
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
@@ -1209,7 +1213,7 @@ router.post('/showBinsList', async function(req, res, next) {
 router.get('/admindash', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	
-	sql = 'select id,fname,fax,cell,website from facilities';
+	sql = 'select id,fname,fax,cell,website,email from facilities where removed_users = 0';
 	results = '';
 	console.log(sql);
 	

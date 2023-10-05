@@ -86,7 +86,7 @@ style.
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6'%3E%3Cpath id='Path_1' data-name='Path 1' d='M371,294l4,6,4-6Z' transform='translate(-371 -294)' fill='%239d3b3b'/%3E%3C/svg%3E%0A");
 	}
 	.input-group {
-	    display: flex;
+		display: flex;
 		.did-floating-input{
 			border-radius:0 4px 4px 0;
 			border-left:0;
@@ -141,35 +141,31 @@ style.
 		include leftmenu_user.pug
 
 	.col-md-8#rightdiv(style='border:1px solid #e7e7e7;margin:12px')
-		form(method='get',onsubmit='return submitform()')
+		form(method='get' onsubmit='return submitform()')
 			.form-group.text-center(style='position:relative')
 				h2 Add Facility
 				div.did-floating-label-content
 					input#facility_name.form-control.did-floating-input(type='text' name='facility_name' placeholder=' ')
 					label.did-floating-label Enter Facility Name
 				//- input#facility_name.form-control(type='text' name='facility_name' placeholder='Enter Facility Name' required )
-				br
 				div.did-floating-label-content
 					input#facility_website.form-control.did-floating-input(type='text' name='facility_website' placeholder=' ' oninput='validateURL(this)' required)
 					label.did-floating-label Enter Website
 				//- input#facility_website.form-control(type='text' name='facility_website' placeholder='Enter Website' oninput='validateURL(this)' required)
-				br
 				div.did-floating-label-content
 					input#facility_phone.form-control.did-floating-input(type='tel' name='facility_phone' placeholder=' '  required oninput='validatePhoneNumber(this)')
 					label.did-floating-label Enter Phone Number
-				br
 				div.did-floating-label-content
 					input#facility_fax.form-control.did-floating-input(type='tel' name='facility_fax' placeholder=' '  required oninput='validateFaxNumber(this)')
 					label.did-floating-label Enter Fax Number
-				br
 				div.did-floating-label-content
 					input#facility_email.form-control.did-floating-input(type='text' name='facility_email' placeholder=' '  required oninput='validateEmail(this)')
 					label.did-floating-label Enter email address
-				br
 				input.btn.cbut.blue.bbbutons(type="submit" value='Save' style='margin-left:35%;position:absolute')
 				br
+				br
 script.
-	
+
 	function validateURL(inputElement) {
 		var urlPattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(\/\S*)?$/;
 		var isValid = urlPattern.test(inputElement.value);
@@ -180,7 +176,7 @@ script.
 		}
 	}
 
-	
+
 	function validatePhoneNumber(input) {
 		var phonePattern = /^\d{10}$/;
 		var isValid = phonePattern.test(input.value);
@@ -245,7 +241,7 @@ script.
 		});
 	}
 	function view_dlink(id){console.log('In dlink:'+id);
-	
+
 		$.post('/admin/showSurgeons', {fid: id}, function(data){
 			console.log(data);
 			if (data.noSurgeons) {
@@ -256,12 +252,53 @@ script.
 		});	
 	}
 	function add_practise(){
-		o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" required id="first_name" type="text" name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" required placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="website" type="text" name="website" required placeholder="Enter Website" oninput="validateURL(this)" /><input class="form-control subdiv" id="fax" type="text" name="fax" required placeholder="Enter Fax" oninput="validateFaxNumber(this)" /><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell" required  oninput="validatePhoneNumber(this)" /><input class="form-control subdiv" id="email" type="text" required name="email" placeholder="Enter Email" /><input class="form-control subdiv" id="npi" type="text" name="npi" required placeholder="Enter NPI" /><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
+		var html = `
+		<h2>Add Surgeon</h2>
+			<form method="get" onsubmit="return submitformpractise()">
+				<div class="form-group text-center row" style="position:relative">
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" required id="first_name" type="text" name="first_name" placeholder=" " />
+						<label class="did-floating-label">Enter First Name</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="middle_name" type="text" name="middle_name" required placeholder=" " />
+						<label class="did-floating-label">Enter Middle Name</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="last_name" type="text" name="last_name" required placeholder=" " />
+						<label class="did-floating-label">Enter Last Name</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="website" type="text" name="website" required placeholder=" " oninput="validateURL(this)" />
+						<label class="did-floating-label">Enter Website</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="fax" type="text" name="fax" required placeholder="" oninput="validateFaxNumber(this)" />
+						<label class="did-floating-label">Enter Fax Number</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="cell" type="text" name="cell" placeholder=" " required  oninput="validatePhoneNumber(this)" />
+						<label class="did-floating-label">Enter Cell Number</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="email" type="text" required name="email" placeholder=" " />
+						<label class="did-floating-label">Enter Email</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="npi" type="text" name="npi" required placeholder=" " />
+						<label class="did-floating-label">Enter NPI</label>
+					</div>
+				</div>
+				<br>
+				<input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save">
+				<br>
+			</form>`;
+		o('rightdiv').innerHTML = html;
 	}
 	function callswap(obj,className){
 		//console.log(className);
 		objc = o(className);
-		  _tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
+			_tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
 		positions = {
 			'left' : _tmp[0],
 			'top' : _tmp[1]
@@ -272,18 +309,18 @@ script.
 			objc.style.display = 'block';
 			// open
 			obj.style.backgroundPosition = '34px -1px';
-			
+
 		}else{
 			obj.style.backgroundPosition = '1px -1px';
 			objc.style.display = 'none';
 		}
-		
+
 	}	
-	
+
 	function callswapp(obj,className){
 		//console.log(className);
 		objc = o(className+'ppp');
-		  _tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
+			_tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
 		positions = {
 			'left' : _tmp[0],
 			'top' : _tmp[1]
@@ -294,7 +331,7 @@ script.
 			objc.style.display = 'block';
 			// open
 			obj.style.backgroundPosition = '34px -1px';
-			
+
 		}else{
 			obj.style.backgroundPosition = '1px -1px';
 			objc.style.display = 'none';
@@ -309,20 +346,67 @@ script.
 		});
 	}
 	ei=0;
-	function edit_facility(fac_id){
+	//- function edit_facility(fac_id){
+	//- 	console.log(fac_id);
+	//- 	$.post('/admin/editfacility', {fac_id: fac_id}, function(data){
+	//- 		//console.log(data);
+	//- 		// results = data.results;
+	//- 		if(ei==0){
+	//- 			edit_facility(fac_id);
+	//- 			ei=1;
+	//- 		}else{
+	//- 			ei=0;
+	//- 			o('rightdiv').innerHTML = data.html;
+	//- 		}			
+	//- 	});
+	//- }
+	function edit_facility(fac_id) {
 		console.log(fac_id);
-		$.post('/admin/editfacility', {fac_id: fac_id}, function(data){
-			//console.log(data);
-			// results = data.results;
-			if(ei==0){
+		$.post('/admin/editfacility', { fac_id: fac_id }, function(data) {
+			if (ei == 0) {
 				edit_facility(fac_id);
-				ei=1;
-			}else{
-				ei=0;
-				o('rightdiv').innerHTML = data.html;
-			}			
-		});
+				ei = 1;
+			} else {
+				ei = 0;
+				var facilityData = data.facility;
+				console.log(facilityData);
+				// Generate HTML here using facilityData
+				var html = `<h2>Edit Facility</h2>
+							<div class="form-group text-center row" style="position:relative">`;
+				html += `<div class="did-floating-label-content col-md-6">
+							<input class="form-control did-floating-input" id="facility_name" type="text" name="facility_name" placeholder=" " value="` + facilityData.fname + `" />
+							<label class="did-floating-label">First Name</label>
+						</div>`;
+				html += `<div class="did-floating-label-content col-md-6">
+							<input class="form-control did-floating-input" id="facility_fax" type="tel" name="facility_fax" placeholder=" " value="` + facilityData.fax + `" />
+							<label class="did-floating-label">Fax Number</label>
+						</div>`;
+				html += `<div class="did-floating-label-content col-md-6">
+							<input class="form-control did-floating-input" id="facility_cell" type="tel" name="facility_cell" placeholder=" " value="` + facilityData.cell + `" />
+							<label class="did-floating-label">Cell Number</label>
+						</div>`;
+				html += `<div class="did-floating-label-content col-md-6">
+							<input class="form-control did-floating-input" id="facility_email" type="tel" name="facility_email" placeholder=" " value="` + facilityData.email + `" />
+							<label class="did-floating-label">Email</label>
+	 					</div>`;
+	 			html += `<div class="did-floating-label-content col-md-6">
+	 						<input class="form-control did-floating-input" id="facility_website" type="tel" name="facility_website" placeholder=" " value="` + facilityData.website + `" />
+	 						<label class="did-floating-label">Website</label>
+						</div></div>`;
+				html += `<br><br><br>`;
+				html += `<div class=" text-center" style="">
+							<input class="btn cbut grey" type="button" style="width: 25%;" onclick="remove_facility('${facilityData.id}')" value="Remove">
+						</div>
+						<br>
+						<div class="text-center" style="">
+							<input class="btn cbut blue" style="width: 25%;" onclick="update_facility('${facilityData.id}')" value="Save">
+						</div>`;
+	 			// Add more HTML generation code for other fields using facilityData
+				o('rightdiv').innerHTML = html;
+	 		}
+	 	});
 	}
+
 	ep=0;
 
 	//edit_practise
@@ -399,7 +483,7 @@ script.
 	*/
 	function view_edit_bins(factid){
 		$.post('/admin/assignbins3', {id:factid}, function(data){ // facid
-			
+
 			results = data.results;
 			console.log(results);
 			html = '<h2>Bins</h2><br><table><tr><th>#</th><th>Model</th><th>Mac Id</th><th>Firmware</th><th>Manufacture Date</th></tr>';
@@ -414,7 +498,7 @@ script.
 	}
 	function changefacildd(id){
 		console.log(id);
-	
+
 		$.post('/admin/changefacildd', {id:id}, function(data){
 			console.log(data);
 			o('righttable').innerHTML = data.html;
@@ -463,8 +547,54 @@ script.
 		}
 		return false;
 	}
-	
-	function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" required name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="cell" type="text" name="cell" required oninput="validatePhoneNumber(this)" placeholder="Enter Cell" /><input class="form-control subdiv" id="email" type="text" name="email" required oninput="validateEmail(this)" placeholder="Enter Email" /><input class="form-control subdiv" required id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email" /><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
+
+	//- function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" required name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="cell" type="text" name="cell" required oninput="validatePhoneNumber(this)" placeholder="Enter Cell" /><input class="form-control subdiv" id="email" type="text" name="email" required oninput="validateEmail(this)" placeholder="Enter Email" /><input class="form-control subdiv" required id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email" /><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
+	function add_user(name) {
+		console.log(name);
+
+		var formHTML = `
+		<h2>Add User</h2>
+		<form method="get" onsubmit="return submitformuser()">
+			<div class="form-group text-center row" style="position:relative">
+				<div class="did-floating-label-content col-md-6">
+					<input class="form-control did-floating-input " id="first_name" type="text" required name="first_name" placeholder=" " />
+					<label class="did-floating-label">Enter First Name</label>
+				</div>
+
+				<div class="did-floating-label-content col-md-6">
+					<input class="form-control did-floating-input " id="middle_name" type="text" name="middle_name" placeholder=" " />
+					<label class="did-floating-label">Enter Middle Name</label>
+				</div>
+
+				<div class="did-floating-label-content col-md-6">
+					<input class="form-control did-floating-input " id="last_name" type="text" name="last_name" required placeholder=" " />
+					<label class="did-floating-label">Enter Last Name</label>
+				</div>
+
+				<div class="did-floating-label-content col-md-6">
+					<input class="form-control did-floating-input " id="cell" type="text" name="cell" required oninput="validatePhoneNumber(this)" placeholder=" " />
+					<label class="did-floating-label">Enter Cell</label>
+				</div>
+
+				<div class="did-floating-label-content col-md-6">
+					<input class="form-control did-floating-input " id="email" type="text" name="email" required oninput="validateEmail(this)" placeholder=" " />
+					<label class="did-floating-label">Enter Email</label>
+				</div>
+
+				<div class="did-floating-label-content col-md-6">
+					<input class="form-control did-floating-input " required id="cemail" type="text" name="cemail" placeholder=" " />
+					<label class="did-floating-label">Enter Confirm Email</label>
+				</div>
+
+				<input type="hidden" name="facid" id="facid" value="${name}" />
+				<input class="btn cbut blue bbbutons" type="submit" style="position:relative; left:-4%; width: 20%; margin-left: 45%;" value="Save">
+			</div>
+		</form>
+		`;
+
+		document.getElementById('rightdiv').innerHTML = formHTML;
+	}
+
 	function validateEmail(input) {
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		var isValid = emailPattern.test(input.value);
@@ -476,11 +606,11 @@ script.
 	}
 
 	function add_surgeon2(name,fname){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><div style="text-align:left;font-weight:bold;margin-left:10px">'+fname+'</div><input type="text" placeholder="Name/NPI" class="magnify" id="searchtext" onkeyup="search_surgeon('+name+',this.value)" /><br><input class="btn cbut blue bbbutons" type="button" style="left:-4%;margin-top:10px;position:relative;" value="Search" /><div id="searchpopup"></div>';}
-	
+
 	function npis(val){
 		console.log(val+'---------');
 	}
-	
+
 	function save_search_surgeon(fid){
 		chs=document.getElementsByName('chsurgeons');
 		vv='|';
@@ -489,9 +619,9 @@ script.
 			if(chs[i].checked)
 				vv += chs[i].value+'|';			
 		}		
-		
+
 		//- console.log(vv);
-		
+
 		$.post('/admin/save_search_surgeon', {fid: fid,sids:vv}, function(data){
 			if(data.message){
 				alert(data.message)
@@ -501,25 +631,44 @@ script.
 			window.location.href = '/admin/admindash';
 		});
 	}
-	
+
 	function search_surgeon(id,val){
 		console.log(id+':'+val);
-		
+
 		$.post('/admin/search_surgeon', {fid: id,text:val}, function(data){
 			//console.log(data.result);
 			o('searchpopup').style.display='block';
 			html = '<table class="table"><thead><tr><th>Select</th><th>First Name</th><th>Middle Name</th><th>Last Name</th><th>NPI</th></tr></thead>';
 			for(i=0;i<data.result.length;i++){
 				obj=data.result[i]; // id,first_name,last_name,middle_name,npi
-				
+
 				html += '<tr><td><input type="checkbox" name="chsurgeons" value="'+obj.user_id+'"  /></td><td>'+obj.first_name+'</td><td>'+obj.middle_name+'</td><td>'+obj.last_name+'</td><td>'+obj.npi+'</td></tr>';
 			}
 			o('searchpopup').innerHTML = html + '</table><input class="btn cbut blue bbbutons" value="Add" onclick="save_search_surgeon('+id+')" style="position:relative" />';
 		});
 	}
-	
-	function add_surgeon(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformsurgeon()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;right: 30px;top: 50px;" value="Save"><br></div></form>';}
-	
+
+	function add_surgeon(name){
+		console.log(name);
+		o('rightdiv').innerHTML = `
+			<h2>Add Surgeon</h2>
+			<form method="get" onsubmit="return submitformsurgeon()">
+				<div class="form-group text-center" style="position:relative">
+					<input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name">
+					<input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name">
+					<input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name">
+					<input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell">
+					<input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email">
+					<input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email">
+					<input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI">
+					<br>
+					<input type="hidden" name="facid" id="facid" value="'+name+'" />
+					<input class="btn cbut blue bbbutons" type="submit" style="position:relative;right: 30px;top: 50px;" value="Save">
+					<br>
+				</div>
+			</form>`;
+	}
+
 	//- function view_user(name){ // _pppp
 	//- 	console.log("In the view facility User =============")
 	//- 	console.log(name)
@@ -554,7 +703,7 @@ script.
 			userListHTML += '<button class="btn cbut blue bbbutons" style="position:relative; margin-top: 40px;" onclick="deleteSelectedUsers()">Remove Selected Surgeon</button>'; // Added delete button
 			o('rightdiv').innerHTML = userListHTML;
 		});
-		
+
 	}
 	function view_user(name){ 
 		console.log("In the view facility User =============")
@@ -611,7 +760,7 @@ script.
 		obj.className = '';
 		obj.classList.add('miniarrow');
 		obj.classList.add(nextFlag); // miniarrow minidown
-		
+
 		//console.log('adding miniarrow ' + nextFlag + ' to ' +name+'_utd');
 		//if(cele=='') // miniarrow minidown
 		objc = o(name+'_pppp');
@@ -628,7 +777,7 @@ script.
 			}			
 		});
 	}
-	
+
 	function view_surgeon(name){ // _pppp
 		obj=o(name+'_utdd');
 		cele=obj.classList; // Clearview1685192542303_utd
@@ -647,7 +796,7 @@ script.
 		obj.className = '';
 		obj.classList.add('miniarrow');
 		obj.classList.add(nextFlag); // miniarrow minidown
-		
+
 		//console.log('adding miniarrow ' + nextFlag + ' to ' +name+'_utd');
 		//if(cele=='') // miniarrow minidown
 		objc = o(name+'_pppp');
@@ -664,8 +813,8 @@ script.
 			}			
 		});
 	}
-	
-	
+
+
 	function opensurgeon(userid){
 		o('rightdiv').innerHTML = '';
 		$.post('/admin/showRightSurgeon', {userid: userid}, function(data){
@@ -676,10 +825,10 @@ script.
 			}			
 		});
 	}
-	
+
 	function removeuser(id){
 		if(confirm('Do you really want to remove the user?')){
-		
+
 		$.post('/admin/removeuser', {user_id: id}, function(data){
 			//console.log(data);
 			// results = data.results;
@@ -690,7 +839,7 @@ script.
 	}
 	function removesurgeon(id){
 		if(confirm('Do you really want to remove the Surgeon?')){
-		
+
 		$.post('/admin/removeuser', {user_id: id}, function(data){
 			//console.log(data);
 			// results = data.results;
@@ -707,7 +856,7 @@ script.
 			});
 		}
 	}
-	
+
 	function exit_screen(){
 		window.location = window.location.href;
 	}
@@ -723,11 +872,11 @@ script.
 			if(cele[i] == 'miniup'){
 				nextFlag = 'minidown'; break; }
 		}
-		
+
 		o(name+'_btd').className = '';
 		o(name+'_btd').classList.add('miniarrow');
 		o(name+'_btd').classList.add(nextFlag);
-		
+
 		objc = o(name+'_bbb');
 		objc.innerHTML = '';
 		$.post('/admin/showBins', {id: name}, function(data){
@@ -743,7 +892,7 @@ script.
 	}
 	function showhightedbin(uuid){
 		console.log(uuid);
-		
+
 		$.post('/admin/showhightedbin', {uuid: uuid}, function(data){
 			o('rightdiv').innerHTML = data.html + '<input class="btn cbut grey bbbutons" type="button" value="Unassign " /><input class="btn cbut grey bbbutons" type="button" value="Exit" style="margin-left:45%" />';
 		});
