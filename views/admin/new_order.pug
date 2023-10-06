@@ -10,6 +10,12 @@ style.
     .tdlabel{color:#999}
     .td2label{color:#000c66}
     #blackscr{background:#FFF;width:100%;height:100%;position:absolute;z-index:9998;display:none}
+    .radio-label {
+        display: inline-block;
+        text-align: center;
+        margin-left: 15px; /* Adjust as needed */
+    }
+
 link(rel='stylesheet' href='//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css')
 link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
 script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
@@ -47,19 +53,42 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                         option(value='left')= 'left'
                         option(value='right')= 'right'
             tr
-                td(style='text-align:center;color:#003595')= 'Select Primary IOL'
-                td(style='text-align:center;color:#003595')= 'Select Backup IOL'
+                td.col-md-3(style="position:relative; text-align: center;")
+                    h2= 'Select IOL :'
+                td.col-md-3(style="padding:5px; position:relative;")
+                    select#select_iol.form-select(type="text" placeholder= 'Select IOL Type' onchange="toggleIOLFields(this.value)")
+                        option(value="" selected) -- Select an IOL Type --
+                        option(value="primary") Select Primary IOL
+                        option(value="backup") Select Backup IOL
+                //td(style='text-align:center;color:#003595')= 'Select Primary IOL'
+                //td(style='text-align:center;color:#003595')= 'Select Backup IOL'
             tr
-                td
-                    input(type="radio" value="fav1" name="fav_sele" style="margin-left: 15%;" onchange="hightlight(this.value)")
-                    label()= 'Fav IOL 01'
-                    input(type="radio" value="fav2" name="fav_sele" style="margin-left: 20%;" onchange="hightlight(this.value)")
-                    label()= 'Fav IOL 02'
-                td
-                    input(type="radio" value="fav3" name="fav_sele1" style="margin-left: 15%;" onchange="hightlight(this.value)")
-                    label()= 'Backup IOL 01'
-                    input(type="radio" value="manually" name="fav_sele1" style="margin-left: 20%;" onchange="showoptt(this.checked)")
-                    label()= 'Select Manually'
+                td.col-md-6(colspan=2,style='margin:auto;text-align:center;padding:10px')
+                    div#primary_iol_fields.mx-auto(style="display: none;")
+                        label.radio-label
+                        input(type="radio" value="fav1" name="fav_sele1" onchange="hightlight(this.value)")
+                        | Fav IOL 01
+                        label.radio-label
+                        input(type="radio" value="fav2" name="fav_sele1" style="margin-left: 20%;" onchange="hightlight(this.value)")
+                        | Fav IOL 02
+                    div#backup_iol_fields.mx-auto(style="display: none;")
+                        label.radio-label
+                        input(type="radio" value="fav1" name="fav_sele1" onchange="hightlight(this.value)")
+                        | Backup IOL 01
+                        label.radio-label
+                        input(type="radio" value="fav2" name="fav_sele1" style="margin-left: 20%;" onchange="hightlight(this.value)")
+                        | Select Manually
+            //- tr
+            //-     td
+            //-         input(type="radio" value="fav1" name="fav_sele1" style="margin-left: 15%;" onchange="hightlight(this.value)")
+            //-         label()= 'Fav IOL 01'
+            //-         input(type="radio" value="fav2" name="fav_sele1" style="margin-left: 20%;" onchange="hightlight(this.value)")
+            //-         label()= 'Fav IOL 02'
+            //-     td
+            //-         input(type="radio" value="backupIoL" name="backup_sele1" style="margin-left: 15%;" onchange="hightlight(this.value)")
+            //-         label()= 'Backup IOL 01'
+            //-         input(type="radio" value="manually" name="backup_sele1" style="margin-left: 20%;" onchange="showoptt(this.checked)")
+            //-         label()= 'Select Manually'
             tr#ddtr01
                 td(style="padding:5px")
                     select.form-select#select_manu(type="text" placeholder="Select Manufacturer" onchange="seleoptuion(this.value,'manu')")
@@ -78,12 +107,29 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                         option(value='')= 'Select Power'
             tr
                 td(colspan=2,style="text-align:center")
-                    input(type="button", value="Save and Exit",class="btn cbut blue bbbutons", onclick="save_order()", style="margin:10px 0 0 0")
-                    input(type='hidden',value=uid,name='userid',id='userid')
+                    input(type="button" value="Save and Exit" class="btn cbut blue bbbutons" onclick="save_order()" style="margin:10px 0 0 0")
+                    input(type='hidden',value=uid,name='userid' id='userid')
         #megadiv()
             h2 Information
             #megadiv_body()
 script.
+
+    function toggleIOLFields(selectedValue) {
+        var primaryIOLFields = $('#primary_iol_fields');
+        var backupIOLFields = $('#backup_iol_fields');
+
+        if (selectedValue === 'primary') {
+            primaryIOLFields.show();
+            backupIOLFields.hide();
+        } else if (selectedValue === 'backup') {
+            primaryIOLFields.hide();
+            backupIOLFields.show();
+        } else {
+            primaryIOLFields.hide();
+            backupIOLFields.hide();
+        }
+    }
+
     function save_order(){
         o('blackscr').style.display = 'block';
         o('megadiv').style.display = 'block';
@@ -95,7 +141,7 @@ script.
             }
             val=val.replaceAll('_', ' ');
         }
-        
+
         names1 = document.getElementsByName('fav_sele1');
         val1='';
         for(i=0;i<names1.length;i++){
@@ -104,7 +150,7 @@ script.
             }
             val1=val1.replaceAll('_', ' ');
         }
-        
+
         // sel.options[sel.selectedIndex].text
         body = '<table><tr>';
         body += '<td class="tdlabel">Surgery Centre</td><td class="td2label">'+o('surgery_center').options[o('surgery_center').selectedIndex].text+'</td></tr>';
@@ -112,21 +158,21 @@ script.
         body += '<tr><td class="tdlabel">Patient First Name</td><td class="td2label">'+o('pat_first_name').value+'</td></tr>';
         body += '<tr><td class="tdlabel">Patient Middle Name</td><td class="td2label">'+o('pat_middle_name').value+'</td></tr>';
         body += '<tr><td class="tdlabel">Patient Last Name</td><td class="td2label">'+o('pat_last_name').value+'</td></tr>';
-        
+
         mm = o('select_manu');
         bb = o('select_brand');
         mo = o('select_model');
         po = o('select_power');
-        
+
         body += '<tr><td class="tdlabel">Primary IOL</td><td class="td2label">'+val+'</td></tr>';
         body += '<tr><td class="tdlabel">Backup IOL</td><td class="td2label">'+val1+'</td></tr>';
-        
+
         body += '<tr><td class="tdlabel">Date of Birth</td><td class="td2label">'+o('datepicker2').value+'</td></tr>';
         body += '<tr><td class="tdlabel">Side</td><td class="td2label">'+o('select_side').value+'</td></tr>';
         body += '<tr><td class="tdlabel"></td><td class="td2label">'+val+'</td></tr>';
         body += '<tr><td class="tdlabel">Manufacturer</td><td class="td2label">'+mm.options[mm.selectedIndex].text+'</td></tr>';
         body += '<tr><td class="tdlabel">Brand</td><td class="td2label">'+bb.options[bb.selectedIndex].text+'</td></tr>';
-        
+
         body += '<tr><td class="tdlabel">Model</td><td class="td2label">'+mo.options[mo.selectedIndex].text+'</td></tr>';
         body += '<tr><td class="tdlabel">Power</td><td class="td2label">'+po.options[po.selectedIndex].text+'</td></tr><tr><td colspan="2" style="padding:10px;color:red">Please check all the information for accuracy</td></tr>';
         body += '<tr><td><input type="button" class="btn cbut grey bbbutons" value="Cancel" onclick="closepop()" /></td><td><input type="button" class="btn cbut blue bbbutons" value="Submit" onclick="submit_save()" /></td>';
@@ -137,32 +183,32 @@ script.
             alert('Saved successfully');
         });*/
     }
-    
+
     function closepop(){o('blackscr').style.display = 'none';
         o('megadiv').style.display = 'none';}
-    
+
     function submit_save(){
         url = '/admin/save_order';
         fav_sele=document.getElementsByName('fav_sele');
         val='';
-        
+
         for(i=0;i<fav_sele.length;i++){
             if(fav_sele[i].checked){
             val=fav_sele[i].value;
             break;
             }
         }
-        
+
         fav_sele1=document.getElementsByName('fav_sele1');
         val1='';
-        
+
         for(i=0;i<fav_sele1.length;i++){
             if(fav_sele1[i].checked){
             val1=fav_sele1[i].value;
             break;
             }
         }
-        
+
         console.log('----------------:'+o('surgery_center').value);
         $.post(url,{sucenter:o('surgery_center').value,start_dt:o('datepicker').value,fn:o('pat_first_name').value,
         mn:o('pat_middle_name').value,ln:o('pat_last_name').value,dob:o('datepicker2').value,side:o('select_side').value,sele:val,manu:o('select_manu').value,brand:o('select_brand').value,model:o('select_model').value,pri_iol:val,back_iol:val1, power:o('select_power').value},function(data){
@@ -170,7 +216,7 @@ script.
             window.location.href=window.location;
         });
     }
-    
+
     function seleoptuion(val,snam){
         if(''==val) return;
         url = '/admin/loadoptt';
@@ -179,7 +225,7 @@ script.
             obj = o('select_brand');            
         }        
         removeOptions(obj);
-            
+
         $.post(url,{val:val,snam:snam},function(data){
             var results = data.results;
             for(i=0;i<results.length;i++){
@@ -213,52 +259,52 @@ script.
             }
         });
     }
-    
+
     function loadpowers(){
-        
+
         option = document.createElement("option");
         obj1 = o('select_power');
         removeOptions(obj1);
         option.text = 'Select Power';
         option.value = '';obj1.add(option);
-        
+
         for(i=5;i<31;i++){
             option = document.createElement("option");
             option.text = i;
             option.value = i;
             obj1.add(option);
-            
+
             option = document.createElement("option");
             option.text = i+parseFloat('0.5');
             option.value = i+parseFloat('0.5');
             obj1.add(option);
         }
     }
-    
+
     function removeOptions(selectElement) {
-       var i, L = selectElement.options.length - 1;
-       for(i = L; i >= 0; i--) {
-          selectElement.remove(i);
-       }
+        var i, L = selectElement.options.length - 1;
+        for(i = L; i >= 0; i--) {
+            selectElement.remove(i);
+        }
     }
     function resetAll(){ 
-        
+
         removeOptions(o('select_brand'));
         console.log('resetAll...........');
         daySelect = o('select_manu');
         daySelect.selectedIndex = 0;
-       // o('favsele').selectedIndex = 0;
-        
-        myOption = document.createElement("option");
-        myOption.text = 'Select Brand';
-        myOption.value = '';        
-        o('select_brand').appendChild(myOption);
-        
-        removeOptions(o('select_model'));
-        myOption = document.createElement("option");
-        myOption.text = 'Select Model';
-        myOption.value = '';        
-        o('select_model').appendChild(myOption);
+        // o('favsele').selectedIndex = 0;
+
+            myOption = document.createElement("option");
+            myOption.text = 'Select Brand';
+            myOption.value = '';        
+            o('select_brand').appendChild(myOption);
+
+            removeOptions(o('select_model'));
+            myOption = document.createElement("option");
+            myOption.text = 'Select Model';
+            myOption.value = '';        
+            o('select_model').appendChild(myOption);
     }
     function getbrandbyid(){}
     function hightlight(opt){
@@ -278,8 +324,8 @@ script.
         for(i=0;i<optarr.length;i++){
             console.log(optarr[i].value+'------'+chid);
             if(optarr[i].value==chid){
-               // console.log('Inside if..............'); gbr=r.brand;gmo=r.model;
-                break;
+                // console.log('Inside if..............'); gbr=r.brand;gmo=r.model;
+                    break;
             }            
         }
         if(i<optarr.length)obj.selectedIndex=i;
@@ -288,7 +334,7 @@ script.
         high_light(o('select_manu'),gma);
         br=o('select_brand');
         removeOptions(br);
-        
+
         $.post('/admin/brandbymid',{id:gma},function(data){
             // id, bname, mid 
             result=data.results;
@@ -296,7 +342,7 @@ script.
             myOption.text = 'Select Brand';
             myOption.value = '';                   
             br.appendChild(myOption);
-            
+
             for(i=0;i<result.length;i++){
                 myOption = document.createElement("option");
                 myOption.text = result[i].bname;
@@ -310,7 +356,7 @@ script.
     function load_models(){// select_manu select_brand select_model
         br=o('select_model');
         removeOptions(br);
-        
+
         $.post('/admin/modelbymid',{id:gbr},function(data){
             // id, bname, mid 
             result=data.results;
@@ -318,7 +364,7 @@ script.
             myOption.text = 'Select Model';
             myOption.value = '';
             br.appendChild(myOption);
-            
+
             for(i=0;i<result.length;i++){
                 myOption = document.createElement("option");
                 myOption.text = result[i].model_name;
@@ -339,4 +385,4 @@ script.
     $( function() {
         $( "#datepicker" ).datepicker();
         $( "#datepicker2" ).datepicker();
-      } );
+    } );
