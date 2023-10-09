@@ -8,15 +8,160 @@ ul.horizontal
 		a(href="../admin/sc_orderhistory") Order History
 	li
 		a(href="../admin/sc_reports") Reports
-style.
+style(type="text/css").
 	#linemenu, #headerspan{display:none}
 	#uuul{padding:0;margin:0}	
 	.thdd{background-color:#003595 !important;color:#FFF !important;}
-	.cp{cursor:pointer !important}
+	.cp{cursor:pointer !important}	
+script.
+	let date=new Date(); // creates a new date object with the current date and time
+	let year=date.getFullYear(); // gets the current year
+	let month=date.getMonth(); // gets the current month (index based, 0-11)
+	const day=document.querySelector(".calendar-dates"); // selects the element with class "calendar-dates"
+	const currdate=document.querySelector(".calendar-current-date"); // selects the element with class "calendar-current-date"
+	const prenexIcons=document.querySelectorAll(".calendar-navigation span"); // selects all elements with class "calendar-navigation span"
+	const months=[
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December"]; // array of month names
+	// function to generate the calendar
+	function calc_date(arr, d,m,y){
+		str = '';m++;
+		for(i=0;i<arr.length;i++){
+		// 07/13/2023
+		sa = arr[i].split('/');
+		//console.log(sa);
+		//console.log(parseInt(sa[1])+'=='+parseInt(d) +'&&'+ parseInt(sa[0])+'=='+parseInt(m)+' &&'+ parseInt(sa[2])+'=='+parseInt(y));
+		if(parseInt(sa[1])==parseInt(d) && parseInt(sa[0])==parseInt(m) && parseInt(sa[2])==parseInt(y)){
+		str='active';//console.log('worked at..'+d);break;
+		}
+		//if(m===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear())
+		}
+		return str;
+	}
+	function load_dates(){    
+	var hid = document.getElementsByName('inputhid');
+	arr = [];//console.log('--------');console.log(hid);console.log('--------');
+	for(i=0;i<hid.length;i++){
+	if(!arr.includes(hid[i].value)){
+	//console.log(hid[i].value);
+	arr.push(hid[i].value);
+	}
+	}
+	return arr;
+	}
+	function calc_date(arr, d,m,y){
+	str = '';m++;
+	for(i=0;i<arr.length;i++){
+	// 07/13/2023
+	sa = arr[i].split('/');
+	//console.log(sa);
+	//console.log(parseInt(sa[1])+'=='+parseInt(d) +'&&'+ parseInt(sa[0])+'=='+parseInt(m)+' &&'+ parseInt(sa[2])+'=='+parseInt(y));
+	if(parseInt(sa[1])==parseInt(d) && parseInt(sa[0])==parseInt(m) && parseInt(sa[2])==parseInt(y)){
+	str='active';//console.log('worked at..'+d);break;
+	}
+	//if(m===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear())
+	}
+	return str;
+	}
+
+	function showrecords(i){
+	console.log(i);
+	$.post('/admin/get_day_records',{m:gm,y:gy,d:i},function(data){
+		o('spandata').innerHTML=data.html+data.spanhtml;
+		// manipulate();
+	});
+	}
+	const manipulate=()=> {
+	//console.log('The page is loaded...');
+	arr=load_dates();
+	// get the first day of the month
+	let dayone=new Date(year, month, 1).getDay();
+	// get the last date of the month
+	let lastdate=new Date(year, month + 1, 0).getDate();
+	// get the day of the last date of the month
+	let dayend=new Date(year, month, lastdate).getDay();
+	// get the last date of the previous month
+	let monthlastdate=new Date(year, month, 0).getDate();
+	let lit=""; // variable to store the generated calendar HTML
+	// loop to add the last dates of the previous month
+	for (let i=dayone; i > 0; i--) {
+	lit+=`<li class="inactive">${monthlastdate - i + 1}</li>`;
+	}
+	// loop to add the dates of the current month
+	for (let i=1; i <=lastdate; i++) {
+	// check if the current date is today
+	let isToday=calc_date(arr,i,month,year); //i===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear() ? "": "";
+	lit+=`<li class="${isToday}"`;
+	lit+= ` onclick="showrecords(${i})" `;
+	lit+=`>${i}</li>`;
+	}
+	// loop to add the first dates of the next month
+	for (let i=dayend; i < 6; i++) {
+	lit+=`<li class="inactive">${i - dayend + 1}</li>`
+	}
+	// update the text of the current date element with the formatted current month and year
+	currdate.innerText=`${months[month]} ${year}`;
+	// update the HTML of the dates element with the generated calendar
+	day.innerHTML=lit;
+	}
+	//manipulate();
+	// Attach a click event listener to each icon
+	prenexIcons.forEach(icon=> {
+	// When an icon is clicked
+	icon.addEventListener("click", ()=> {
+	// Check if the icon is "calendar-prev" or "calendar-next"
+	month=icon.id==="calendar-prev" ? month - 1 : month + 1;
+	// Check if the month is out of range
+	if (month < 0 || month > 11) {
+	// Set the date to the first day of the month with the new year
+	date=new Date(year, month, new Date().getDate());
+	// Set the year to the new year
+	year=date.getFullYear();
+	// Set the month to the new month
+	month=date.getMonth();
+	}
+	else {
+	// Set the date to the current date
+	date=new Date();
+	}
+	// Call the manipulate function to update the calendar display
+	//manipulate();
+
+	gm=month;gy=year;
+	//console.log(month+':'+year+':gm:'+gm+':'+gy);
+	load_page();
+	});
+	});
 .row
 	input(type='hidden' id='hidid' name='hidid' value=pageid)
 	input(type='hidden' id='surgyid' name='surgyid' value=uid)
 	.col-md-3
+		.calendar-container
+			header.calendar-header
+				p.calendar-current-date
+				.calendar-navigation
+					span#calendar-prev.material-symbols-rounded chevron_left
+					span#calendar-next.material-symbols-rounded chevron_right
+				.calendar-body
+				ul.calendar-weekdays(style='padding:0')
+					li Sun
+					li Mon
+					li Tue
+					li Wed
+					li Thu
+					li Fri
+					li Sat
+				ul.calendar-dates(style='padding:0')
 	if pageid == 'neworder'
 		.col-md-8#rightdiv_neworder(style='border:1px solid #e7e7e7;margin:12px;')
 	else if pageid == 'orderhistory'
@@ -47,6 +192,13 @@ script.
 				window.location = window.location.href;
 			});
 		}
+	}
+	function showrecords(i){
+		console.log(i);
+		$.post('/admin/get_day_records',{m:gm,y:gy,d:i},function(data){
+				o('spandata').innerHTML=data.html+data.spanhtml;
+				// manipulate();
+			});
 	}
 	$(document).ready(function(){
 		id = o('hidid').value;
