@@ -233,9 +233,9 @@ router.post('/save_password',async function(req, res, next) {
 });
 
 router.get('/getbinUpdate',async function(req, res, next) {	
-	reqs = req.body;
-	console.log(reqs.bin_mac_id);
-	var bin_mac_id= reqs.bin_mac_id;
+	
+    var bin_mac_id = req.query.bin_mac_id;
+    console.log(bin_mac_id);
 	
 	var sql = `SELECT   bins.binstatus,  bins.mac_id,  orders.surgery_date, 
 				orders.patient_dob, orders.side, orders.status as order_status,models.model_name, 
@@ -245,7 +245,7 @@ router.get('/getbinUpdate',async function(req, res, next) {
 				INNER JOIN orders ON bins.fact_id = orders.surgery_center_id AND bins.mac_id = orders.bin_mac_id 
    				INNER JOIN other_users ON orders.surgeon_id = other_users.user_id
    				INNER JOIN models on bins.uid = models.bid
-				WHERE (bins.mac_id = ${bin_mac_id}) AND surgery_date >= DATE_FORMAT(CURRENT_DATE(),'%d/%m/%Y')`;
+				WHERE (bins.mac_id = ${bin_mac_id}) AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%d/%m/%Y')`;
 			 
 	console.log(sql);
 	conn.query(sql,[bin_mac_id], function (err, result) {
