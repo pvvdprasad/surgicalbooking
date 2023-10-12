@@ -22,7 +22,7 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
 #blackscr()
 .container
     .row
-        table(style='width:60%;margin:auto')
+        table(style='width:60%;margin:auto;background:#FAFAFA')
             tr
                 td.col-md-6(colspan=2,style='margin:auto;border:1px solid #EFFFFF;background:#FAFAFA;text-align:center;padding:10px')
                     h2= 'New Order'
@@ -52,7 +52,7 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                         option(value='')= 'Select side'
                         option(value='left')= 'left'
                         option(value='right')= 'right'
-            tr
+            //- tr
                 td.col-md-3(style="position:relative; text-align: center;")
                     h2= 'Select IOL :'
                 td.col-md-3(style="padding:5px; position:relative;")
@@ -62,7 +62,7 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                         option(value="backup") Select Backup IOL
                 //td(style='text-align:center;color:#003595')= 'Select Primary IOL'
                 //td(style='text-align:center;color:#003595')= 'Select Backup IOL'
-            tr
+            //- tr
                 td.col-md-6(colspan=2,style='margin:auto;text-align:center;padding:10px')
                     div#primary_iol_fields.mx-auto(style="display: none;")
                         label.radio-label

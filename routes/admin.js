@@ -271,7 +271,7 @@ router.post('/get_day_records', async function(req, res, next) {
     surgeon_id: 0,
     practise_id: 0 
 	*/
-	html='<table style="width:100%;margin:auto">';
+	html='<table style="width:100%;margin:auto" class="table"><tr><th>Patient Name: </th><th>DOB:</th><th>Action</th></tr>';
 	spanhtml='';
 	conn.query(sql, function (err, result) {
 		if (err) console.log( err);
@@ -279,8 +279,8 @@ router.post('/get_day_records', async function(req, res, next) {
 			for(i=0;i<result.length;i++){
 				//result[i]
 				html+='<tr><td>'+((i+1 < 10)?"0":'') + (i+1)+'</td>';
-				html+='<td><span style="color:#999">Patient Name: </span><span>'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
-				html+='<td><span style="color:#999">DOB: </span><span>'+result[i].patient_dob+'</span></td>';
+				html+='<td><span style="color:#999">'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
+				html+='<td><span>'+result[i].patient_dob+'</span></td>';
 				html+='<td><img src="../images/uparrow.png" class="uparrow" onclick="popo('+result[i].id+')"/></td></tr>';
 				spanhtml+='<input name="inputhid" type="hidden" value='+result[i].surgery_date+'/>';
 			}
@@ -682,13 +682,17 @@ router.post('/editfacility', async function(req, res, next) {
 	
 	var sql = "select id,fname,fax,email ,cell,website from facilities where id="+reqs.fac_id;
 	console.log(sql);
+	
 	await conn.query(sql, function (err, results) {
 		console.log(results);
-	
-	// AWS.config.update(config.aws_remote_config);
+		
+		html = '<h2>Edit Facility</h2>';
+	html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].fname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="facility_email" type="text" name="facility_email" placeholder="Enter Email" value="'+ (undefined ==results[0].email?"":results[0].email) +'" />';
+		
+	html += '<br /><br /><input class="btn cbut grey" type="button" onclick="remove_facility(\''+reqs.fac_id+'\')" value="Remove"><input class="btn cbut blue" style="margin-left:40px" type="button" onclick="update_facility(\''+reqs.fac_id+'\')" value="Save">';
+	res.send({ facility:html });
+
 	/*
-	var results = await scanTable(config.aws_facility_table_name);
-	*/
 		var facilityData = {
 			id: results[0].id,
 			fname: results[0].fname,
@@ -698,6 +702,7 @@ router.post('/editfacility', async function(req, res, next) {
 			website: results[0].website
 	  };
 	  res.status(200).send({ facility: facilityData });
+	  */
 	});
 	
 });
@@ -727,6 +732,7 @@ router.post('/editpractise', async function(req, res, next) {
 router.post('/removefacility', async function(req, res, next) {
 	var reqs = req.body;
 	
+	//var sql = 'delete from facilities where id='+reqs.fac_id;
 	var sql = 'UPDATE facilities SET removed_users= True where id='+reqs.fac_id ;
 	await conn.query(sql, function (err, result) {
     if (err) console.log( err);
