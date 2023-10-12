@@ -237,18 +237,10 @@ router.get('/getbinUpdate',async function(req, res, next) {
     var bin_mac_id = req.query.bin_mac_id;
     console.log(bin_mac_id);
 	
-	var sql = `SELECT   bins.binstatus,  bins.mac_id,  orders.surgery_date, 
-				orders.patient_dob, orders.side, orders.status as order_status,models.model_name, 
-   				CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name,
-   				CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name
-   				FROM  bins 
-				INNER JOIN orders ON bins.fact_id = orders.surgery_center_id AND bins.mac_id = orders.bin_mac_id 
-   				INNER JOIN other_users ON orders.surgeon_id = other_users.user_id
-   				INNER JOIN models on bins.uid = models.bid
-				WHERE (bins.mac_id = ${bin_mac_id}) AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%d/%m/%Y')`;
+	var sql = "SELECT   bins.binstatus,  bins.mac_id,  orders.surgery_date, DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y') as tdate, orders.patient_dob, orders.side, orders.status as order_status, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name,                            CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, m.mname as primary_manufacturer, b.bname as primary_brand_name, models.model_name as primary_model_name, power_id as primary_power,mb.mname as backup_manufacturer, bb.bname as backup_brand_name, mob.model_name as backup_model_name, b_power_id as backup_power  FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id  WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
 			 
 	console.log(sql);
-	conn.query(sql,[bin_mac_id], function (err, result) {
+	conn.query(sql, function (err, result) {
 		if(err){
 			res.status(400).send("Not Found");
 		}else{
@@ -263,11 +255,11 @@ router.post('/remove_bin',async function(req, res, next) {
 	console.log(reqs.bin_mac_id);
 	var bin_mac_id= reqs.bin_mac_id;
 	
-	sql = `UPDATE bins SET removed_bins = 1 where mac_id = ${bin_mac_id}`
-	console.log(sql);
-	conn.query(sql,[bin_mac_id], function (err, result) {
+	sql = 'UPDATE bins SET removed_bins = 1 where mac_id = "'+bin_mac_id+'"';
+	//console.log(sql);
+	conn.query(sql, function (err, result) {
 		if(err){
-			res.status(400).send("Not Found");
+			res.status(400).send("Error executing query");
 		}else{
 			res.status(200).send(result);
 		}
