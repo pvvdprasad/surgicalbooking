@@ -62,7 +62,7 @@ function checkToken(req){
 router.post('/save_order', async function(req, res, next) {
 	var reqs = req.body;
 	
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
 	console.log('2-----------------');
 	console.log(reqs);
@@ -70,7 +70,7 @@ router.post('/save_order', async function(req, res, next) {
 	console.log(reqs.sucenter);
 	console.log('1-----------------');
 	
-	var sql = 'INSERT INTO orders(surgery_center_id, surgery_date, first_name, middle_name, last_name, patient_dob, side, manufacture_id, brand_id, model_id, power_id,surgeon_id ,practise_id,first_sel_type,second_sel_type,status) VALUES('+reqs.sucenter+', "'+reqs.start_dt+'", "'+reqs.fn+'", "'+reqs.mn+'", "'+reqs.ln+'", "'+reqs.dob+'", "'+reqs.side+'", '+reqs.manu+', '+reqs.brand+', '+reqs.model+', "'+reqs.power+'", '+req.session.userid+', '+reqs.sucenter+', "'+reqs.back_iol+'", "'+reqs.pri_iol+'",0)'; 
+	var sql = 'INSERT INTO orders(surgery_center_id, surgery_date, first_name, middle_name, last_name, patient_dob, side, manufacture_id, brand_id, model_id, power_id,surgeon_id ,practise_id,first_sel_type,second_sel_type,status,b_manufacture_id, b_brand_id, b_model_id, b_power_id) VALUES('+reqs.surgycenter+', "'+reqs.start_dt+'", "'+reqs.fn+'", "'+reqs.mn+'", "'+reqs.ln+'", "'+reqs.dob+'", "'+reqs.side+'", '+reqs.manu+', '+reqs.brand+', '+reqs.model+', "'+reqs.power+'", 0, '+reqs.surgycenter+', "'+reqs.back_iol+'", "'+reqs.pri_iol+'",0,'+reqs.backup_manu+', '+reqs.backup_brand+', '+reqs.backup_model+', "'+reqs.backup_power+'")'; 
 	console.log(sql);
 	
 	await conn.query(sql, function (err, result) {
@@ -85,7 +85,7 @@ router.post('/save_order', async function(req, res, next) {
 router.post('/decommissioned', async function(req, res, next) {
 	//AWS.config.update(config.aws_remote_config);
 	//var results = await scanTable(config.aws_bins_table_name);
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
 	sql = 'select * from bins where binstatus = 3';
 	
@@ -110,7 +110,7 @@ router.post('/unassignedBins', async function(req, res, next) {
 	//var results = await scanTable(config.aws_users_table_name);
 	//var binresults = await scanTable(config.aws_bins_table_name);
 	
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
 	arrbin = [];
 	sql = 'select * from bins where binstatus = 0';
@@ -130,7 +130,7 @@ router.post('/unassignedBins', async function(req, res, next) {
 
 router.post('/assignedBins', async function(req, res, next) {
 	
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 		
 	arrbin = []; fff = true;
 	sql = 'select * from bins where binstatus = 1';
@@ -162,7 +162,7 @@ router.post('/assignedBins', async function(req, res, next) {
 router.post('/addbin', async function(req, res, next) {
 	reqs = req.body;
 	
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
 	sql = 'insert into bins (binstatus, comments,fact_id, firmware , mac_id ,mandate ,model) values(0,'+
 	'"",0,"'+reqs.firmware+'","'+reqs.macid+'","'+reqs.mandate+'","'+reqs.model+'")';
@@ -184,7 +184,7 @@ router.post('/resetpassword', async function(req, res, next) {
 	reqs = req.body;
 	var pass = generatePassword();
 	
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
 	sql = 'select id,user_id,first_name,npi,passcode,email,fact_id from other_users where id= '+reqs.user_id;
 	
@@ -211,18 +211,8 @@ router.post('/save_password',async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
 	
-	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
-	//reqs.p
-	//reqs.uid   sid = req.session.userid;   p:p,uid:o('uid').value,path:'sc'
-	/*
-	if(reqs.path && reqs.path == 'sc'){
-		sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
-		console.log(sql);
-		
-		conn.query(sql, function (err, result) {
-			res.send({});
-		});
-	}else{ */
+//	if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
+
 		sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
 		console.log(sql);
 		
@@ -296,7 +286,6 @@ router.post('/postlogin', async function(req, res, next) {
 			console.log(req.session);
 			try{
 				if(!req.session || !req.session.userid ){
-					// res.status(401).render('admin/login', { BASE_PATH: '../', message: 'Unauthorized access. Please login with valid credentials.' });
 					res.send({'message':'invalid details'});
 				}else{
 					console.log('user id exists');
@@ -318,30 +307,7 @@ router.post('/postlogin', async function(req, res, next) {
 		}
 	}
 	});
-	/*
-	var reqs = req.body;
-	var loginid =	reqs.loginid;
-	var passid =	reqs.passid;
-	
-	console.log('The config.............');
-	console.log(config);
-		
-	var sql = "select id,role from users where name ='"+loginid+"' and passcode='"+passid+"'";
-	await conn.query(sql, function (err, result) {
-		if (err){			
-			res.send({"message": "Unauthorized access. Please login with valid credentials."});
-		}else{
-			let jwtSecretKey = process.env.JWT_SECRET_KEY;
-			let data = {
-				time: Date()
-			}
-			
-			const token = jwt.sign(data, jwtSecretKey,{expiresIn: "2h" });
-			console.log('In the service oken:'+token);
-			res.send({token});
-		}
-	});
-	*/
+
 });
 
 /*

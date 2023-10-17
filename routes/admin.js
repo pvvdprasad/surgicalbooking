@@ -44,8 +44,12 @@ router.post('/getfavs',async function(req, res, next) {
 	var reqs = req.body;
 	uid = reqs.uid;
 	opt=reqs.opt;
+	fav_type = 'fav_type = "'+opt+'"';
+	
+	if('backupIoL' == opt || 'fav3' == opt)
+		fav_type='fav_type = "fav3" or fav_type = "backupIoL"'; 
 	// id,fav_type,surgeon_id,manufacture,model,brand from fav_iols where surgeon_id=
-	var sql = 'select id,fav_type,surgeon_id,manufacture,model,brand from fav_iols where surgeon_id='+uid+' and fav_type="'+opt+'"';
+	var sql = 'select id,fav_type,surgeon_id,manufacture,model,brand from fav_iols where surgeon_id='+uid+' and ('+fav_type+')';
 	conn.query(sql, function (err, result) {
 		if (err) console.log( err);
 		else{console.log(result);
@@ -176,7 +180,7 @@ router.post('/get_order', async function(req, res, next) {
   facilities (id INT NOT NULL AUTO_INCREMENT, fname CHAR(200) NOT NULL,fax CHAR(50),cell CHAR(50),website CHAR(150), PRIMARY KEY (id));"; id, bname, mid from brands
   
 	*/
-	sql = 'select f.fname, surgery_date,first_name,middle_name,last_name,patient_dob,side,bname,mname,model_name, power_id from orders o  LEFT JOIN facilities f on f.id=o.surgery_center_id LEFT JOIN manufacturers m on m.id= o.manufacture_id left join brands b on b.id = o.brand_id left join models mm on mm.id = model_id where o.id = '+reqs.id;
+	sql = 'select f.fname, surgery_date,first_name,middle_name,last_name,patient_dob,side,b.bname,m.mname,mm.model_name, power_id,mb.mname as back_manu ,mmb.model_name as back_model_name,b_power_id from orders o  LEFT JOIN facilities f on f.id=o.surgery_center_id LEFT JOIN manufacturers m on m.id= o.manufacture_id left join brands b on b.id = o.brand_id left join models mm on mm.id = model_id LEFT JOIN manufacturers mb on mb.id= o.manufacture_id left join brands bb on bb.id = o.brand_id left join models mmb on mmb.id = model_id where o.id = '+reqs.id;
 	
 	console.log(sql);
 	
@@ -187,6 +191,25 @@ router.post('/get_order', async function(req, res, next) {
 		}
 	});
 });
+
+router.post('/get_orders', async function(req, res, next) {
+	reqs = req.body;
+	ids = reqs.ids;
+	
+	console.log(ids);
+	
+	sql = 'select f.fname, surgery_date,first_name,middle_name,last_name,patient_dob,side,b.bname,m.mname,mm.model_name, power_id, mb.mname as back_manu ,bb.bname as back_bname,mmb.model_name as back_model_name,b_power_id from orders o  LEFT JOIN facilities f on f.id=o.surgery_center_id LEFT JOIN manufacturers m on m.id= o.manufacture_id left join brands b on b.id = o.brand_id left join models mm on mm.id = model_id LEFT JOIN manufacturers mb on mb.id= o.manufacture_id left join brands bb on bb.id = o.brand_id left join models mmb on mmb.id = model_id where o.id IN ('+reqs.ids+')';
+	
+	console.log(sql);
+	
+	conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		else{console.log(result);
+			res.send({result:result});
+		}
+	});
+});
+
 
 router.post('/updatefacili', async function(req, res, next) {
 	reqs = req.body;
@@ -271,14 +294,14 @@ router.post('/get_day_records', async function(req, res, next) {
     surgeon_id: 0,
     practise_id: 0 
 	*/
-	html='<table style="width:100%;margin:auto" class="table"><tr><th>Patient Name: </th><th>DOB:</th><th>Action</th></tr>';
+	html='<table style="width:100%;margin:auto" class="table"><tr><th>#</th><th>Patient Name: </th><th>DOB:</th><th>Action</th></tr>';
 	spanhtml='';
 	conn.query(sql, function (err, result) {
 		if (err) console.log( err);
 		else{console.log(result);
 			for(i=0;i<result.length;i++){
 				//result[i]
-				html+='<tr><td>'+((i+1 < 10)?"0":'') + (i+1)+'</td>';
+				html+='<tr><td><input type="checkbox" name="chdnames" value="'+result[i].id+'" /></td>';
 				html+='<td><span style="color:#999">'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
 				html+='<td><span>'+result[i].patient_dob+'</span></td>';
 				html+='<td><img src="../images/uparrow.png" class="uparrow" onclick="popo('+result[i].id+')"/></td></tr>';
@@ -345,30 +368,12 @@ router.post('/save_order', async function(req, res, next) {
 	console.log('2-----------------');
 	console.log(reqs.sucenter);
 	console.log('1-----------------');
-	/*
-	sc:o('surgery_center').value,start_dt:o('datepicker').value,fn:o('pat_first_name').value,
-		mn:o('pat_middle_name').value,ln:o('pat_last_name').value,dob:o('datepicker2').value,side:o('select_side').value,sele:val
-		
-		CREATE TABLE orders (id INT NOT NULL AUTO_INCREMENT, surgery_center_id INT NOT NULL,surgery_date CHAR(10) NOT NULL, first_name CHAR(50),middle_name CHAR(50),last_name CHAR(50), patient_dob CHAR(20), side CHAR(10), manufacture_id INT, brand_id INT, model_id INT, power_id CHAR(5),surgeon_id INT,practise_id INT, PRIMARY KEY (id)
-		
-		req.session.userid = result[i].id;
-			req.session.role = result[i].role;
-			
-		sucenter:o('surgery_center').value,start_dt:o('datepicker').value,fn:o('pat_first_name').value,
-        mn:o('pat_middle_name').value,ln:o('pat_last_name').value,dob:o('datepicker2').value,side:o('select_side').value,sele:val,manu:o('select_manu').value,brand:o('select_brand').value,model:o('select_model').value,pri_iol:val,back_iol:val1, power:o('select_power').value
-		
-	*/
-	
-	/*
-	sql = 'select * from fav_iols where surgeon_id='++' and fav_type="'+reqs.back_iol+'"';
-	
-	await conn.query(sql, function (err, result) {
-		
-	});
+	/*sucenter:o('surgery_center').value,start_dt:o('datepicker').value,fn:o('pat_first_name').value,
+        mn:o('pat_middle_name').value,ln:o('pat_last_name').value,dob:o('datepicker2').value,side:o('select_side').value,sele:val,manu:o('select_manu').value,brand:o('select_brand').value,model:o('select_model').value,power:o('select_power').value,pri_iol:val,back_iol:val1,manu2:o('select_manu2').value,brand2:o('select_brand2').value,model2:o('select_model2').value,power2:o('select_power2').value
 	*/
 	
 	// ,b_manufacture_id,b_brand_id ,b_model_id ,b_power_id
-	var sql = 'INSERT INTO orders(surgery_center_id, surgery_date, first_name, middle_name, last_name, patient_dob, side, manufacture_id, brand_id, model_id, power_id,surgeon_id ,practise_id,first_sel_type,second_sel_type,status) VALUES('+reqs.sucenter+', "'+reqs.start_dt+'", "'+reqs.fn+'", "'+reqs.mn+'", "'+reqs.ln+'", "'+reqs.dob+'", "'+reqs.side+'", '+reqs.manu+', '+reqs.brand+', '+reqs.model+', "'+reqs.power+'", '+req.session.userid+', '+reqs.sucenter+', "'+reqs.back_iol+'", "'+reqs.pri_iol+'",0)'; 
+	var sql = 'INSERT INTO orders(surgery_center_id, surgery_date, first_name, middle_name, last_name, patient_dob, side, manufacture_id, brand_id, model_id, power_id,surgeon_id ,practise_id,first_sel_type,second_sel_type,status,b_manufacture_id, b_brand_id , b_model_id , b_power_id , bin_mac_id) VALUES('+reqs.sucenter+', "'+reqs.start_dt+'", "'+reqs.fn+'", "'+reqs.mn+'", "'+reqs.ln+'", "'+reqs.dob+'", "'+reqs.side+'", '+reqs.manu+', '+reqs.brand+', '+reqs.model+', "'+reqs.power+'", '+req.session.userid+', '+reqs.sucenter+', "'+reqs.back_iol+'", "'+reqs.pri_iol+'",0, '+reqs.manu2+', '+reqs.brand2+', '+reqs.model2+', "'+reqs.power2+'","")'; 
 	console.log(sql);
 	
 	await conn.query(sql, function (err, result) {
@@ -630,8 +635,11 @@ router.post('/addpractise', async function(req, res, next) {
 					console.log(sql);
 					conn.query(sql, function (err, result1) {
 					if (err) console.log( err);
+					
 					else{
-					}});
+					}
+					sendEmail(reqs.email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.prac_name+',<br></i></b>Your temporary password is '+pass);
+					});
 					break;
 				}
 				res.send({results:''});
@@ -1275,8 +1283,8 @@ function sendEmail(to,sub, body){
    host: 'smtp.gmail.com',
   port: 587,
   auth: {
-    user: 'info@surgislate.com',
-    pass: 'Sbin@8924'
+    user: 'akhtar@surgicalbooking.com',
+    pass: 'Project@2529$'
   }
 });
 
@@ -1348,15 +1356,16 @@ router.post('/addsurgeon', async function(req, res, next) {
 	
 		 conn.query(sql, function (err, result) {
 			if (err) throw err;
+			sendEmail(reqs.email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.first_name+',<br></i></b>Your temporary password is '+pass);
 			res.send('respond with a resource'); 
 		  });
 		});
 
 	console.log(sql);	
 	
-	/*	
-	sendEmail(reqs.email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.first_name+',<br></i></b>Your temporary password is '+pass);
-	*/
+		
+	
+	
 	
 });
 
@@ -1371,9 +1380,9 @@ router.post('/adduser', async function(req, res, next) {
 	
 	console.log(sql);
 	
-		/*
+		
 	sendEmail(reqs.email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.first_name+',<br></i></b>Your temporary password is '+pass);
-	*/
+	
 	await conn.query(sql, function (err, result) {
 			if (err) throw err;
 			console.log("facilities query created");	
@@ -1382,6 +1391,12 @@ router.post('/adduser', async function(req, res, next) {
 	
 	//res.send({results:{}});
 });
+
+router.get('/testMail', async function(req, res, next) {
+sendEmail('pvvdprasad@gmail.com','Temporary password for surgicalbooking.com', '<b><i>Hi ,<br></i></b>Your temporary password is ');
+res.send('respond with a resource'); 
+});
+
 router.post('/showRightSurgeon', async function(req, res, next) {
 	id = req.body.userid;
 	console.log(id+'<--->');
@@ -1619,7 +1634,7 @@ router.post('/addFacility', async function(req, res, next) {
     console.log(reqs);	
 	var pass = generatePassword();
 	
-	sql = "INSERT INTO users(name,passcode,role ) VALUES('"+reqs.email+"','"+pass+"',3)";
+	sql = "INSERT INTO users(name,passcode,role ) VALUES('"+reqs.facility_email+"','"+pass+"',3)";
 	
 	await conn.query(sql, function (err, result) {
 		if (err) throw err;
@@ -1634,7 +1649,7 @@ router.post('/addFacility', async function(req, res, next) {
 			if (err) throw err;
 			console.log("facilities query created");
 			
-			
+			sendEmail(reqs.facility_email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+reqs.facility_name+',<br></i></b>Your temporary password is '+pass);
 			
 			res.send('respond with a resource'); 
 		  });
