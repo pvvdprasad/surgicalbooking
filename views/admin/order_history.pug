@@ -173,8 +173,8 @@ script.
     //if(m===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear())
     }
     return str;
-  }
-  
+   } 
+
   function showrecords(i){
     console.log(i);
     $.post('/admin/get_day_records',{m:gm,y:gy,d:i},function(data){
@@ -245,12 +245,12 @@ script.
   });
 #blackscr()    
 #megadiv()
-#cccc(style="float:left;width:50%")
+#cccc(style="float:left;width:50%;margin-left: 80px;")
     h1(style='text-align:center') Previous Orders
     .row
     span#spandata       
         table#daaat(style='width:100%;margin:auto')
-    input(type="button" value="Print" class="btn cbut blue bbbutons" onclick="popos()" style="margin:50px 0 0 250px")
+    input(type="button" value="Print" class="btn cbut blue bbbutons" onclick="popos()" style="display: block; margin: 30px  auto;")
 script.
     function popos(){
         ch=document.getElementsByName('chdnames');
@@ -261,6 +261,11 @@ script.
             }
         }
         
+        // Check if ch is empty (no checkboxes are checked)
+        if (ids.length === 0) {
+            alert("No checkboxes are selected. Please select at least one.");
+            return; // Stop further execution
+        }
         $.post('/admin/get_orders',{ids:ids},function(data){
             
             
@@ -334,11 +339,47 @@ script.
             a.document.write(divContents);
             a.document.write('</body></html>');
             a.document.close();
-            a.print();
             
         });
     }
     
+    function popo1(id){
+        console.log(id);
+        
+        $.post('/admin/get_order',{id:id},function(data){
+            d=data.result[0];
+            html='<table><tr><td>Surger Center:'+d.fname+'</td></tr>';
+            html+='<tr><td>Surgery date:'+d.surgery_date+'</td></tr>';
+            html+='<tr><td>First Name:'+d.first_name+'</td></tr>';
+            html+='<tr><td>Middle Name:'+d.middle_name+'</td></tr>';
+            html+='<tr><td>Last Name:'+d.last_name+'</td></tr>';
+            
+            html+='<tr><td>Date of Birth:'+d.patient_dob+'</td></tr>';
+            html+='<tr><td>Side:'+d.side+'</td></tr>';
+            html+='<tr><td>P IOL Manufacturer:'+d.mname+'</td></tr>';
+            html+='<tr><td>P IOL Brand:'+d.bname+'</td></tr>';
+            html+='<tr><td>P IOL Model Name:'+d.model_name+'</td></tr>';
+            html+='<tr><td>P IOL Power:'+d.power_id+'</td></tr>';
+            
+            html+='<tr><td>B IOL Manufacturer:'+d.b_mname+'</td></tr>';
+            html+='<tr><td>B IOL Brand:'+d.b_bname+'</td></tr>';
+            html+='<tr><td>B IOL Model Name:'+d.b_model_name+'</td></tr>';
+            html+='<tr><td>B IOL Power:'+d.b_power_id+'</td></tr>';
+            
+            html+='</table>';
+            
+            url = window.location.href;
+            var divContents = html;
+            var a = window.open(url, '', 'height=500, width=500');
+            a.document.write('<html>');
+            a.document.write('<body>');
+            a.document.write(divContents);
+            a.document.write('</body></html>');
+            a.document.close();
+            a.print();
+            
+        });
+    }
     gm=0,gy=0;
     function printcan(id){
         if(id==0){

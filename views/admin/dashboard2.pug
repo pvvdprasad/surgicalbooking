@@ -141,28 +141,24 @@ style.
 		include leftmenu_user.pug
 
 	.col-md-8#rightdiv(style='border:1px solid #e7e7e7;margin:12px')
-		form(method='get', onsubmit='return submitform()')
+		form(method='get' onsubmit='return submitform()')
 			.form-group.text-center(style='position:relative')
 				h2 Add Facility
 				div.did-floating-label-content
 					input#facility_name.form-control.did-floating-input(type='text' name='facility_name' placeholder=' ')
 					label.did-floating-label Enter Facility Name
 				//- input#facility_name.form-control(type='text' name='facility_name' placeholder='Enter Facility Name' required )
-				br
 				div.did-floating-label-content
 					input#facility_website.form-control.did-floating-input(type='text' name='facility_website' placeholder=' ' oninput='validateURL(this)' required)
 					label.did-floating-label Enter Website
 				//- input#facility_website.form-control(type='text' name='facility_website' placeholder='Enter Website' oninput='validateURL(this)' required)
 				div.did-floating-label-content
-					br
 					input#facility_phone.form-control.did-floating-input(type='tel' name='facility_phone' placeholder=' '  required oninput='validatePhoneNumber(this)')
 					label.did-floating-label Enter Phone Number
 				div.did-floating-label-content
-					br
 					input#facility_fax.form-control.did-floating-input(type='tel' name='facility_fax' placeholder=' '  required oninput='validateFaxNumber(this)')
 					label.did-floating-label Enter Fax Number
 				div.did-floating-label-content
-					br
 					input#facility_email.form-control.did-floating-input(type='text' name='facility_email' placeholder=' '  required oninput='validateEmail(this)')
 					label.did-floating-label Enter email address
 					br
@@ -257,7 +253,49 @@ script.
 		});	
 	}
 	function add_practise(){
-		o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" required id="first_name" type="text" name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" required placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="website" type="text" name="website" required placeholder="Enter Website" oninput="validateURL(this)" /><input class="form-control subdiv" id="fax" type="text" name="fax" required placeholder="Enter Fax" oninput="validateFaxNumber(this)" /><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell" required  oninput="validatePhoneNumber(this)" /><input class="form-control subdiv" id="email" type="text" required name="email" placeholder="Enter Email" /><input class="form-control subdiv" id="npi" type="text" name="npi" required placeholder="Enter NPI" /><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
+		var html = `
+		<h2>Add Surgeon</h2>
+			<form method="get" onsubmit="return submitformpractise()">
+				<div class="form-group text-center row" style="position:relative">
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" required id="first_name" type="text" name="first_name" placeholder=" " />
+						<label class="did-floating-label">Enter First Name</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="middle_name" type="text" name="middle_name" required placeholder=" " />
+						<label class="did-floating-label">Enter Middle Name</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="last_name" type="text" name="last_name" required placeholder=" " />
+						<label class="did-floating-label">Enter Last Name</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="website" type="text" name="website" required placeholder=" " oninput="validateURL(this)" />
+						<label class="did-floating-label">Enter Website</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="fax" type="text" name="fax" required placeholder="" oninput="validateFaxNumber(this)" />
+						<label class="did-floating-label">Enter Fax Number</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="cell" type="text" name="cell" placeholder=" " required  oninput="validatePhoneNumber(this)" />
+						<label class="did-floating-label">Enter Cell Number</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="email" type="text" required name="email" placeholder=" " />
+						<label class="did-floating-label">Enter Email</label>
+					</div>
+					<div class="did-floating-label-content col-md-6">
+						<input class="form-control did-floating-input" id="npi" type="text" name="npi" required placeholder=" " />
+						<label class="did-floating-label">Enter NPI</label>
+					</div>
+				</div>
+				<br>
+				<input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save">
+				<br>
+			</form>`;
+		o('rightdiv').innerHTML = html;
+		//- o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformpractise()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" required id="first_name" type="text" name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" required placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="website" type="text" name="website" required placeholder="Enter Website" oninput="validateURL(this)" /><input class="form-control subdiv" id="fax" type="text" name="fax" required placeholder="Enter Fax" oninput="validateFaxNumber(this)" /><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell" required  oninput="validatePhoneNumber(this)" /><input class="form-control subdiv" id="email" type="text" required name="email" placeholder="Enter Email" /><input class="form-control subdiv" id="npi" type="text" name="npi" required placeholder="Enter NPI" /><br><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';
 	}
 	function callswap(obj,className){
 		//console.log(className);
@@ -336,13 +374,11 @@ script.
 				var facilityData = data.facility;
 				console.log(facilityData);
 				// Generate HTML here using facilityData
-				var html = facilityData;
-				
-				/*`<h2>Edit Facility</h2>
+				var html = `<h2>Edit Facility</h2>
 							<div class="form-group text-center row" style="position:relative">`;
 				html += `<div class="did-floating-label-content col-md-6">
 							<input class="form-control did-floating-input" id="facility_name" type="text" name="facility_name" placeholder=" " value="` + facilityData.fname + `" />
-							<label class="did-floating-label">First Name</label>
+							<label class="did-floating-label">Facility Name</label>
 						</div>`;
 				html += `<div class="did-floating-label-content col-md-6">
 							<input class="form-control did-floating-input" id="facility_fax" type="tel" name="facility_fax" placeholder=" " value="` + facilityData.fax + `" />
@@ -355,10 +391,10 @@ script.
 				html += `<div class="did-floating-label-content col-md-6">
 							<input class="form-control did-floating-input" id="facility_email" type="tel" name="facility_email" placeholder=" " value="` + facilityData.email + `" />
 							<label class="did-floating-label">Email</label>
-	 					</div>`;
-	 			html += `<div class="did-floating-label-content col-md-6">
-	 						<input class="form-control did-floating-input" id="facility_website" type="tel" name="facility_website" placeholder=" " value="` + facilityData.website + `" />
-	 						<label class="did-floating-label">Website</label>
+						</div>`;
+				html += `<div class="did-floating-label-content col-md-6">
+							<input class="form-control did-floating-input" id="facility_website" type="tel" name="facility_website" placeholder=" " value="` + facilityData.website + `" />
+							<label class="did-floating-label">Website</label>
 						</div></div>`;
 				html += `<br><br><br>`;
 				html += `<div class=" text-center" style="">
@@ -366,12 +402,12 @@ script.
 						</div>
 						<br>
 						<div class="text-center" style="">
-							<input class="btn cbut blue" style="width: 25%;" onclick="update_facility('${facilityData.id}')" value="Save">
-						</div>`; */
-	 			// Add more HTML generation code for other fields using facilityData
+							<input class="btn cbut blue" style="width: 25%;" onclick="update_facility('${facilityData.id}', '${facilityData.fname}', '${facilityData.fax}', '${facilityData.cell}', '${facilityData.email}', '${facilityData.website}')" value="Save">
+						</div>`; 
+				
 				o('rightdiv').innerHTML = html;
-	 		}
-	 	});
+			}
+		});
 	}
 
 	ep=0;
@@ -406,12 +442,18 @@ script.
 		});
 		}
 	}	
-	function update_facility(id){
-		console.log(id );
-		$.post('/admin/updatefacili', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value,email:o('facility_email').value }, function(data){
-		console.log(data);
-		window.location.href = window.location;
-		});
+	function update_facility(id, facility_name, facility_fax, facility_cell, facility_email, facility_website){
+		if(confirm('Do you really want to Update this Facility Details!')){
+			var fax = o('facility_fax').value;
+			var phone = o('facility_cell').value;
+			var email = o('facility_email').value;
+			var website = o('facility_website').value;
+			var namee = o('facility_name').value;
+			console.log(fax, phone, email, website, namee)
+			$.post('/admin/updatefacili', {id: id, fax: fax, phone: phone, website: website, namee: namee, email: email }, function(data){
+				console.log(data);
+			});
+		}
 	}
 	/*
 	binname | uniquename | binstatus | comments | fact_id | firmware     | mac_id    | mandate    | model    |
@@ -516,7 +558,7 @@ script.
 	}
 
 	//- function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" required name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="cell" type="text" name="cell" required oninput="validatePhoneNumber(this)" placeholder="Enter Cell" /><input class="form-control subdiv" id="email" type="text" name="email" required oninput="validateEmail(this)" placeholder="Enter Email" /><input class="form-control subdiv" required id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email" /><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
-	
+
 	function add_user(name) {
 		console.log(name);
 
@@ -617,7 +659,8 @@ script.
 	}
 
 	function add_surgeon(name){
-		console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformsurgeon()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;right: 30px;top: 50px;" value="Save"><br></div></form>';
+		console.log(name);
+		o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><form method="get" onsubmit="return submitformsurgeon()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" name="first_name" placeholder="Enter First Name"><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name"><input class="form-control subdiv" id="last_name" type="text" name="last_name" placeholder="Enter Last Name"><input class="form-control subdiv" id="cell" type="text" name="cell" placeholder="Enter Cell"><input class="form-control subdiv" id="email" type="text" name="email" placeholder="Enter Email"><input class="form-control subdiv" id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email"><input class="form-control subdiv" id="npi" type="text" name="npi" placeholder="Enter NPI"><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;right: 30px;top: 50px;" value="Save"><br></div></form>';
 		/*console.log(name);
 		o('rightdiv').innerHTML = `
 			<h2>Add Surgeon</h2>

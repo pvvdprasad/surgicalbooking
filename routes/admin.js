@@ -255,7 +255,7 @@ router.post('/resetpassword', async function(req, res, next) {
 router.post('/updatepractise', async function(req, res, next) {
 	reqs = req.body;
 	sql = 'update practises set pname="'+reqs.namee+'",fax="'+reqs.fax+'", cell="'+reqs.phone+'", website="'+reqs.website+'",npi="'+reqs.npi+'" where id='+reqs.id; //   
-	console.log('updatefacili---------------');
+	console.log('updatepractise---------------');
 	// id: id, fax:o('facility_fax').value,phone: o('facility_phone').value,website:o('facility_website').value,namee:o('facility_name').value
 	
 	conn.query(sql, function (err, result) {
@@ -294,7 +294,13 @@ router.post('/get_day_records', async function(req, res, next) {
     surgeon_id: 0,
     practise_id: 0 
 	*/
-	html='<table style="width:100%;margin:auto" class="table"><tr><th>#</th><th>Patient Name: </th><th>DOB:</th><th>Action</th></tr>';
+	html=`<table style="width:100%;margin:auto" class="table">
+			<tr>
+				<th>#</th>
+				<th> Patient Name: </th>
+				<th> DOB: </th>
+				<th> Action </th> 
+			</tr>`;
 	spanhtml='';
 	conn.query(sql, function (err, result) {
 		if (err) console.log( err);
@@ -304,7 +310,8 @@ router.post('/get_day_records', async function(req, res, next) {
 				html+='<tr><td><input type="checkbox" name="chdnames" value="'+result[i].id+'" /></td>';
 				html+='<td><span style="color:#999">'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
 				html+='<td><span>'+result[i].patient_dob+'</span></td>';
-				html+='<td><img src="../images/uparrow.png" class="uparrow" onclick="popo('+result[i].id+')"/></td></tr>';
+				html+='<td><img src="../images/uparrow.png" class="uparrow" onclick="popo1('+result[i].id+')"/></td>';
+				html += '<td><a href="javascript:void(0);" onclick="popo('+result[i].id+')" class="view-detail-link" data-order-id="' + result[i].id + '">View Detail</a></td></tr>';
 				spanhtml+='<input name="inputhid" type="hidden" value='+result[i].surgery_date+'/>';
 			}
 			html+='</table>';
@@ -694,13 +701,12 @@ router.post('/editfacility', async function(req, res, next) {
 	await conn.query(sql, function (err, results) {
 		console.log(results);
 		
-		html = '<h2>Edit Facility</h2>';
-	html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].fname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="facility_email" type="text" name="facility_email" placeholder="Enter Email" value="'+ (undefined ==results[0].email?"":results[0].email) +'" />';
+	// 	html = '<h2>Edit Facility</h2>';
+	// html += '<input class="form-control" id="facility_name" type="text" name="facility_name" placeholder="Enter Facility Name"  value="'+ results[0].fname +'" /><br><input class="form-control" id="facility_website" type="text" name="facility_website" placeholder="Enter Website" value="'+ results[0].website +'" /><br><input class="form-control" id="facility_phone" type="text" name="facility_phone" placeholder="Enter Phone" value="'+ results[0].cell +'" /><br><input class="form-control" id="facility_fax" type="text" name="facility_fax" placeholder="Enter Fax" value="'+ results[0].fax +'" /><br><input class="form-control" id="facility_email" type="text" name="facility_email" placeholder="Enter Email" value="'+ (undefined ==results[0].email?"":results[0].email) +'" />';
 		
-	html += '<br /><br /><input class="btn cbut grey" type="button" onclick="remove_facility(\''+reqs.fac_id+'\')" value="Remove"><input class="btn cbut blue" style="margin-left:40px" type="button" onclick="update_facility(\''+reqs.fac_id+'\')" value="Save">';
-	res.send({ facility:html });
+	// html += '<br /><br /><input class="btn cbut grey" type="button" onclick="remove_facility(\''+reqs.fac_id+'\')" value="Remove"><input class="btn cbut blue" style="margin-left:40px" type="button" onclick="update_facility(\''+reqs.fac_id+'\')" value="Save">';
+	//res.send({ facility:html });
 
-	/*
 		var facilityData = {
 			id: results[0].id,
 			fname: results[0].fname,
@@ -710,7 +716,7 @@ router.post('/editfacility', async function(req, res, next) {
 			website: results[0].website
 	  };
 	  res.status(200).send({ facility: facilityData });
-	  */
+	  
 	});
 	
 });
