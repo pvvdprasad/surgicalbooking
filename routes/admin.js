@@ -1649,7 +1649,7 @@ router.post('/addFacility', async function(req, res, next) {
 	
 
 	try{
-		sql = "INSERT INTO facilities(fname,fax,cell,website,email) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.facility_email+"')";
+		sql = "INSERT INTO facilities(fname,fax,cell,website,email,removed_users) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.facility_email+"',0)";
 		
 		conn.query(sql, function (err, result) {
 			if (err) throw err;
