@@ -1,87 +1,194 @@
 doctype html
 head
-  meta(charset='utf-8')
-  meta(content='width=device-width, initial-scale=1.0' name='viewport')
-  title SurgicalBooking
-  meta(content='' name='description')
-  meta(content='' name='keywords')
-  // Favicons
-  link(href=BASE_PATH+'assets/img/favicon.png' rel='icon')
-  link(href=BASE_PATH+'assets/img/apple-touch-icon.png' rel='apple-touch-icon')
-  // Google Fonts
-  link(href='https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i' rel='stylesheet')
-  // Vendor CSS Files
-  link(href=BASE_PATH+'assets/vendor/aos/aos.css' rel='stylesheet')
-  link(href=BASE_PATH+'assets/vendor/bootstrap/css/bootstrap.min.css' rel='stylesheet')
-  link(href=BASE_PATH+'assets/vendor/bootstrap-icons/bootstrap-icons.css' rel='stylesheet')
-  link(href=BASE_PATH+'assets/vendor/boxicons/css/boxicons.min.css' rel='stylesheet')
-  link(href=BASE_PATH+'assets/vendor/glightbox/css/glightbox.min.css' rel='stylesheet')
-  link(href=BASE_PATH+'assets/vendor/remixicon/remixicon.css' rel='stylesheet')
-  link(href=BASE_PATH+'assets/vendor/swiper/swiper-bundle.min.css' rel='stylesheet')
-  // Template Main CSS File
-  link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
-  
-  script.
-    function o(id){return document.getElementById(id);}
-    function back(){
-        o('div1').style.display = 'block';
-        o('div2').style.display = 'none';
-    }
-    function showlog(){
-        o('div1').style.display = 'none';
-        o('div2').style.display = 'block';
-        // surgeonradio ptag
-        sr = document.getElementsByName('surgeonradio');
-        for(i=0;i<sr.length;i++){
-            if(sr[i].checked){
-                if(sr[i].value == 1){
-                    o('ptag').innerHTML = 'Admin Login';
-                }else if(sr[i].value == 2){
-                    o('ptag').innerHTML = 'Surgery Center Login';
-                }else if(sr[i].value == 3){
-                    o('ptag').innerHTML = 'Surgeon Login';
+    meta(charset='utf-8')
+    meta(content='width=device-width, initial-scale=1.0' name='viewport')
+    title SurgicalBooking
+    meta(content='' name='description')
+    meta(content='' name='keywords')
+    // Favicons
+    link(href=BASE_PATH+'assets/img/favicon.png' rel='icon')
+    link(href=BASE_PATH+'assets/img/apple-touch-icon.png' rel='apple-touch-icon')
+    // Google Fonts
+    link(href='https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i' rel='stylesheet')
+    // Vendor CSS Files
+    link(href=BASE_PATH+'assets/vendor/aos/aos.css' rel='stylesheet')
+    link(href=BASE_PATH+'assets/vendor/bootstrap/css/bootstrap.min.css' rel='stylesheet')
+    link(href=BASE_PATH+'assets/vendor/bootstrap-icons/bootstrap-icons.css' rel='stylesheet')
+    link(href=BASE_PATH+'assets/vendor/boxicons/css/boxicons.min.css' rel='stylesheet')
+    link(href=BASE_PATH+'assets/vendor/glightbox/css/glightbox.min.css' rel='stylesheet')
+    link(href=BASE_PATH+'assets/vendor/remixicon/remixicon.css' rel='stylesheet')
+    link(href=BASE_PATH+'assets/vendor/swiper/swiper-bundle.min.css' rel='stylesheet')
+    // Template Main CSS File
+    link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
+
+    script.
+        function o(id){return document.getElementById(id);}
+        function back(){
+            o('div1').style.display = 'block';
+            o('div2').style.display = 'none';
+        }
+        function showlog(){
+            o('div1').style.display = 'none';
+            o('div2').style.display = 'block';
+            // surgeonradio ptag
+            sr = document.getElementsByName('surgeonradio');
+            for(i=0;i<sr.length;i++){
+                if(sr[i].checked){
+                    if(sr[i].value == 1){
+                        o('ptag').innerHTML = 'Admin Login';
+                    }else if(sr[i].value == 2){
+                        o('ptag').innerHTML = 'Surgery Center Login';
+                    }else if(sr[i].value == 3){
+                        o('ptag').innerHTML = 'Surgeon Login';
+                    }
+                    break;
                 }
-                break;
+            }
+        }
+style.
+    
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px white inset;
+    }
+
+    /* Adjust text color on autofilled inputs (optional) */
+    input:-webkit-autofill {
+        -webkit-text-fill-color: your-text-color;
+    }
+    .did-floating-label-content {
+        position:relative;
+        margin-bottom:20px;
+    }
+    .did-floating-label {
+        color:#000000;
+        font-size:13px;
+        font-weight:normal;
+        position:absolute;
+        pointer-events:none;
+        left:15px;
+        top:11px;
+        padding:0 5px;
+        background:#fff;
+        transition:0.2s ease all;
+        -moz-transition:0.2s ease all;
+        -webkit-transition:0.2s ease all;
+    }
+
+    .did-floating-input, .did-floating-select {
+        font-size:12px;
+        display:block;
+        width:100%;
+        height:36px;
+        padding: 0 20px;
+        background: #fff;
+        color: #323840;
+        border: 1px solid #3D85D8;
+        border-radius: 4px;
+        box-sizing: border-box;
+        &:focus{
+            outline:none;
+            ~ .did-floating-label{
+                top:-8px;
+                font-size:13px;
             }
         }
     }
-  style.
+    select.did-floating-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    select.did-floating-select::-ms-expand {
+        display: none;
+    }
+    .did-floating-input:not(:placeholder-shown) ~ .did-floating-label {
+        top:-8px;
+        font-size:13px;
+    }
+    .did-floating-select:not([value=""]):valid ~ .did-floating-label {
+        top:-8px;
+        font-size:13px;
+    }
+    .did-floating-select[value=""]:focus ~ .did-floating-label {
+        top:11px;
+        font-size:13px;
+    }
+
+    .did-floating-label{
+        font-weight: 600;
+        color:#003595;
+    }
+    .did-floating-select:not([multiple]):not([size]) {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6'%3E%3Cpath id='Path_1' data-name='Path 1' d='M371,294l4,6,4-6Z' transform='translate(-371 -294)' fill='%239d3b3b'/%3E%3C/svg%3E%0A");
+    }
+    .input-group {
+        display: flex;
+        .did-floating-input{
+            border-radius:0 4px 4px 0;
+            border-left:0;
+            padding-left:0;
+        }
+    }
+    .input-group-append {
+        display:flex;
+        align-items:center;
+        /*   margin-left:-1px; */
+    }
+
+    .input-group-text {
+        display: flex;
+        align-items: center;
+        font-weight: 400;
+        height:34px;
+        color: #323840;
+        padding: 0 5px 0 20px;
+        font-size:12px;
+        text-align: center;
+        white-space: nowrap;
+        border: 1px solid #3D85D8;
+        border-radius: 4px 0 0 4px;
+        border-right:none;
+    }   
     #div2{display:none}
     .labels{background: #F3F3F3;padding: 10px 20px;width: 200px;border-radius: 20px;margin-left: 10px;cursor:pointer}
-  header#header.header.fixed-top(data-scrollto-offset='0')
-  .container-fluid.d-flex.align-items-center.justify-content-between
-    a.logo.align-items-center(href='index.html',style='position:absolute;top:0')
-      // Uncomment the line below if you also wish to use an image logo
-      // <img src="img/logo.png" alt="">
-      h1
-        img(src=BASE_PATH+'images/125.png' style='width:150px;top:20px;position:absolute')
-        // | SurgicalBooking
-    .container.align-items-center.justify-content-between
-        section#features.features(class="col-md-6",style="margin:15% auto")
-            form#loginform(action='/admin/postlogin' method='post')
-                .form-group.text-center
-                    
-                    #div1 
-                        p#ptag()
-                        span= 'Login As'
-                        br
-                        br
-                        div.form-floating.mb-3
-                            input.form-control(type='text'  id='floatingInput' name='loginid' placeholder=' ' required='')
-                            label(for='floatingInput') Username/Email
-                        br
-                        div.form-floating
-                            input.form-control(type='password' id='floatingInput' name='passid' placeholder='Password' required='')
-                            label(for='floatingInput') Password
-                        br
-                        br
-                        input.btn.btn-success( type='submit' value='Login')
-                    //- div.form-floating.mb-3
-                    //-     input.form-control(type='email', id='floatingInput', placeholder='name@example.com')
-                    //-     label(for='floatingInput') Email address
-                    //- div.form-floating
-                    //-     input.form-control(type='password', id='floatingPassword', placeholder='Password')
-                    //-     label(for='floatingPassword') Password
-                if message
-                    script.
-                        alert("#{message}");
+
+
+
+
+header#header.header.fixed-top(data-scrollto-offset='0')
+    .container-fluid.d-flex.align-items-center.justify-content-between
+        a.logo.align-items-center(href='index.html' style='position:absolute;top:0')
+            // Uncomment the line below if you also wish to use an image logo
+            // <img src="img/logo.png" alt="">
+            h1
+                img(src=BASE_PATH+'images/125.png' style='width:150px;top:20px;position:absolute')
+                // | SurgicalBooking
+        .container.align-items-center.justify-content-between
+            section#features.features(class="col-md-6" style="margin:15% auto")
+                form#loginform(action='/admin/postlogin' method='post')
+                    .form-group.text-center
+
+                        #div1 
+                            p#ptag()
+                            span= 'Login As'
+                            br
+                            br
+                            div.did-floating-label-content
+                                input.form-control.did-floating-input(type='text' id='floatingInput' name='loginid' placeholder=' ' required='' autocomplete="off" )
+                                label.did-floating-label Username/Email
+                            br
+                            div.did-floating-label-content
+                                input.form-control.did-floating-input(type='password' id='floatingInput' name='passid' placeholder=' ' required='' autocomplete="off")
+                                label.did-floating-label Password
+                            br
+                            br
+                            input.btn.btn-success( type='submit' value='Login')
+                        //- div.form-floating.mb-3
+                        //-     input.form-control(type='email' id='floatingInput' placeholder='name@example.com')
+                        //-     label(for='floatingInput') Email address
+                        //- div.form-floating
+                        //-     input.form-control(type='password' id='floatingPassword' placeholder='Password')
+                        //-     label(for='floatingPassword') Password
+                    if message
+                        script.
+                            alert("#{message}");
