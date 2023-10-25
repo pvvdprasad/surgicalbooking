@@ -13,6 +13,8 @@ router.get('/login', function(req, res, next) {
   res.render('admin/login', { BASE_PATH: '../' });
 });
 
+
+
 router.post('/save_favsg',async function(req, res, next) {
 	var reqs = req.body;
 	console.log(reqs);
@@ -264,6 +266,53 @@ router.post('/updatepractise', async function(req, res, next) {
 		}
 		res.send({});
 		//res.render('admin/order_history', { BASE_PATH: '../',results:result });
+	});
+});
+
+router.post('/get_day_records_nnnn', async function(req, res, next) {
+	
+	reqs = req.body;
+	reqs.m++;
+	reqs.m=reqs.m<10?'0'+reqs.m:reqs.m;
+	reqs.d=reqs.d<10?'0'+reqs.d:reqs.d;
+	sid=reqs.sid;
+	
+	sql = 'select  id from facilities where email = (select name from users where id = '+sid+')';
+	
+	await conn.query(sql, function (err, result) {
+		sid = result[0].id;
+		sql = 'select o.id,u.first_name,u.middle_name,u.last_name,surgery_date,o.surgeon_id from orders o  left join other_users u on u.user_id = o.surgeon_id where surgery_date like "'+reqs.m+'/'+reqs.d+'/'+reqs.y+'" and surgery_center_id='+sid+' order by surgery_date';
+	
+	
+	
+	
+	console.log(sql);
+	
+	conn.query(sql, function (err, result) {
+		if (err) console.log( err);
+		else{console.log(result);
+			html='<table class="table"><tr><th>Surgeon Name</th><th>Surgery Date</th><th>Cases</th></tr>';
+			dd='';count=0;
+			for(i=0;i<result.length;i++){
+				if(dd==result[i].surgeon_id){
+					count++;
+				}else{if(count>0){html+='<td>'+(count)+' case(s)</td>';html+='</tr>';}count=0;count++;
+//				dd=result[i].surgery_date;
+				dd=result[i].surgeon_id;
+			//html+='<tr><td><input type="checkbox" name="chdnames" value="'+result[i].id+'" /></td>';
+				html+='<tr style="cursor:pointer" onclick="showindiv('+reqs.m+','+reqs.d+','+reqs.y+','+sid+','+result[i].surgeon_id+')"><td><span style="color:#333">'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
+				html += '<td>'+result[i].surgery_date+'</td>';
+				//html += '<td><a href="javascript:void(0);" onclick="popo('+result[i].id+')" class="view-detail-link" data-order-id="' + result[i].id + '">View Detail</a></td>';
+				//spanhtml+='<input name="inputhid" type="hidden" value='+result[i].surgery_date+'/>';
+				}
+			
+			}
+			html+='<td>'+(count)+' case(s)</td></tr>';
+			res.send({html:html});
+		}
+	
+	});
+	
 	});
 });
 
@@ -964,7 +1013,7 @@ router.post('/scorderhistory', async function(req, res, next) {
 					fffid = result2[0].id;
 					fobj = result2[0];
 					
-					sql = 'select o.id,surgery_date,patient_dob,side ,status,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id='+fffid+' and (status=3 or status = 4)';
+					sql = 'select o.id,surgery_date,patient_dob,side ,status,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id='+fffid+' and (status=3 or status = 4 or status = 1)';
 					console.log(':-'+sql);
 					html = '<h2 style="width:100%;text-align:center">Completed Orders</h2><table class="table"><tr><th class="thdd">Sr#</th><th class="thdd">Surgeon NPI</th><th class="thdd">Surgeon Name</th><th class="thdd">DOS</th><th class="thdd">Status</th></tr>';
 	
@@ -991,6 +1040,61 @@ router.post('/scorderhistory', async function(req, res, next) {
 						}
 					});
 					
+					
+				}
+			});
+		}
+	});
+});
+
+router.post('/loaddates', async function(req, res, next) {
+	var reqs = req.body;
+	fid = reqs.fid;
+	
+	sql = 'select id, name from users where id='+reqs.fid;
+	console.log(sql);
+	await conn.query(sql, function (err, result) {
+		if(undefined != result){
+			sql = 'select id,fname,cell,email,fax,website from facilities where email = "'+result[0].name+'"';
+			console.log(':-------------'+sql);
+			conn.query(sql, function (err, result2) {
+				if(undefined != result2){
+					fffid = result2[0].id;
+					fobj = result2[0];
+					
+					sql = 'select o.id,surgery_date,patient_dob,side ,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id='+fffid+' and status=0';
+					cases = new Map([]);
+					caseArr = [];
+					console.log(sql);
+										
+					conn.query(sql, function (err, result33) {
+						if (err) console.log( err);
+						if(undefined != result33){
+							console.log(result33);							
+							for(i=0;i<result33.length;i++){
+								obj = result33[i];
+								caseArr.push(obj);
+								key = obj['surgeon_id'] + '_' + obj['surgery_date'];
+								console.log('key is'+key);
+								if(!cases.has(key)){
+									cases.set(key, []);
+								//	console.log('no key');
+								}
+							//	console.log(cases);
+								temparr = cases.get(key);
+								temparr.push(obj);
+								cases.delete(key);
+								//console.log(cases);
+								cases.set(key, temparr);
+								//console.log(cases);
+							}
+							
+						}
+						console.log('Before sending...........');
+						console.log(cases);
+						res.send({'cases':caseArr});
+						
+					});
 					
 				}
 			});
@@ -1057,6 +1161,62 @@ router.post('/scneworders', async function(req, res, next) {
 	
 });
 
+router.post('/scneworders2', async function(req, res, next) {
+	
+	var reqs = req.body;
+	console.log(reqs); // reqs.fid
+	// fid = reqs.fid;
+	m = reqs.m;
+	d = reqs.d;
+	y = reqs.y;
+	sid = reqs.sid;
+	surid = reqs.surid;
+	
+	fffid = 0;
+	fobj = {};
+	gresult = '';
+	
+	/*
+	//sql = 'select id, name from users where id='+reqs.fid;
+	console.log(sql);
+	await conn.query(sql, function (err, result) {
+		if(undefined != result){
+			//sql = 'select id,fname,cell,email,fax,website from facilities where email = "'+result[0].name+'"';
+			console.log(':-------------'+sql);
+			conn.query(sql, function (err, result2) {
+				if(undefined != result2){
+					fffid = result2[0].id;
+					fobj = result2[0];
+					
+					
+					*/
+					sql = 'select o.id,surgery_date,patient_dob,side,o.first_name as fn,o.middle_name as mn,o.last_name   as ln,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id = '+sid+' and surgeon_id='+surid+' and surgery_date like "'+m+'/'+d+'/'+y+'" ';
+					console.log(':-'+sql);
+					html = '<h2 style="width:100%;text-align:center"></h2><table class="table"><tr><th class="thdd">Sr#</th><th class="thdd">Patient Name</th><th class="thdd">Surgeon Name</th><th class="thdd">DOS</th></tr>';
+	
+					await conn.query(sql, function (err, result33) {
+						if (err) console.log( err);
+						if(undefined != result33){
+							//console.log(result33);
+							for(i=0;i<result33.length;i++){
+								obj = result33[i];
+								//console.log(obj);
+								html += '<tr class="cp" onclick="openorder('+obj.id+')"><td>'+(i+1)+'</td><td>'+(obj.fn+' '+obj.mn+' '+obj.ln)+'</td><td>'+(obj.first_name +' '+ obj.middle_name + ' ' +obj.last_name)+'</td><td>'+(obj.surgery_date)+'</td></tr>';
+								console.log(html);
+							}
+							html += '</table>';
+					
+							res.send({html:html});
+						}
+					});
+					
+				/*	
+				}
+			});
+		}
+	});*/
+});
+
 router.post('/printorder', async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
@@ -1093,11 +1253,14 @@ router.post('/openorder', async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
 	
-	//reqs.oid;
-	sql = 'select surgery_date,patient_dob,side, m.mname, b.bname, d.model_name ,manufacture_id,brand_id,model_id,power_id,surgeon_id, practise_id,first_sel_type,second_sel_type, u.npi, o.first_name,o.middle_name,o.last_name,u.first_name as sfname, u.last_name as lfname, u.middle_name as mfname  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
 	
+	
+	//reqs.oid;
+	sql = 'select surgery_date,patient_dob,side, m.mname, b.bname, d.model_name ,o.surgery_center_id,manufacture_id,brand_id,model_id,power_id,surgeon_id, practise_id,first_sel_type,second_sel_type, u.npi, o.first_name,o.middle_name,o.last_name,u.first_name as sfname, u.last_name as lfname, u.middle_name as mfname  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
+	fid=0;html = '';
 	await conn.query(sql, function (err, result) {
 		obj = result[0];
+		if(fid==0){fid=obj.surgery_center_id;}
 		html = '<table class="table"><tr><td colspan="2" style="font-size:25px;text-align:center"><b>Information</b></td></tr><tr><td>Surgeon Name</td><td>'+(obj.sfname+' '+obj.mfname+' '+obj.lfname)+'</td></tr>'
 		+'<tr><td>Surgeon NPI</td><td>'+(obj.npi)+'</td></tr>'
 		
@@ -1113,10 +1276,28 @@ router.post('/openorder', async function(req, res, next) {
 		+'<tr><td>Power</td><td>'+(obj.power_id)+'</td></tr>'
 		+'<tr><td>Stock Level</td><td>2</td></tr>'
 		+'<tr><td colspan="2" style="color:red;text-align:center">Please check all the information for accuracy<td></tr>'
-		+'<tr><td colspan="2" style="text-align:center"><input type="button" class="btn cbut blue bbbutons" value="Approve" onclick="approveorder('+reqs.oid+')"/><td></tr>'
+		
+		sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins where removed_bins =0 and fact_id='+fid;
+		console.log(sql);
+		conn.query(sql, function (err, result) {
+			sql = 'select surgery_dt from bins_logs where facility_id='+fid+' and surgery_dt="'+obj.surgery_date+'"';
+			conn.query(sql, function (err, resultbb) {
+				occu=0;
+				if(undefined ==resultbb){}else{occu=resultbb.length}
+				occu = result.length-occu;
+				if(occu>0)
+				html+='<tr><td colspan="2" style="text-align:center"><input type="button" class="btn cbut blue bbbutons" value="Approve" onclick="approveorder('+reqs.oid+')"/><td></tr>'
 		+'</table>';
-		res.send({html:html});
+		else
+			html+='<tr><td colspan="2" style="text-align:center"><input type="button" class="btn cbut blue bbbutons" value="Cancel" /><td></tr></table>'; // onclick="approveorder('+reqs.oid+')"
+		
+			html += '<div style="position: absolute;padding:10px;background:red;color:#FFF;top:28%;right:5%">'+(occu)+' Bin(s) Available</div>';
+			res.send({html:html});
+			});
+		});
 	});
+	
+	
 	
 	
 
@@ -1125,10 +1306,44 @@ router.post('/approveorder', async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
 	
-	
-	sql = 'update orders set status = 1 where id='+reqs.oid;
+	sql = 'select surgery_date,surgery_center_id,bin_mac_id from orders where id='+reqs.oid;
+	//sql = 'update orders set status = 1 where id='+reqs.oid;
 	await conn.query(sql, function (err, result) {
-		res.send({});
+		
+		if(result[0].bin_mac_id == ''){
+		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status int,
+		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
+		// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
+		console.log(sql);
+		conn.query(sql, function (err, result1) {
+			obj = result1[0];
+			sql = 'select binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+obj.surgery_center_id;
+			console.log(sql);
+			conn.query(sql, function (err, facbins) {
+				sql = 'select id,mac_id    , facility_id  from bins_logs  where facility_id='+obj.surgery_center_id +' and surgery_dt !="'+obj.surgery_date+'"';
+				console.log(sql);
+				mac_id='';
+				conn.query(sql, function (err, freebins) {
+					
+					if(freebins==undefined || freebins.length==0){
+						bin=facbins[0];
+						mac_id=facbins[0].mac_id;
+						sql = 'insert into bins_logs(surgery_dt,facility_id,status,order_id,mac_id) values("'+obj.surgery_date+'",'+obj.surgery_center_id+',1,'+reqs.oid+',"'+facbins[0].mac_id+'")';
+					}else if(freebins.length>0){
+						bin=freebins[0];
+						mac_id=freebins[0].mac_id;
+						sql = 'insert into bins_logs(surgery_dt,facility_id,status,order_id,mac_id) values("'+obj.surgery_date+'",'+obj.surgery_center_id+',1,'+reqs.oid+',"'+freebins[0].mac_id+'")';
+					}
+					console.log(sql);
+					
+					conn.query(sql, function (err, freebins) {
+						sql = 'update orders set status = 1,bin_mac_id= "'+mac_id+'" where id='+reqs.oid;
+						conn.query(sql, function (err, freebins) {
+						res.send({});});});
+				});
+			});
+		});
+		}else{res.send({});}
 	});
 	
 });
@@ -1699,7 +1914,7 @@ router.post('/postlogin', function(req, res, next) {
   console.log(reqs);
  
   
-  var sql = "select id,role from users where name ='"+loginid+"' and passcode='"+passid+"'";
+  var sql = "select id,name,role from users where name ='"+loginid+"' and passcode='"+passid+"'";
   //VALUES('surgeon','surgeon',2)";
   conn.query(sql, function (err, result) {
     if (err){
@@ -1714,6 +1929,7 @@ router.post('/postlogin', function(req, res, next) {
 				//console.log(result[i]);
 				req.session.userid = result[i].id;
 				req.session.role = result[i].role;
+				req.session.name = result[i].name;
 				console.log(req.session.role)
 				break;
 			}
@@ -1732,6 +1948,13 @@ router.post('/postlogin', function(req, res, next) {
 						// res.render('admin/dashboard2', { BASE_PATH: '../' });
 						res.status(200).redirect('admindash');
 					}else if(req.session.role==3){
+						sql = 'select id from facilities where email = "'+req.session.name+'"';
+						console.log(sql);
+						/*conn.query(sql, function (err, result1111) {
+							req.session.userid = result1111[0].id;
+							
+						}); */
+						//req.session.userid = result[i].id;
 						req.session.role_name = 'surgycenter';
 						res.status(200).redirect('sc_neworders');
 						// res.render('admin/dashboard3', { BASE_PATH: '../' });

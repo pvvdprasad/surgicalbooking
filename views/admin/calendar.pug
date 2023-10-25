@@ -1,5 +1,5 @@
 link(rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200')
-.calendar-container
+.calendar-container(style='float:left')
   header.calendar-header
     p.calendar-current-date
     .calendar-navigation
@@ -18,7 +18,7 @@ link(rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Material+Sy
 style.
   .calendar-container {
   background: #fff;
-  width: 330px;
+  width: 310px;
   border-radius: 10px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
   }
@@ -124,8 +124,35 @@ script.
   "November",
   "December"]; // array of month names
   // function to generate the calendar
+  function load_dates(){    
+    var hid = document.getElementsByName('inputhid');
+    arr = [];console.log('--------');console.log(hid);console.log('--------');
+    for(i=0;i<hid.length;i++){
+        if(!arr.includes(hid[i].value)){
+        console.log(hid[i].value);
+        arr.push(hid[i].value);
+        }
+    }
+    return arr;
+  }
+  function calc_date(arr, d,m,y){
+    str = '';m++;
+    for(i=0;i<arr.length;i++){
+    // 07/13/2023
+    sa = arr[i].split('/');
+    //console.log(sa);
+    //console.log(parseInt(sa[1])+'=='+parseInt(d) +'&&'+ parseInt(sa[0])+'=='+parseInt(m)+' &&'+ parseInt(sa[2])+'=='+parseInt(y));
+    if(parseInt(sa[1])==parseInt(d) && parseInt(sa[0])==parseInt(m) && parseInt(sa[2])==parseInt(y)){
+    str='active';//console.log('worked at..'+d);break;
+    }
+    //if(m===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear())
+    }
+    return str;
+   } 
   const manipulate=()=> {
+  arr=load_dates();
   // get the first day of the month
+  //console.log('This is console log.....');
   let dayone=new Date(year, month, 1).getDay();
   // get the last date of the month
   let lastdate=new Date(year, month + 1, 0).getDate();
@@ -140,9 +167,17 @@ script.
   }
   // loop to add the dates of the current month
   for (let i=1; i <=lastdate; i++) {
+  
+  // check if the current date is today
+  let isToday=calc_date(arr,i,month,year); //i===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear() ? "": "";
+  lit+=`<li class="${isToday}"`;
+  lit+= ` onclick="showrecords(${i})" `;
+  lit+=`>${i}</li>`;
+  /*
   // check if the current date is today
   let isToday=i===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear() ? "active": "";
   lit+=`<li class="${isToday}">${i}</li>`;
+  */
   }
   // loop to add the first dates of the next month
   for (let i=dayend; i < 6; i++) {
@@ -153,7 +188,7 @@ script.
   // update the HTML of the dates element with the generated calendar
   day.innerHTML=lit;
   }
-  manipulate();
+ // manipulate();
   // Attach a click event listener to each icon
   prenexIcons.forEach(icon=> {
   // When an icon is clicked
@@ -173,7 +208,45 @@ script.
   // Set the date to the current date
   date=new Date();
   }
+  date=new Date();
+   year=date.getFullYear();
+  // Set the month to the new month
+  month=date.getMonth();
   // Call the manipulate function to update the calendar display
-  manipulate();
+  //manipulate();
+  console.log('---------------------');
+  gm=month;gy=year;
   });
   });
+  gm='';gy='';
+ function showrecords(i){
+     date=new Date();
+       year=date.getFullYear();
+      // Set the month to the new month
+      month=date.getMonth();
+      // Call the manipulate function to update the calendar display
+      //manipulate();
+      console.log('---------------------');
+      gm=month;gy=year;
+    console.log(i+'----------');
+    sid = document.getElementById('surgyid').value;
+    $.post('/admin/get_day_records_nnnn',{m:gm,y:gy,d:i,sid:sid},function(data){
+        console.log(data);
+            o('rightdiv_neworder').innerHTML=data.html;
+            // manipulate();
+        });
+  }
+ function calc_date(arr, d,m,y){
+    str = '';m++;
+    for(i=0;i<arr.length;i++){
+    // 07/13/2023
+    sa = arr[i].split('/');
+    //console.log(sa);
+    //console.log(parseInt(sa[1])+'=='+parseInt(d) +'&&'+ parseInt(sa[0])+'=='+parseInt(m)+' &&'+ parseInt(sa[2])+'=='+parseInt(y));
+    if(parseInt(sa[1])==parseInt(d) && parseInt(sa[0])==parseInt(m) && parseInt(sa[2])==parseInt(y)){
+    str='active';//console.log('worked at..'+d);break;
+    }
+    //if(m===date.getDate() && month===new Date().getMonth() && year===new Date().getFullYear())
+    }
+    return str;
+   } 

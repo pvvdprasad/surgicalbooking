@@ -131,12 +131,13 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
                     h2= 'New Order'
                     hr
                     div.did-floating-label-content
-                        label(for='surgery_center' class='did-floating-label did-floating-label1') Selected Surgery Center
+                        label(for='surgery_center' class='did-floating-label did-floating-label1') Select Surgery Center
                         select.did-floating-input.float-label-input.form-select#surgery_center()
                             option(Value= ' ') Select 
                             if results != undefined
                                 each result in results
-                                    option(value=result.id)= result.fname
+                                    if result.fname != ''
+                                        option(value=result.id)= result.fname
             tr
                 td.col-md-3(style="padding:5px;position:relative")
                     //- p.hlabel Surgery Date
@@ -413,18 +414,20 @@ script.
 
     function seleoptuion(val,snam){
         if(''==val) return;
-        
+        jj=1;
         url = '/admin/loadoptt';
         obj = o('select_model');
         if('manu'==snam){
             obj = o('select_brand');
         }else if('manu2'==snam){
             obj = o('select_brand2');
+            jj=2;
             gdt = 'back';
             snam='manu';
         }else if('brand2'==snam){
             snam='brand';
             obj = o('select_model2');
+            jj=2;
         }
         removeOptions(obj);
         $.post(url,{val:val,snam:snam},function(data){
@@ -456,7 +459,10 @@ script.
             }
             if('manu'!=snam){
                 removeOptions(o('select_power'));
+                if(jj==1)
                 loadpowers();
+                else
+                loadpowers2();
             }
         });
     }
@@ -464,16 +470,11 @@ script.
     function loadpowers(){
 
         option = document.createElement("option");
-        option2 = document.createElement("option");
         obj1 = o('select_power');
-        obj2 = o('select_power2');
         removeOptions(obj1);
-        removeOptions(obj2);
         option.text = 'Select Power';
         option.value = '';obj1.add(option);
         
-        option2.text = 'Select Power';
-        option2.value = '';obj2.add(option2);
 
         for(i=5;i<31;i++){
             option = document.createElement("option");
@@ -486,6 +487,21 @@ script.
             option.value = i+parseFloat('0.5');
             obj1.add(option);
             
+        }
+    }
+    function loadpowers2(){
+
+        
+        option2 = document.createElement("option");
+        
+        obj2 = o('select_power2');
+        
+        removeOptions(obj2);
+        
+        option2.text = 'Select Power';
+        option2.value = '';obj2.add(option2);
+
+        for(i=5;i<31;i++){
             option2 = document.createElement("option");
             option2.text = i;
             option2.value = i;
@@ -639,7 +655,10 @@ script.
                 br.appendChild(myOption);
             }
             high_light(br,gmo);
+            if(gdt == 'prim')
             loadpowers();
+            else
+            loadpowers2();
         });
     }
     gma='';gbr='';gmo='';gdt='';
