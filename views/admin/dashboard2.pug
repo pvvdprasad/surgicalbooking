@@ -525,19 +525,21 @@ script.
 		}
 	}	
 	function update_facility(id, facility_name, facility_fax, facility_cell, facility_email, facility_website){
-		
+		if((!validateFacilityName(o('facility_name'))) || (!validateFaxNumber(o('facility_fax'))) || !validatePhoneNumber(o('facility_cell')) || (!validateEmail(o('facility_email'))) || (!validateURL(o('facility_website')))){
+			alert("Please provide valid Data ")
+			return;
+		}
+		if (fax === '' || phone === '' || email === '' || website === '' || namee === '') { // Check if any of the fields are empty
+			alert('Please fill in all required fields.');
+			return; // Prevent the form submission
+		}
+
 		var fax = o('facility_fax').value;
 		var phone = o('facility_cell').value;
 		var email = o('facility_email').value;
 		var website = o('facility_website').value;
 		var namee = o('facility_name').value;
-		if(!validateFacilityName(o('facility_name')) && !validateFaxNumber(o('facility_fax')) && !validatePhoneNumber(o('facility_cell')) && !validateEmail(o('facility_email')) && !validateURL(o('facility_website'))){
-			return;
-		};
-		if (fax === '' || phone === '' || email === '' || website === '' || namee === '') { // Check if any of the fields are empty
-			alert('Please fill in all required fields.');
-			return; // Prevent the form submission
-		}
+
 		if(confirm('Do you really want to Update this Facility Details!')){
 
 			console.log(fax, phone, email, website, namee)

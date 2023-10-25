@@ -83,48 +83,23 @@ router.post('/save_order', async function(req, res, next) {
 });
 // Endpoint for surgeon to preview order history as month
 router.get('/get_month_records', async function(req, res, next) {
-    const reqs = req.query;
-    reqs.m = parseInt(reqs.m, 10); // Convert to an integer.
-    reqs.m = reqs.m < 10 ? '0' + reqs.m : reqs.m;
+    const { surgery_center_id, month, year } = req.query;
+    const formattedMonth = month < 10 ? '0' + month : month;
 
-    const sql = 'SELECT * FROM orders WHERE surgery_date LIKE ?';
-    const sqlParams = [`${reqs.m}/%/${reqs.y}`];
+    const sql = 'SELECT * FROM orders WHERE surgery_date LIKE ? AND surgery_center_id = ?';
+    const sqlParams = [`${formattedMonth}/%/${year}`, surgery_center_id];
 
     console.log(sql);
-    console.log("Month =" + reqs.m + " &&&&&&& " + "Year =" + reqs.y);
+    console.log("Month =" + formattedMonth + " &&&&&&& " + "Year =" + year);
+    console.log("Surgery Center ID = " + surgery_center_id);
 
     conn.query(sql, sqlParams, function(err, result) {
         if (err) {
             console.log(err);
             res.status(500).json({ error: 'An error occurred while fetching data' });
         } else {
-            console.log(result);
-            res.status(200).json(result);
-        }
-    });
-});
-// Endpoint for surgeon to preview order history as day
-router.get('/get_day_records', async function(req, res, next) {
-    const { m, d, y } = req.query;
-
-    // Ensure proper formatting of month and day with leading zeros.
-    const month = m < 10 ? '0' + m : m;
-    const day = d < 10 ? '0' + d : d;
-
-    const formattedDate = `${month}/${day}/${y}`;
-
-    const sql = 'SELECT * FROM orders WHERE surgery_date = ?';
-
-    console.log(sql);
-    console.log(formattedDate); // Example: 10-24-2023
-
-    conn.query(sql, [formattedDate], function (err, result) {
-        if (err) {
-            console.log(err);
-            res.status(500).json({ error: 'An error occurred while fetching data' });
-        } else {
             if (result.length === 0) {
-                res.status(404).json({ message: 'No orders found for the specified date.' });
+                res.status(404).json({ message: 'No orders found for the specified date and surgery center.' });
             } else {
                 console.log(result);
                 res.status(200).json(result);
@@ -132,6 +107,37 @@ router.get('/get_day_records', async function(req, res, next) {
         }
     });
 });
+// Endpoint for surgeon to preview order history as day
+router.get('/get_day_records', async function(req, res, next) {
+    const { m, d, y, surgery_center_id } = req.query;
+
+    // Ensure proper formatting of month and day with leading zeros.
+    const month = m < 10 ? '0' + m : m;
+    const day = d < 10 ? '0' + d : d;
+
+    const formattedDate = `${month}/${day}/${y}`;
+
+    const sql = 'SELECT * FROM orders WHERE surgery_date = ? AND surgery_center_id = ?';
+
+    console.log(sql);
+    console.log(formattedDate); // Example: 10/24/2023
+    console.log(surgery_center_id);
+
+    conn.query(sql, [formattedDate, surgery_center_id], function (err, result) {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: 'An error occurred while fetching data' });
+        } else {
+            if (result.length === 0) {
+                res.status(404).json({ message: 'No orders found for the specified date against your surgery center.' });
+            } else {
+                console.log(result);
+                res.status(200).json(result);
+            }
+        }
+    });
+});
+
 
 
 
