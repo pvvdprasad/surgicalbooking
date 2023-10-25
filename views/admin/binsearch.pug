@@ -1,6 +1,9 @@
-h1(style='text-align:center') Search Bins
-input(type='text',style='margin-top:20px;width:100%' onkeyup='catchWords(this.value)')
-#hiddiv()
-input.btn.cbut.grey.bbbutons(type="button" value='Assign More', onclick="amorei(1)",style='left:20%')
-input.btn.cbut.blue.bbbutons(type="button" value='Assign', onclick="amorei(2)", style='left:45%')
+style.
+    #hiddiv{display:none;border:1px solid #D0D0D0;margin-top: -15px;padding:5px;position:absolute;z-index:9999; width:98%; top:118px; background:#FFF}
+
+h2(style='text-align:center') Search Bins
+input(type='text',placeholder="Enter Bin Name/MAC to Search For",class="magnify", style='width:75%' onkeyup='catchWords(this.value)')
+div#hiddiv()
+input.btn.cbut.blue.bbbutons(type="button" value='Search' style="margin-left:40%;margin-bottom:30%;position:absolute")
+//- input.btn.cbut.blue.bbbutons.mb-5(type="button" value='Assign', onclick="amorei(2)", style='left:45%')
 input(type='hidden',value=fac_id,id='binseahid')

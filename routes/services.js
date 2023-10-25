@@ -58,7 +58,7 @@ function checkToken(req){
 }
   
 // Set up Global configuration access
-
+// Endpoints for surgeon creating New orders
 router.post('/save_order', async function(req, res, next) {
 	var reqs = req.body;
 	
@@ -81,6 +81,60 @@ router.post('/save_order', async function(req, res, next) {
 		res.send({results:result});
 	  });
 });
+// Endpoint for surgeon to preview order history as month
+router.get('/get_month_records', async function(req, res, next) {
+    const reqs = req.query;
+    reqs.m = parseInt(reqs.m, 10); // Convert to an integer.
+    reqs.m = reqs.m < 10 ? '0' + reqs.m : reqs.m;
+
+    const sql = 'SELECT * FROM orders WHERE surgery_date LIKE ?';
+    const sqlParams = [`${reqs.m}/%/${reqs.y}`];
+
+    console.log(sql);
+    console.log("Month =" + reqs.m + " &&&&&&& " + "Year =" + reqs.y);
+
+    conn.query(sql, sqlParams, function(err, result) {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: 'An error occurred while fetching data' });
+        } else {
+            console.log(result);
+            res.status(200).json(result);
+        }
+    });
+});
+// Endpoint for surgeon to preview order history as day
+router.get('/get_day_records', async function(req, res, next) {
+    const { m, d, y } = req.query;
+
+    // Ensure proper formatting of month and day with leading zeros.
+    const month = m < 10 ? '0' + m : m;
+    const day = d < 10 ? '0' + d : d;
+
+    const formattedDate = `${month}/${day}/${y}`;
+
+    const sql = 'SELECT * FROM orders WHERE surgery_date = ?';
+
+    console.log(sql);
+    console.log(formattedDate); // Example: 10-24-2023
+
+    conn.query(sql, [formattedDate], function (err, result) {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: 'An error occurred while fetching data' });
+        } else {
+            if (result.length === 0) {
+                res.status(404).json({ message: 'No orders found for the specified date.' });
+            } else {
+                console.log(result);
+                res.status(200).json(result);
+            }
+        }
+    });
+});
+
+
+
 
 router.post('/decommissioned', async function(req, res, next) {
 	//AWS.config.update(config.aws_remote_config);
@@ -227,7 +281,7 @@ router.get('/getbinUpdate',async function(req, res, next) {
     var bin_mac_id = req.query.bin_mac_id;
     console.log(bin_mac_id);
 	
-	var sql = "SELECT   bins.binstatus,  bins.mac_id,  orders.surgery_date, DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y') as tdate, orders.patient_dob, orders.side, orders.status as order_status, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name,                            CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, m.mname as primary_manufacturer, b.bname as primary_brand_name, models.model_name as primary_model_name, power_id as primary_power,mb.mname as backup_manufacturer, bb.bname as backup_brand_name, mob.model_name as backup_model_name, b_power_id as backup_power  FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id  WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
+	var sql = "SELECT  orders.surgery_date, orders.patient_dob, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id  WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
 			 
 	console.log(sql);
 	conn.query(sql, function (err, result) {
