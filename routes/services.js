@@ -5,6 +5,9 @@ var conn = require('../model/db').conn;
 const config = process.env;
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
+const io = require('../bin/www').io;
+const moment = require('moment');
+
   
 const app = express();
   
@@ -58,7 +61,7 @@ function checkToken(req){
 }
   
 // Set up Global configuration access
-// Endpoints for surgeon creating New orders
+// Endpoints for  creating New orders
 router.post('/save_order', async function(req, res, next) {
 	var reqs = req.body;
 	
@@ -81,9 +84,9 @@ router.post('/save_order', async function(req, res, next) {
 		res.send({results:result});
 	  });
 });
-// Endpoint for surgeon to preview order history as month
-router.get('/get_month_records', async function(req, res, next) {
-    const { surgery_center_id, month, year } = req.query;
+// Endpoint for view order history as month
+router.post('/get_month_records', async function(req, res, next) {
+    const { surgery_center_id, month, year } = req.body;
     const formattedMonth = month < 10 ? '0' + month : month;
 
     const sql = 'SELECT * FROM orders WHERE surgery_date LIKE ? AND surgery_center_id = ?';
@@ -107,9 +110,10 @@ router.get('/get_month_records', async function(req, res, next) {
         }
     });
 });
-// Endpoint for surgeon to preview order history as day
-router.get('/get_day_records', async function(req, res, next) {
-    const { m, d, y, surgery_center_id } = req.query;
+
+// Endpoint for view order history as day
+router.post('/get_day_records', async function (req, res, next) {
+    const { m, d, y, surgery_center_id } = req.body;
 
     // Ensure proper formatting of month and day with leading zeros.
     const month = m < 10 ? '0' + m : m;
@@ -138,103 +142,133 @@ router.get('/get_day_records', async function(req, res, next) {
     });
 });
 
+// Endpoints for  related to show decommissioned Master Bins
+router.post('/decommissionedBin', async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	const sql = 'update bins set binstatus = 3,comments="'+reqs.ans+'" where uid = '+reqs.id;
+	console.log('SQL Query:', sql);
+	conn.query(sql, function (err, binresults) {
+		if (err) {
+			console.log("Error", err);
+			res.send({results:"Error"});
+		  } else {
+			console.log("Success", binresults);
+			res.send({results:"Success"});
+		  }
+	});
+});
 
-
-
+router.post('/moveBinToUnassignedBins', async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	
+	const sql = 'UPDATE bins SET binstatus = 0, comments = NULL WHERE uid = ' + reqs.id;
+	console.log('SQL Query:', sql);
+	conn.query(sql, function (err, binresults) {
+		if (err) {
+			console.log("Error", err);
+			res.send({results:"Error"});
+		  } else {
+			console.log("Success", binresults);
+			res.send({results:"Success"});
+		  }
+	});
+});
 
 router.post('/decommissioned', async function(req, res, next) {
 	//AWS.config.update(config.aws_remote_config);
 	//var results = await scanTable(config.aws_bins_table_name);
 	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
-	
-	sql = 'select * from bins where binstatus = 3';
-	
-	html = '<h2>Decommissioned Bins</h2><table><tr><th>Model / Bin no</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th><th>Comments</th><th>Action</th></tr>';
+	const { fact_id } = req.body;
+    if (!fact_id) {
+        return res.status(400).json({ error: 'Missing fact_id in the request body' });
+    }
+	arrbin = [];
+	const sql = 'SELECT * FROM bins WHERE binstatus = 3 AND fact_id = ?';
+	console.log('SQL Query:', sql);
 	conn.query(sql, function (err, results) {
-		/*
-	for(i=0;i<results.length;i++){
-		if(results[i].binstatus == 3){
-			html += '<tr><td>'+ results[i].model + '/'+results[i].binname+'</td><td>'+ results[i].mac_id +'</td><td>'+ results[i].firmware +'</td><td>'+ results[i].mandate +'</td><td>Comment '+i+'</td><td><a href="javascript:recommission(\''+results[i].uid+'\')">Recommission</a></td></tr>';
-			
-			// break;
-		}
-	}html += '</table>'; */
-	res.send({ data:results });
+		if (err) {
+            console.error('SQL Query Error:', err);
+            return res.status(500).json({ error: 'An error occurred while fetching data' });
+        }
+
+        console.log('Fact ID:', fact_id);
+        console.log('Data:', binresults);
+        res.status(200).json({ data: binresults });
 	});
 	
 	
 });
-
+// Endpoints for  related to show unassigned Master Bins
 router.post('/unassignedBins', async function(req, res, next) {
-	
+	const { fact_id } = req.body;
+    if (!fact_id) {
+        return res.status(400).json({ error: 'Missing fact_id in the request body' });
+    }
 	//var results = await scanTable(config.aws_users_table_name);
 	//var binresults = await scanTable(config.aws_bins_table_name);
 	
 	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
 	arrbin = [];
-	sql = 'select * from bins where binstatus = 0';
-	html = '<h2>Unassigned Bins</h2><table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th></tr>';
+	const sql = 'SELECT * FROM bins WHERE binstatus = 0 AND fact_id = ?';
+	console.log('SQL Query:', sql);
+
 	conn.query(sql, function (err, binresults) {
-		/*
-		for(i=0;i<binresults.length;i++){
-			//if(binresults[i].binstatus == 0)
-				//arrbin.push(binresults[i]);
-			html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td>'+binresults[i].mandate+'</td></tr>';
-		}
-		html += '</table>';
-		*/
-		res.send({data:binresults});
+		if (err) {
+            console.error('SQL Query Error:', err);
+            return res.status(500).json({ error: 'An error occurred while fetching data' });
+        }
+
+        console.log('Fact ID:', fact_id);
+        console.log('Data:', binresults);
+        res.status(200).json({ data: binresults });
 	});
 });
-
+// Endpoints for  related to show assigned Master Bins
 router.post('/assignedBins', async function(req, res, next) {
-	
-	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
-		
-	arrbin = []; fff = true;
-	sql = 'select * from bins where binstatus = 1';
-	
-	
-	/*
-	html = '<h2>Assigned Bins</h2><select id="dynfacilsele" onchange="changefacildd(this.value)" style="margin-bottom: 20px"></select><table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
-	*/
-	conn.query(sql, function (err, binresults) {
-		
-		/*
-	for(i=0;i<binresults.length;i++){
-		//if(binresults[i].binstatus == 1)
-			//arrbin.push(binresults[i]);
-			if(fff){
-				html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:22px" src="../images/signal.png" onclick="showslots()" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';
-				fff = false;
-			}else{
-				html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:25px" src="../images/nosignal.png" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uuid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uuid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';				
-			}
-		}
-		html += '</table>';
-		*/
-		res.send({data:binresults});
-	});	
+    const { fact_id } = req.body;
+
+    if (!fact_id) {
+        return res.status(400).json({ error: 'Missing fact_id in the request body' });
+    }
+
+    const sql = 'SELECT * FROM bins WHERE binstatus = 1 AND fact_id = ?';
+	console.log('SQL Query:', sql);
+
+    conn.query(sql, [fact_id], function (err, binresults) {
+        if (err) {
+            console.error('SQL Query Error:', err);
+            return res.status(500).json({ error: 'An error occurred while fetching data' });
+        }
+
+        console.log('Fact ID:', fact_id);
+        console.log('Data:', binresults);
+        res.status(200).json({ data: binresults });
+    });
 });
 
-
+// Endpoints for  related to add Master Bins
 router.post('/addbin', async function(req, res, next) {
 	reqs = req.body;
-	
+	const bin_mac_id = req.body.bin_mac_id;
+	const socket_id = req.body.socket_id;
+	console.log("Bin Mac_ID is: ====="+bin_mac_id);
+	console.log("Bin socket_ID is: ====="+socket_id);
 	//if(!checkToken(req)){ res.send({'message':'Please login with valid credentials'}); return; }
 	
-	sql = 'insert into bins (binstatus, comments,fact_id, firmware , mac_id ,mandate ,model) values(0,'+
-	'"",0,"'+reqs.firmware+'","'+reqs.macid+'","'+reqs.mandate+'","'+reqs.model+'")';
+	sql = 'insert into bins (binstatus, comments,fact_id, firmware , mac_id ,mandate ,model,removed_bins,socket_id) values(0,'+
+	'"","'+reqs.fact_id+'","'+reqs.firmware+'","'+reqs.macid+'","'+reqs.mandate+'","'+reqs.model+'",0,"'+socket_id+'")';
 	//docClient.put(params, function(err, data) {
-		console.log(sql);
+	console.log(sql);
 	conn.query(sql, function (err, binresults) {
 	  if (err) {
 		console.log("Error", err);
 		res.send({results:"Error"});
 	  } else {
 		console.log("Success", binresults);
-		res.send({results:"Success"});
+		res.status(200).json({ message: "Success", socket_id: socket_id }); // Include socket_id in the response
 	  }
 	});
 });
