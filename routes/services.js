@@ -431,4 +431,43 @@ router.post('/generateToken', async function(req, res, next) {
 });
 */
 
+
+router.post('/heartbeat', (req, res) => {
+    const { mac_id } = req.body; // Extract MAC ID from the request body
+
+    // Check if the bin with the provided MAC ID exists in the database
+    conn.query('SELECT * FROM bins WHERE mac_id = ?', [mac_id], (err, results) => {
+        if (err) {
+            console.log('Error querying the database:', err);
+            res.status(500).json({ message: 'Internal Server Error' });
+            return;
+        }
+
+        if (results.length === 0) {
+            // Bin not found
+            res.status(404).json({ message: 'Bin not found' });
+        } else {
+            // Bin found, update its last heartbeat timestamp
+            const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+
+            // Insert the heartbeat data into the bin_logs table
+            conn.query(
+                'INSERT INTO bin_logs (mac_id, timestamp, connection_status) VALUES (?, ?, ?)',
+                [mac_id, currentTimestamp, true],
+                (updateErr) => {
+                    if (updateErr) {
+                        console.log('Error updating the heartbeat timestamp:', updateErr);
+                        res.status(500).json({ message: 'Internal Server Error' });
+                        return;
+                    }
+
+                    res.status(200).json({ message: 'Heartbeat received, bin is connected to the server' });
+                }
+            );
+        }
+    });
+});
+
+
+
 module.exports = router;

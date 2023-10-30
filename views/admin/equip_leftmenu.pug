@@ -15,6 +15,7 @@ style.
 			a(href='javascript:showunassigned()') UnAssigned Bins
 		li(style='padding-bottom:10px')
 			a(href='javascript:showdecommissioned()') Decompressed Bins
+script(src='/socket.io/socket.io.js')
 script.
 	function o(id){return document.getElementById(id)}
 	function showunassigned(){
@@ -37,10 +38,51 @@ script.
 	function showassigned(){
 		$.post('/admin/assignedBins', {}, function(data){
 			console.log(data);
-			o('rightdiv').innerHTML = data.html;
+			html = '<h2>Assigned Bins</h2>';
+			html += '<select id="dynfacilsele" onchange="changefacildd(this.value)" style="margin-bottom: 20px"></select>';
+			html += '<table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+			for ( const bin of data){
+				html += `<tr><td>${bin.model}</td>`;
+				html += `<td>${bin.mac_id}</td>`;
+				html += `<td>${bin.firmware}</td>`;
+				html += `<td id="status_${bin.mac_id}">Loading...</td>`;
+				html += `<td>${bin.mandate}</td>`;
+				html += `<td><a href="javascript:decommi('${bin.uid}')">Decommission</a>`;
+				html += `<div class="hidassdiv" id="${bin.uid}_hid"><span class="spanclose" onclick="closediv('${bin.uid}_hid')">X</span><a href="javascript:seleop(1, ${bin.uid})">Malfunction</a><br><a href="javascript:seleop(2, ${bin.uid})">Damaged</a><br><a href="javascript:seleop(3, ${bin.uid})">Other</a></div></td></tr>`;
+				checkBinStatusRegularly(bin.mac_id);
+			}
+			html += '</table>';
+			o('rightdiv').innerHTML = html;
 			loadDD();
 		});
+		// Listen for real-time status updates
+		io.on('statusUpdate', (data) => {
+			const statusCell = document.getElementById(`status_${data.mac_id}`);
+			if (statusCell) {
+				statusCell.textContent = data.status;
+			}
+		});
 	}
+
+	function checkBinStatusRegularly(mac_id) {
+		setInterval(function () {
+			$.post('/admin/showstatus', { mac_id }, function (data) {
+				//- console.log(data);
+				//- console.log(data.status);
+			const statusCell = document.getElementById(`status_${mac_id}`);
+			if (statusCell) {
+				if (!(data.status === 'offline')) {
+					statusCell.innerHTML = '<img src="/images/signal.png" class="img-fluid" onclick="showslots()"/>';
+				} else {
+					statusCell.innerHTML = '<img src="/images/nosignal.png" class="img-fluid "/>';
+				}
+			}
+			});
+		}, 5000); // Check status every 10 seconds (adjust the interval as needed)
+	}
+
+
+
 	function decommi(bbid){
 		console.log(bbid);
 		o(bbid+'_hid').style.display='block';
@@ -48,6 +90,7 @@ script.
 	function loadDD(){
 		daySelect = o('dynfacilsele');
 		daySelect.options[daySelect.options.length] = new Option('Select facility', '');
+		daySelect.options[daySelect.options.length - 1].disabled = true;
 		$.post('/admin/loadFacDropdown', {}, function(data){
 			console.log(data); // 
 			facresults = data.results;
