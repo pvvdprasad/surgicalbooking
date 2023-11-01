@@ -329,6 +329,15 @@ router.get('/getbinUpdate',async function(req, res, next) {
 			res.status(400).send("Not Found");
 		}else{
 			res.status(200).json(result);
+			var updateSql = "INSERT INTO bin_logs (mac_id, timestamp, connection_status) VALUES (?, NOW(), ?)";
+			conn.query(updateSql, [bin_mac_id, true], function (err, updateResult) {
+                if (err) {
+                    console.error("Error updating bin_logs:", err);
+                } else {
+                    console.log("bin_logs updated with last heartbeat time and connection_status");
+                }
+            });
+			
 		}
 	});
 });
@@ -468,6 +477,46 @@ router.post('/heartbeat', (req, res) => {
     });
 });
 
+router.post('/showstatus', async function(req, res, next) {
+	const userMacId = req.body.mac_id; // Assuming the user sends the mac_id in the request body
+	console.log('Received mac_id:', userMacId);
+	const sql = 'SELECT * FROM bin_logs WHERE mac_id = ? ORDER BY timestamp DESC LIMIT 1';
+  
+	// Current time
+	const currentTime = moment(); // Use moment to get the current time
+  
+	conn.query(sql, [userMacId], function (err, binresults) {
+	  if (err) {
+		console.error('SQL Query Error:', err);
+		return res.status(500).json({ error: 'An error occurred while fetching data' });
+	  }
+	  
+	  if (binresults.length === 0) {
+		console.log('Bin status is not available');
+		return res.status(400).json({ message: 'Bin status is not available' });
+	  } else {
+		const lastHeartbeatTime = moment(binresults[0].timestamp, 'YYYY-MM-DD HH:mm:ss'); // Specify the format
+		// Calculate time difference in minutes
+		const timeDifference = currentTime.diff(lastHeartbeatTime, 'minutes');
+		// if (timeDifference <= 10) {
+		// 	console.log('Bins are online');
+		// 	io.emit('statusUpdate', { mac_id: userMacId, status: 'online' });
+		// } else {
+		// 	console.log('Bins are offline');
+		// 	io.emit('statusUpdate', { mac_id: userMacId, status: 'offline' });
+		// }
+		if (timeDifference <= 10) {
+			console.log('Bins are online');
+			console.log(binresults);
+			res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
+		} else {
+			console.log('Bins are offline');
+			console.log(binresults);
+			res.status(200).json({ message: 'Bins are offline', status: 'offline', data: binresults });
+		}
+	  }
+	});
+});
 
 
 module.exports = router;
