@@ -54,17 +54,18 @@ script.
 			html += '</table>';
 			o('rightdiv').innerHTML = html;
 			loadDD();
-		});
-		// Listen for real-time status updates
-		io.on('statusUpdate', (data) => {
-			const statusCell = document.getElementById(`status_${data.mac_id}`);
-			if (statusCell) {
-				statusCell.textContent = data.status;
-			}
+			// Listen for real-time status updates
+			io.on('statusUpdate', (data) => {
+				const statusCell = document.getElementById(`status_${data.mac_id}`);
+				if (statusCell) {
+					statusCell.textContent = data.status;
+				}
+			});
 		});
 	}
 
 	function checkBinStatusRegularly(mac_id) {
+		console.log(mac_id)
 		setInterval(function () {
 			$.post('/admin/showstatus', { mac_id }, function (data) {
 				//- console.log(data);
@@ -78,7 +79,7 @@ script.
 				}
 			}
 			});
-		}, 5000); // Check status every 10 seconds (adjust the interval as needed)
+		}, 150000); // Check status every 5 minutes (adjust the interval as needed)
 	}
 
 
@@ -108,7 +109,18 @@ script.
 	
 		$.post('/admin/changefacildd', {id:id}, function(data){
 			console.log(data);
-			o('righttable').innerHTML = data.html;
+			var tableContent = '<tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+			for ( const bin of data){
+				tableContent += `<tr><td>${bin.model}</td>`;
+				tableContent += `<td>${bin.mac_id}</td>`;
+				tableContent += `<td>${bin.firmware}</td>`;
+				tableContent += `<td id="status_${bin.mac_id}">Loading...</td>`;
+				tableContent += `<td>${bin.mandate}</td>`;
+				tableContent += `<td><a href="javascript:decommi('${bin.uid}')">Decommission</a>`;
+				tableContent += `<div class="hidassdiv" id="${bin.uid}_hid"><span class="spanclose" onclick="closediv('${bin.uid}_hid')">X</span><a href="javascript:seleop(1, ${bin.uid})">Malfunction</a><br><a href="javascript:seleop(2, ${bin.uid})">Damaged</a><br><a href="javascript:seleop(3, ${bin.uid})">Other</a></div></td></tr>`;
+				checkBinStatusRegularly(bin.mac_id);
+			}
+			o('righttable').innerHTML = tableContent;
 		});
 	}
 	

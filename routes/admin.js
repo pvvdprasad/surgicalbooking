@@ -2038,16 +2038,17 @@ router.post('/changefacildd', async function(req, res, next) {
 	sql = 'select * from bins where fact_id = '+req.body.id+' AND binstatus= 1 ';
 	//html = '<h2>Decommissioned Bins</h2><table><tr><th>Model / Bin no</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th><th>Comments</th><th>Action</th></tr>';
 	
-	html = '<table><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+	// html = '<table><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
 	conn.query(sql, function (err, binresults) {
-	for(i=0;i<binresults.length;i++)
-		//if(binresults[i].fac_id == req.body.id){
-			//arrbin.push(binresults[i]);
-				html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:22px" src="../images/signal.png" onclick="showslots()" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';				
-		//}
+	// for(i=0;i<binresults.length;i++)
+	// 	//if(binresults[i].fac_id == req.body.id){
+	// 		//arrbin.push(binresults[i]);
+	// 			html += '<tr><td>'+binresults[i].model+'</td><td>'+binresults[i].mac_id+'</td><td>'+binresults[i].firmware+'</td><td><img style="width:22px" src="../images/signal.png" onclick="showslots()" /></td><td>'+binresults[i].mandate+'</td><td><a href="javascript:decommi(\''+binresults[i].uid+'\')">Decommission</a><div class="hidassdiv" id="'+binresults[i].uid+'_hid"><span class="spanclose" onclick="closediv(\''+binresults[i].uid+'_hid\')">X</span><a href="javascript:seleop(1,'+binresults[i].uid+')">Malfunction</a><br><a href="javascript:seleop(2,'+binresults[i].uid+')">Damaged</a><br><a href="javascript:seleop(3,'+binresults[i].uid+')">Other</a></div></td></tr>';				
+	// 	//}
 	
-	html += '</table>';
-	res.send({html:html});
+	// html += '</table>';
+		console.log(binresults)
+		res.send(binresults)
 	});
 });
 
@@ -2124,12 +2125,12 @@ router.post('/showstatus', async function(req, res, next) {
   
 	conn.query(sql, [userMacId], function (err, binresults) {
 	  if (err) {
-		console.error('SQL Query Error:', err);
+		// console.error('SQL Query Error:', err);
 		return res.status(500).json({ error: 'An error occurred while fetching data' });
 	  }
 	  
 	  if (binresults.length === 0) {
-		console.log('Bin status is not available');
+		// console.log('Bin status is not available');
 		return res.status(400).json({ message: 'Bin status is not available' });
 	  } else {
 		const lastHeartbeatTime = moment(binresults[0].timestamp, 'YYYY-MM-DD HH:mm:ss'); // Specify the format
@@ -2143,12 +2144,12 @@ router.post('/showstatus', async function(req, res, next) {
 		// 	io.emit('statusUpdate', { mac_id: userMacId, status: 'offline' });
 		// }
 		if (timeDifference <= 10) {
-			console.log('Bins are online');
-			console.log(binresults);
+			// console.log('Bins are online');
+			// console.log(binresults);
 			res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
 		} else {
-			console.log('Bins are offline');
-			console.log(binresults);
+			// console.log('Bins are offline');
+			// console.log(binresults);
 			res.status(200).json({ message: 'Bins are offline', status: 'offline', data: binresults });
 		}
 	  }
