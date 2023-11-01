@@ -1000,7 +1000,7 @@ router.post('/scorderhistory', async function(req, res, next) {
 		new order ---> 0
 		approved ---> 1
 		not approved ->2
-		completed ---> 3
+		completed ---> 3 
 		not completed -> 4
 	*/
 	
@@ -1219,6 +1219,40 @@ router.post('/scneworders2', async function(req, res, next) {
 	});*/
 });
 
+router.post('/openbin', async function(req, res, next) {
+	reqs = req.body;
+	
+	sql = 'select b.id,binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.bid;
+	html = '';
+	
+	res.send({html:html});
+	
+	
+	
+});
+
+router.post('/loadbins', async function(req, res, next) {
+	reqs = req.body;
+	// sql = 'select binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join users u on u.name=f.email left join facilities f on f.email = u.name where removed_bins =0 and u.id='+reqs.fid+' and f.id=b.fact_id';
+	
+	sql = 'select b.id,binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.fid;
+	
+	console.log(sql);
+	await conn.query(sql, function (err, result) {
+	console.log(result);
+	html = '';
+	for(i=0;i<result.length;i++){
+		html += '<div class="bindivs" onclick="openbin('+result[i].id+')">';
+		html += result[i].mac_id;
+		html += '</div>';
+	}
+	
+	res.send({html:html});
+	
+	});
+	
+});
+
 router.post('/printorder', async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
@@ -1258,8 +1292,8 @@ router.post('/openorder', async function(req, res, next) {
 	
 	
 	//reqs.oid;
-	sql = 'select surgery_date,patient_dob,side, m.mname, b.bname, d.model_name ,o.surgery_center_id,manufacture_id,brand_id,model_id,power_id,surgeon_id, practise_id,first_sel_type,second_sel_type, u.npi, o.first_name,o.middle_name,o.last_name,u.first_name as sfname, u.last_name as lfname, u.middle_name as mfname  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
-	fid=0;html = '';
+	sql = 'select surgery_date,patient_dob,side, m.mname, b.bname, d.model_name  , o.surgery_center_id,manufacture_id,brand_id,model_id,power_id,surgeon_id, practise_id,first_sel_type,second_sel_type, u.npi, o.first_name,o.middle_name,o.last_name,u.first_name as sfname, u.last_name as lfname, u.middle_name as mfname  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
+	fid=0;html = '';occu=0;
 	await conn.query(sql, function (err, result) {
 		obj = result[0];
 		if(fid==0){fid=obj.surgery_center_id;}
@@ -1279,9 +1313,37 @@ router.post('/openorder', async function(req, res, next) {
 		+'<tr><td>Stock Level</td><td>2</td></tr>'
 		+'<tr><td colspan="2" style="color:red;text-align:center">Please check all the information for accuracy<td></tr>'
 		
+		// if(obj.bin_mac_id != '') occu++;
+		
 		sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins where removed_bins =0 and fact_id='+fid;
 		console.log(sql);
+		
 		conn.query(sql, function (err, result) {
+			
+			sql = 'select count(bin_mac_id) as cb  from orders where surgery_center_id='+fid+' and (bin_mac_id is null or bin_mac_id="")';
+			total_bins = result.length;
+		
+			conn.query(sql, function (err, result) {
+				oooo = result[0];
+				occu = oooo.cb;
+				
+				console.log('occu----'+occu+':total_bins------'+total_bins);
+				
+				html+='<tr><td colspan="2" style="text-align:center"><input type="button" class="btn cbut blue bbbutons" value="Approve" onclick="approveorder('+reqs.oid+')"/><td></tr>'
+				+'</table>';
+				
+				if(total_bins < occu){ occu = 0; }
+				else { occu = total_bins - occu; }
+				
+				html += '<div style="position: absolute;padding:10px;background:red;color:#FFF;top:28%;right:5%">'+(occu)+' Bin(s) Available</div>';
+				
+				res.send({html:html});
+			});
+			
+			
+			
+		
+			/*
 			sql = 'select surgery_dt from bins_logs where facility_id='+fid+' and surgery_dt="'+obj.surgery_date+'"';
 			conn.query(sql, function (err, resultbb) {
 				occu=0;
@@ -1295,7 +1357,7 @@ router.post('/openorder', async function(req, res, next) {
 		
 			html += '<div style="position: absolute;padding:10px;background:red;color:#FFF;top:28%;right:5%">'+(occu)+' Bin(s) Available</div>';
 			res.send({html:html});
-			});
+			}); */
 		});
 	});
 	
@@ -1311,17 +1373,43 @@ router.post('/approveorder', async function(req, res, next) {
 	sql = 'select surgery_date,surgery_center_id,bin_mac_id from orders where id='+reqs.oid;
 	//sql = 'update orders set status = 1 where id='+reqs.oid;
 	await conn.query(sql, function (err, result) {
-		
+		fact_id = 0;
 		if(result[0].bin_mac_id == ''){
+			fact_id = result[0].surgery_center_id;
+			surg_id = result[0].surgery_date;
 		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status int,
 		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
 		// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
+		sql = ' select bin_mac_id from orders where surgery_center_id='+fact_id +' and surgery_date="' +  surg_id+'"';
+
 		console.log(sql);
-		conn.query(sql, function (err, result1) {
-			obj = result1[0];
-			sql = 'select binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+obj.surgery_center_id;
+		conn.query(sql, function (err, bookedbins) {
+			obj = bookedbins[0];
+			bbins = [];selected_mac_id=''; // array.splice(index, 1);
+			for(i=0;i<bookedbins.length;i++){if(bookedbins[i].bin_mac_id!='') bbins.push(bookedbins[i].bin_mac_id);}
+			//if(bbins.length>0)selected_mac_id=bbins[0];
+			sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+fact_id;
 			console.log(sql);
 			conn.query(sql, function (err, facbins) {
+				
+				
+				all_facbin = [];for(i=0;i<facbins.length;i++){all_facbin.push(facbins[i].mac_id);}
+				for(i=0;i<bookedbins.length;i++){
+					if(all_facbin.includes(bookedbins[i])){
+						ind = all_facbin.indexOf(bookedbins[i]);
+						all_facbin.splice(ind, 1);
+					}
+				}
+				selected_bin='';
+				if(all_facbin.length > 0)					
+					selected_bin = all_facbin[0];
+				
+				sql = 'update orders set status = 1,bin_mac_id= "'+selected_bin+'" where id='+reqs.oid;
+				conn.query(sql, function (err, freebins) {
+					res.send({});
+				});
+				
+				/*
 				sql = 'select id,mac_id    , facility_id  from bins_logs  where facility_id='+obj.surgery_center_id +' and surgery_dt !="'+obj.surgery_date+'"';
 				console.log(sql);
 				mac_id='';
@@ -1343,6 +1431,7 @@ router.post('/approveorder', async function(req, res, next) {
 						conn.query(sql, function (err, freebins) {
 						res.send({});});});
 				});
+				*/
 			});
 		});
 		}else{res.send({});}
@@ -1374,6 +1463,17 @@ router.get('/sc_reports', async function(req, res, next) {
 	
 	// query = "select id,fname,fax,cell,website from facilities";
 	res.render('admin/dashboard3', { BASE_PATH: '../', pageid:'reports', uid:sid});
+});
+
+
+
+router.get('/sc_bins', async function(req, res, next) {
+	if(checkAuth(req,res)) return;
+	
+	sid = req.session.userid;
+	
+	// query = "select id,fname,fax,cell,website from facilities";
+	res.render('admin/dashboard3', { BASE_PATH: '../', pageid:'bins', uid:sid});
 });
 
 router.get('/settings', async function(req, res, next) {

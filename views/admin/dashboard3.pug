@@ -7,13 +7,15 @@ ul.horizontal
 	li
 		a(href="../admin/sc_orderhistory") Order History
 	li
+		a(href="../admin/sc_bins") Bins
+	li
 		a(href="../admin/sc_reports") Reports
 style(type="text/css").
 	#linemenu, #headerspan{display:none}
 	#uuul{padding:0;margin:0}	
 	.thdd{background-color:#003595 !important;color:#FFF !important;}
 	.cp{cursor:pointer !important}
-
+	.bindivs{border: 1px solid #000;float:left;margin:10px;padding:10px;cursor:pointer}
 if( pageid == 'neworder')	
 	include calendar.pug
 
@@ -37,6 +39,9 @@ if( pageid == 'neworder')
 					br
 					input.form-control(type="button" style="margin:0" value="Submit" class="btn cbut blue" onclick="changepassword()")
 					input(type='hidden', id='uid', value=uid)
+	else if pageid == 'bins'
+		.col-md-8#rightbins(style='border:1px solid #e7e7e7;margin:12px')
+			h2(style='text-align:center') Bins
 script.	
 	function changepassword(){
 		url = '/admin/save_password';
@@ -59,6 +64,7 @@ script.
 			//else o('subdivddd').innerHTML = '';
 			});
 	}
+	
 	$(document).ready(function(){
 		id = o('hidid').value;
 		sid = o('surgyid').value;
@@ -68,6 +74,8 @@ script.
 			loaddates(sid);
 		}else if(id == 'orderhistory'){
 			loadorderhistory(sid);
+		}else if(id == 'bins'){
+			loadbins(sid);
 		}
 		
 		try{
@@ -112,6 +120,12 @@ script.
 			manipulate();
 		});
 	}
+	function openbin(bid){
+		$.post('/admin/openbin', {bid:bid}, function(data){ // facid
+			console.log(bid+data);
+			//o('rightdiv_neworder').innerHTML = data.html;
+		});
+	}
 	function loadneworder(fid){
 		$.post('/admin/scneworders', {fid:fid}, function(data){ // facid
 			//console.log(data);
@@ -143,6 +157,12 @@ script.
 			//else o('subdivddd').innerHTML = '';
 			//alert('Approved Successfully');
 			 //window.location.href = window.location;
+		});
+	}
+	function loadbins(fid){
+		$.post('/admin/loadbins', {fid:fid}, function(data){ // facid
+			console.log(data);
+			o('rightbins').innerHTML = data.html;
 		});
 	}
 	function loadorderhistory(fid){
