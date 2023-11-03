@@ -300,6 +300,42 @@ router.post('/resetpassword', async function(req, res, next) {
 	});
 });
 
+router.post('/uploadbin',async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	
+	data = reqs;
+/*
+Expected output
+------------------
+[{
+	"masterBin_mac_id":"CC:DB:A7:12:91:2C",
+	"Slot_mac_id":"Slot 0",
+	"manufacturer_id":"",
+	"brand_id":"",
+	"model_id":"",
+	"status":"empty",
+	"order_id":"",
+	"power_id":"3",
+	"slotjson":""
+}]
+*/
+
+for(i=0;i<data.length;i++){
+	obj = data[i];
+	query = "insert into slots(masterBin_mac_id,Slot_mac_id,manufacturer_id,brand_id,model_id,power_id,status,slotjson,order_id) values('"+obj.masterBin_mac_id+"','"+obj.Slot_mac_id+"','"+obj.manufacturer_id+"','"+obj.brand_id+"','"+obj.model_id+"','"+obj.power_id+"','"+obj.status+"','"+JSON.stringify(obj)+"','"+obj.order_id+"')";
+	console.log(query);
+	
+	await conn.query(query, function (err, result) {
+		console.log(err);
+	});
+	
+	
+}
+
+	res.send({"message":"success"});
+});
+
 router.post('/save_password',async function(req, res, next) {	
 	// query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
 	reqs = req.body;
