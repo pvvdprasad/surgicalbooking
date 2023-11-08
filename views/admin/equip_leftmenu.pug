@@ -17,6 +17,7 @@ style.
 			a(href='javascript:showdecommissioned()') Decompressed Bins
 script(src='/socket.io/socket.io.js')
 script.
+	const socket = io();
 	function o(id){return document.getElementById(id)}
 	function showunassigned(){
 		$.post('/admin/unassignedBins', {}, function(data){
@@ -49,24 +50,18 @@ script.
 				html += `<td>${bin.mandate}</td>`;
 				html += `<td><a href="javascript:decommi('${bin.uid}')">Decommission</a>`;
 				html += `<div class="hidassdiv" id="${bin.uid}_hid"><span class="spanclose" onclick="closediv('${bin.uid}_hid')">X</span><a href="javascript:seleop(1, ${bin.uid})">Malfunction</a><br><a href="javascript:seleop(2, ${bin.uid})">Damaged</a><br><a href="javascript:seleop(3, ${bin.uid})">Other</a></div></td></tr>`;
-				checkBinStatusRegularly(bin.mac_id);
+				//- checkBinStatusRegularly(bin.mac_id);
 			}
 			html += '</table>';
 			o('rightdiv').innerHTML = html;
 			loadDD();
-			// Listen for real-time status updates
-			io.on('statusUpdate', (data) => {
-				const statusCell = document.getElementById(`status_${data.mac_id}`);
-				if (statusCell) {
-					statusCell.textContent = data.status;
-				}
-			});
+
 		});
 	}
 
 	function checkBinStatusRegularly(mac_id) {
 		console.log(mac_id)
-		setInterval(function () {
+		setInterval (function () {
 			$.post('/admin/showstatus', { mac_id }, function (data) {
 				//- console.log(data);
 				//- console.log(data.status);
@@ -79,7 +74,7 @@ script.
 				}
 			}
 			});
-		}, 50000); // Check status every 5 minutes (adjust the interval as needed)
+		}, 30000); // Check status every 5 minutes (adjust the interval as needed)
 	}
 
 
@@ -108,7 +103,7 @@ script.
 	console.log(id);
 	
 		$.post('/admin/changefacildd', {id:id}, function(data){
-			console.log(data);
+			console.log("I am data of changefacildd",data);
 			var tableContent = '<tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
 			for ( const bin of data){
 				tableContent += `<tr><td>${bin.model}</td>`;
@@ -121,6 +116,13 @@ script.
 				checkBinStatusRegularly(bin.mac_id);
 			}
 			o('righttable').innerHTML = tableContent;
+			// Listen for real-time status updates
+			socket.on('statusUpdate', (data) => {
+				const statusCell = document.getElementById(`status_${data.mac_id}`);
+				if (statusCell) {
+					statusCell.textContent = data.status;
+				}
+			});
 		});
 	}
 	
