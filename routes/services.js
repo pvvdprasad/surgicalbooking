@@ -323,17 +323,20 @@ Expected output
 
 for(i=0;i<data.length;i++){
 	obj = data[i];
-	query = "insert into slots(masterBin_mac_id,Slot_mac_id,manufacturer_id,brand_id,model_id,power_id,status,slotjson,order_id) values('"+obj.masterBin_mac_id+"','"+obj.Slot_mac_id+"','"+obj.manufacturer_id+"','"+obj.brand_id+"','"+obj.model_id+"','"+obj.power_id+"','"+obj.status+"','"+JSON.stringify(obj)+"','"+obj.order_id+"')";
-	console.log(query);
-	
-	await conn.query(query, function (err, result) {
-		console.log(err);
-	});
-	
+	query = `INSERT INTO slots(masterBin_mac_id, Slot_id, manufacturer_id, brand_id, model_id, power_of_lens, status, order_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+const values = [obj.masterBin_mac_id, obj.Slot_id, obj.manufacturer_id, obj.brand_id, obj.model_id, obj.power_of_lens, obj.status, obj.order_id];
+
+await conn.query(query, values, function (err, result) {
+    console.log(err);
+});
+
 	
 }
 
-	res.send({"message":"success"});
+console.log('Sending success response');
+res.json({"message":"success"});
+
 });
 
 router.post('/save_password',async function(req, res, next) {	
@@ -357,7 +360,7 @@ router.get('/getbinUpdate',async function(req, res, next) {
     var bin_mac_id = req.query.bin_mac_id;
     console.log(bin_mac_id + ' in getbinUpdate');
 	
-	var sql = "SELECT  orders.surgery_date, orders.patient_dob, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id  WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
+	var sql = "SELECT  orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id  WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
 			 
 	console.log(sql);
 	conn.query(sql, function (err, result) {
@@ -498,8 +501,8 @@ router.post('/heartbeat', (req, res) => {
 
             // Insert the heartbeat data into the bin_logs table
             conn.query(
-                'INSERT INTO bin_logs (mac_id, timestamp, connection_status) VALUES (?, ?, ?)',
-                [mac_id, currentTimestamp, true],
+                'UPDATE bin_logs SET timestamp = ?, connection_status = ? WHERE mac_id = ?',
+                [currentTimestamp, true, mac_id],
                 (updateErr) => {
                     if (updateErr) {
                         console.log('Error updating the heartbeat timestamp:', updateErr);
