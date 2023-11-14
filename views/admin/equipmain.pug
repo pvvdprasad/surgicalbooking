@@ -162,9 +162,6 @@ script.
 	$( function() {
 	$( "#man_date" ).datepicker();
 	});
-	function showslots(){
-		alert('this is show slots');
-	}
 	function submitform(ch){	
 		//console.log('kkkkkkkkkk');
 		$.post('/admin/addbin',{model:o('model_name').value,macid:o('mac_id').value,firmware:o('firmware').value,mandate:o('man_date').value,ch:ch}, function(data){

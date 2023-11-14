@@ -2261,6 +2261,25 @@ router.post('/showstatus', async function(req, res, next) {
 });
 
 
+router.post('/showslots', async function(req, res, next) {
+	const userMacId = req.body.id; // Assuming the user sends the mac_id in the request body
+	console.log('Received mac_id:', userMacId);
+	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? ';
+	conn.query(sql, [userMacId], function (err, binresults) {
+	  if (err) {
+		// console.error('SQL Query Error:', err);
+		return res.status(500).json({ error: 'An error occurred while fetching data' });
+	  }
+	  
+	  if (binresults.length === 0) {
+		// console.log('Bin status is not available');
+		return res.status(400).json({ message: 'Bin status is not available' });
+	  } else {
+		res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
+	  }
+	});
+});
+
 router.post('/addbin', async function(req, res, next) {
 	// {model:o('model_name'),mac_id:o('mac_id'),firmware:o('firmware'),mandate:o('man_date')
 	reqs = req.body;

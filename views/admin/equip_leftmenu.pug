@@ -1,3 +1,4 @@
+script(src='/socket.io/socket.io.js')
 style.
 	#uuul li{background:#f3f3f3;padding: 10px 10px 0 10px;}
 	table{width:100%}
@@ -15,7 +16,6 @@ style.
 			a(href='javascript:showunassigned()') UnAssigned Bins
 		li(style='padding-bottom:10px')
 			a(href='javascript:showdecommissioned()') Decompressed Bins
-script(src='/socket.io/socket.io.js')
 script.
 	const socket = io();
 	function o(id){return document.getElementById(id)}
@@ -71,12 +71,13 @@ script.
 			const statusCell = document.getElementById(`status_${mac_id}`);
 			if (statusCell) {
 				if (!(data.status === 'offline')) {
-					statusCell.innerHTML = '<img src="/images/signal.png" class="img-fluid" onclick="showslots()"/>';
+					statusCell.innerHTML = '<img src="/images/signal.png" class="img-fluid" onclick="showslots(\'' + mac_id + '\')"/>';
 				} else {
 					statusCell.innerHTML = '<img src="/images/nosignal.png" class="img-fluid "/>';
 				}
 			}
 			});
+
 
 		}, 50000); // Check status every 5 minutes (adjust the interval as needed)
 		*/
@@ -84,6 +85,12 @@ script.
 	}
 
 
+	function showslots(id){
+		console.log(id);
+		$.post('/admin/showslots', {id}, function (data){
+			console.log(data)
+		})
+	}
 
 	function decommi(bbid){
 		console.log(bbid);
