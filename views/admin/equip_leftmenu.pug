@@ -6,7 +6,7 @@ style.
 	td, h2{text-align:center}
 	.hidassdiv{display:none;position:absolute;border:1px solid #000;width: 150px;height: 100px;background: #FFF}
 	.spanclose{position:absolute;color:red;right:10px;cursor:pointer}
-	
+	.slotsTable{position:absolute; top: 24px;border: 1px solid #000;background: #FFF; width: 70vh;}
 .col-md-11(style='border:1px solid #e7e7e7;margin:10px 0 0 20px;padding:0')
 	ul#uuul
 		li(style='padding-bottom:10px')
@@ -70,9 +70,9 @@ script.
 			const statusCell = document.getElementById(`status_${mac_id}`);
 			if (statusCell) {
 				if (!(data.status === 'offline')) {
-					statusCell.innerHTML = '<div class="slot" id="showslotpop"><img src="/images/signal.png" class="img-fluid" onclick="showslots(\'' + mac_id + '\')"/></div>';
+					statusCell.innerHTML = '<div class="slot position-relative" ><div id="showslotpop"></div><img src="/images/signal.png" class="img-fluid" onclick="showslots(\'' + mac_id + '\')"/></div>';
 				} else {
-					statusCell.innerHTML = '<div class="slot" id="showslotpop"><img src="/images/nosignal.png" class="img-fluid " onclick="showslots(\'' + mac_id + '\')"/></div>';
+					statusCell.innerHTML = '<div class="slot position-relative" ><div id="showslotpop"></div><img src="/images/nosignal.png" class="img-fluid " onclick="showslots(\'' + mac_id + '\')"/></div>';
 				}
 			}
 			});
@@ -84,22 +84,28 @@ script.
 
 
 	function showslots(id) {
+		debugger
 		console.log(id);
 		$.post('/admin/showslots', { id }, function (response) {
+			debugger
+
 			const data = response.data; // Extracting the array of bins
 			console.log("I am data received from Backend", data);
-			let html = '<h2>Slots</h2>';
-			html += '<table id="righttable" ><tr><th>Slot ID</th><th>Master Bin</th><th>Brand</th><th>Model</th><th>Power</th><th>Status</th></tr>';
+			let html = `<div class="slotsTable" id="${id}viewSlotsDetail"><h2>Slots</h2><span class="spanclose" onclick="closediv('${id}viewSlotsDetail')">X</span>`;
+			html += '<table id="slots" ><tr><th>ID</th><th>Master Bin</th><th>Status</th><th>Order Status</th></tr>';
 			data.forEach(bin => {
-				html += `<tr><td>${bin.Slot_ID}</td>`;
+
+				html += `<tr><td>${bin.slot_ID}</td>`;
 				html += `<td>${bin.masterBin_mac_id}</td>`;
-				html += `<td>${bin.brand_id}</td>`;
-				html += `<td>${bin.model_id}</td>`;
-				html += `<td>${bin.power_of_lens}</td>`;
-				html += `<td>${bin.status}</td></tr>`;
+				html += `<td>${bin.status}</td>`;
+				if(bin.order_id == 0){
+					html += `<td><p>No Order</p></td>`;
+				}else{
+					html += `<td><a href= #>View Order</a></td>`
+				}
 				//- checkBinStatusRegularly(bin.mac_id);
 			});
-			html += '</table>';
+			html += '</tr></table></div>';
 			o('showslotpop').innerHTML= html ;
 		});
 	}
