@@ -16,6 +16,10 @@ style(type="text/css").
 	.thdd{background-color:#003595 !important;color:#FFF !important;}
 	.cp{cursor:pointer !important}
 	.bindivs{border: 1px solid #000;float:left;margin:10px;padding:10px;cursor:pointer}
+	#invidiv{z-index:9999;display:none;border:1px solid #666}
+	#invidivcover{z-index:9998;background:#FAFAFA;display:none;width:100%;height:100%}
+#invidivcover
+#invidiv	
 if( pageid == 'neworder')	
 	include calendar.pug
 
@@ -123,7 +127,9 @@ script.
 	function openbin(bid){
 		$.post('/admin/openbin', {bid:bid}, function(data){ // facid
 			console.log(bid+data);
-			//o('rightdiv_neworder').innerHTML = data.html;
+			o('invidiv').style.display='block';
+			o('invidivcover').style.display='block';
+			o('invidivcover').innerHTML = data.html;
 		});
 	}
 	function loadneworder(fid){

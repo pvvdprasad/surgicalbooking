@@ -336,6 +336,48 @@ for(i=0;i<data.length;i++){
 	res.send({"message":"success"});
 });
 
+router.post('/save_slot_info',async function(req, res, next) {
+	/*{
+		"mac_id":"CC:DB:A7:12:91:2C",
+		"slot_status":101010101010101010
+	}
+	const myArray = text.split("");
+	*/
+	reqs = req.body;
+	console.log(reqs);
+	
+	sstaArr = reqs.slot_status.split('');
+	
+	sql = 'select id, Slot_mac_id from slots where masterBin_mac_id = "'+reqs.mac_id+'"';
+	
+	await conn.query(sql, function (err, dbresult) {
+			//res.send({"message":"success"});
+		dcount = dbresult.length;
+		//if(dcount<sstaArr.length){
+			for(si=0;si<sstaArr.length;si++){
+				if(dcount>si){// In range{
+					sql = "update slots set Slot_mac_id='"+si+"', status='"+ssstr(sstaArr[si])+"' where id = "+dbresult[si].id;
+				}else{
+					sql = "insert into slots(masterBin_mac_id,Slot_mac_id,status) values('"+reqs.mac_id+"', '"+si+"', '"+ssstr(sstaArr[si])+"')";
+				}
+				conn.query(sql, function (err, dbresult) {});
+			}
+			
+			res.send({"message":"success"});
+		//}
+	});
+	
+	// reqs.mac_id reqs.slot_status | id | Slot_mac_id | masterBin_mac_id  | order_id  | manufacturer_id | brand_id | power_id | model_id | status | slotjson
+});
+
+function ssstr(id){
+	switch(id){
+		case 0: case '0': return 'empty';
+		case 1: case '1': return 'occupied';
+		case 2: case '2': return 'due';
+	}
+}
+
 router.post('/save_password',async function(req, res, next) {	
 	// query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
 	reqs = req.body;
@@ -352,6 +394,7 @@ router.post('/save_password',async function(req, res, next) {
 //	}
 });
 
+/*
 router.get('/getbinUpdate',async function(req, res, next) {	
 	
     var bin_mac_id = req.query.bin_mac_id;
@@ -378,7 +421,35 @@ router.get('/getbinUpdate',async function(req, res, next) {
 		}
 	});
 });
+*/
 
+router.get('/getbinUpdate',async function(req, res, next) {	
+	
+    var bin_mac_id = req.query.bin_mac_id;
+    console.log(bin_mac_id + ' in getbinUpdate ----');
+	
+	var sql = "SELECT  orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id  WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
+			 
+	console.log(sql);
+	conn.query(sql, function (err, result) {
+		if(err){
+			res.status(400).send("Not Found");
+		}else{
+			res.status(200).json(result);
+			var updateSql = "INSERT INTO bin_logs (mac_id, timestamp, connection_status) VALUES (?, NOW(), ?)";
+			conn.query(updateSql, [bin_mac_id, true], function (err, updateResult) {
+                if (err) {
+                    console.error("Error updating bin_logs:", err);
+                } else {
+                    console.log("bin_logs updated with last heartbeat time and connection_status");
+					
+					return updateResult;
+                }
+            });
+			
+		}
+	});
+});
 
 router.post('/remove_bin',async function(req, res, next) {	
 	reqs = req.body;

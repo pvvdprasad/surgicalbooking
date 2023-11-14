@@ -1223,19 +1223,23 @@ router.post('/openbin', async function(req, res, next) {
 	reqs = req.body;
 	
 	sql = 'select b.id,binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.bid;
-	html = '';
+	
+	html = '<table class="table">';
+	await conn.query(sql, function (err, result) {
+		for(i=0;i<result.length;i++){
+		}
+	});
+	html += '</table>';
 	
 	res.send({html:html});
-	
-	
-	
+		
 });
 
 router.post('/loadbins', async function(req, res, next) {
 	reqs = req.body;
 	// sql = 'select binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join users u on u.name=f.email left join facilities f on f.email = u.name where removed_bins =0 and u.id='+reqs.fid+' and f.id=b.fact_id';
 	
-	sql = 'select uid,binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.fid;
+	sql = 'select uid,binstatus,comments,fact_id,firmware, mac_id, mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.fid;
 	
 	console.log(sql);
 	await conn.query(sql, function (err, result) {
