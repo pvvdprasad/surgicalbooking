@@ -2310,6 +2310,27 @@ router.post('/addbin', async function(req, res, next) {
 		console.log("Error", err);
 		res.status(500).json({ message: "Error" });
 	  } else {
+		for(i=0; i<=15; i++){
+			sql1='insert into slots(slot_ID, masterBin_mac_id, order_id, status) values("'+i+'","'+reqs.macid+'",0,0)';
+			console.log(sql1);
+			conn.query(sql1, function(err, slots){
+				if(err){
+					console.log("Error", err);
+					res.status(500).json({ message: "Error" });
+				}
+				console.log("Slots are created against the Added Master Bin MacID.")
+			})
+		}
+		sql2='INSERT INTO bin_logs (mac_id, timestamp, connection_status) VALUES ("'+reqs.macid+'", NOW(), 0)';
+		console.log(sql2);
+		conn.query(sql2, function(err, slots){
+			if(err){
+				console.log("Error", err);
+				res.status(500).json({ message: "Error" });
+			}else{
+				console.log("Bins_log entry is filled")
+			}	
+		})
 		console.log("Success", binresults);
 		res.status(200).json({ message: "Success" });
 	  }

@@ -6,6 +6,7 @@ style.
 	td, h2{text-align:center}
 	.hidassdiv{display:none;position:absolute;border:1px solid #000;width: 150px;height: 100px;background: #FFF}
 	.spanclose{position:absolute;color:red;right:10px;cursor:pointer}
+	
 .col-md-11(style='border:1px solid #e7e7e7;margin:10px 0 0 20px;padding:0')
 	ul#uuul
 		li(style='padding-bottom:10px')
@@ -41,12 +42,11 @@ script.
 			console.log(data);
 			html = '<h2>Assigned Bins</h2>';
 			html += '<select id="dynfacilsele" onchange="changefacildd(this.value)" style="margin-bottom: 20px"></select>';
-			html += '<table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+			html += '<table id="righttable"><tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Manufactured Date</th><th>Action</th></tr>';
 			for ( const bin of data){
 				html += `<tr><td>${bin.model}</td>`;
 				html += `<td>${bin.mac_id}</td>`;
 				html += `<td>${bin.firmware}</td>`;
-				html += `<td id="status_${bin.mac_id}">Loading...</td>`;
 				html += `<td>${bin.mandate}</td>`;
 				html += `<td><a href="javascript:decommi('${bin.uid}')">Decommission</a>`;
 				html += `<div class="hidassdiv" id="${bin.uid}_hid"><span class="spanclose" onclick="closediv('${bin.uid}_hid')">X</span><a href="javascript:seleop(1, ${bin.uid})">Malfunction</a><br><a href="javascript:seleop(2, ${bin.uid})">Damaged</a><br><a href="javascript:seleop(3, ${bin.uid})">Other</a></div></td></tr>`;
@@ -71,9 +71,9 @@ script.
 			const statusCell = document.getElementById(`status_${mac_id}`);
 			if (statusCell) {
 				if (!(data.status === 'offline')) {
-					statusCell.innerHTML = '<img src="/images/signal.png" class="img-fluid" onclick="showslots(\'' + mac_id + '\')"/>';
+					statusCell.innerHTML = '<div class="slot" id="showslotpop"><img src="/images/signal.png" class="img-fluid" onclick="showslots(\'' + mac_id + '\')"/></div>';
 				} else {
-					statusCell.innerHTML = '<img src="/images/nosignal.png" class="img-fluid "/>';
+					statusCell.innerHTML = '<div class="slot" id="showslotpop"><img src="/images/nosignal.png" class="img-fluid " onclick="showslots(\'' + mac_id + '\')"/></div>';
 				}
 			}
 			});
@@ -85,12 +85,27 @@ script.
 	}
 
 
-	function showslots(id){
+	function showslots(id) {
 		console.log(id);
-		$.post('/admin/showslots', {id}, function (data){
-			console.log(data)
-		})
+		$.post('/admin/showslots', { id }, function (response) {
+			const data = response.data; // Extracting the array of bins
+			console.log("I am data received from Backend", data);
+			let html = '<h2>Slots</h2>';
+			html += '<table id="righttable" ><tr><th>Slot ID</th><th>Master Bin</th><th>Brand</th><th>Model</th><th>Power</th><th>Status</th></tr>';
+			data.forEach(bin => {
+				html += `<tr><td>${bin.Slot_ID}</td>`;
+				html += `<td>${bin.masterBin_mac_id}</td>`;
+				html += `<td>${bin.brand_id}</td>`;
+				html += `<td>${bin.model_id}</td>`;
+				html += `<td>${bin.power_of_lens}</td>`;
+				html += `<td>${bin.status}</td></tr>`;
+				//- checkBinStatusRegularly(bin.mac_id);
+			});
+			html += '</table>';
+			o('showslotpop').innerHTML= html ;
+		});
 	}
+
 
 	function decommi(bbid){
 		console.log(bbid);
@@ -117,7 +132,7 @@ script.
 	
 		$.post('/admin/changefacildd', {id:id}, function(data){
 			console.log("I am data of changefacildd",data);
-			var tableContent = '<tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status</th><th>Manufactured Date</th><th>Action</th></tr>';
+			var tableContent = '<tr><th>Model</th><th>Mac ID</th><th>Firmware</th><th>Status/Slots</th><th>Manufactured Date</th><th>Action</th></tr>';
 			for ( const bin of data){
 				tableContent += `<tr><td>${bin.model}</td>`;
 				tableContent += `<td>${bin.mac_id}</td>`;
