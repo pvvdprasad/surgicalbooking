@@ -62,8 +62,7 @@ script.
 	function checkBinStatusRegularly(mac_id) {
 
 		console.log(mac_id);
-		/*
-		setInterval(function () {
+		setTimeout(function () {
 
 			$.post('/admin/showstatus', { mac_id }, function (data) {
 				//- console.log(data);
@@ -79,9 +78,8 @@ script.
 			});
 
 
-		}, 50000); // Check status every 5 minutes (adjust the interval as needed)
-		*/
-
+		}, 10000); // Check status every 5 minutes (adjust the interval as needed)
+		
 	}
 
 
@@ -141,7 +139,7 @@ script.
 				tableContent += `<td>${bin.mandate}</td>`;
 				tableContent += `<td><a href="javascript:decommi('${bin.uid}')">Decommission</a>`;
 				tableContent += `<div class="hidassdiv" id="${bin.uid}_hid"><span class="spanclose" onclick="closediv('${bin.uid}_hid')">X</span><a href="javascript:seleop(1, ${bin.uid})">Malfunction</a><br><a href="javascript:seleop(2, ${bin.uid})">Damaged</a><br><a href="javascript:seleop(3, ${bin.uid})">Other</a></div></td></tr>`;
-				// checkBinStatusRegularly(bin.mac_id);
+				checkBinStatusRegularly(bin.mac_id);
 			}
 			o('righttable').innerHTML = tableContent;
 			// Listen for real-time status updates

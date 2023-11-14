@@ -1385,7 +1385,6 @@ router.post('/approveorder', async function(req, res, next) {
 		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
 		// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
 		sql = ' select bin_mac_id from orders where surgery_center_id='+fact_id +' and surgery_date="' +  surg_id+'"';
-
 		console.log(sql);
 		conn.query(sql, function (err, bookedbins) {
 			obj = bookedbins[0];
@@ -1410,6 +1409,34 @@ router.post('/approveorder', async function(req, res, next) {
 				
 				sql = 'update orders set status = 1,bin_mac_id= "'+selected_bin+'" where id='+reqs.oid;
 				conn.query(sql, function (err, freebins) {
+					if (err) {
+						console.error(err);
+						res.status(500).json({ message: "Error in finding available slots" });
+						return;
+					}
+					const selectAvailableSlotQuery = 'SELECT slot_ID FROM slots WHERE masterBin_mac_id = "'+selected_bin+'" AND status = 0 AND order_id= 0  ORDER BY slot_ID ASC LIMIT 1';
+					conn.query(selectAvailableSlotQuery, function (err, availableSlots){
+						if (err) {
+							console.error(err);
+							res.status(500).json({ message: "Error in finding available slots" });
+							return;
+						}
+						if(availableSlots.length > 0){
+							const availableSlot = availableSlots[0].slot_ID;
+							// Now, store order details into the first available slot
+							const storeOrderDetailsQuery = 'UPDATE slots SET order_id= "'+reqs.oid+'" WHERE masterBin_mac_id = "'+selected_bin+'" AND slot_ID = "'+availableSlot+'"';
+							console.log(storeOrderDetailsQuery);
+							conn.query(storeOrderDetailsQuery, function (err, result) {
+								if (err) {
+									console.error(err);
+									res.status(500).json({ message: "Error in storing order details" });
+									return;
+								}
+				
+								console.log("Order details stored in the slot" );
+							});
+						}
+					})
 					res.send({});
 				});
 				
