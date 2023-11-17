@@ -2290,8 +2290,9 @@ router.post('/showstatus', async function(req, res, next) {
 
 router.post('/showslots', async function(req, res, next) {
 	const userMacId = req.body.id; // Assuming the user sends the mac_id in the request body
-	console.log('Received mac_id:', userMacId);
-	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? ';
+	// console.log('Received mac_id:', userMacId);
+	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? AND order_id != 0';
+	// console.log(sql);
 	conn.query(sql, [userMacId], function (err, binresults) {
 	  if (err) {
 		// console.error('SQL Query Error:', err);
@@ -2302,6 +2303,7 @@ router.post('/showslots', async function(req, res, next) {
 		// console.log('Bin status is not available');
 		return res.status(400).json({ message: 'Bin status is not available' });
 	  } else {
+		// console.log(binresults)
 		res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
 	  }
 	});
@@ -2331,18 +2333,18 @@ router.post('/addbin', async function(req, res, next) {
 	sql = 'insert into bins (binstatus, comments,fact_id, firmware , mac_id ,mandate ,model,removed_bins) values(0,'+
 	'"",0,"'+reqs.firmware+'","'+reqs.macid+'","'+reqs.mandate+'","'+reqs.model+'",0)';
 	//docClient.put(params, function(err, data) {
-		console.log(sql);
+		// console.log(sql);
 	conn.query(sql, function (err, binresults) {
 	  if (err) {
-		console.log("Error", err);
+		// console.log("Error", err);
 		res.status(500).json({ message: "Error" });
 	  } else {
 		for(i=0; i<=15; i++){
 			sql1='insert into slots(slot_ID, masterBin_mac_id, order_id, status) values("'+i+'","'+reqs.macid+'",0,0)';
-			console.log(sql1);
+			// console.log(sql1);
 			conn.query(sql1, function(err, slots){
 				if(err){
-					console.log("Error", err);
+					// console.log("Error", err);
 					res.status(500).json({ message: "Error" });
 				}
 				console.log("Slots are created against the Added Master Bin MacID.")
@@ -2352,13 +2354,13 @@ router.post('/addbin', async function(req, res, next) {
 		console.log(sql2);
 		conn.query(sql2, function(err, slots){
 			if(err){
-				console.log("Error", err);
+				// console.log("Error", err);
 				res.status(500).json({ message: "Error" });
 			}else{
 				console.log("Bins_log entry is filled")
 			}	
 		})
-		console.log("Success", binresults);
+		// console.log("Success", binresults);
 		res.status(200).json({ message: "Success" });
 	  }
 	});
@@ -2372,6 +2374,37 @@ router.get('/equipmain', async function(req, res, next) {
  // var results = await scanTable(config.aws_facility_table_name);
  // console.log(results);
   res.render('admin/equipmain', { BASE_PATH: '../', results: {}});
+});
+
+router.post('/vieworder', async function(req, res, next) {
+	reqs = req.body;
+	// console.log(reqs);
+	const macID= reqs.macID;
+	const slotID= reqs.slotID;
+	sql = `Select   slots.slot_ID,orders.surgery_date, orders.status As Order_Status, orders.side AS Surgery_Side,
+	CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, 
+	CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL,
+	CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name,
+	orders.patient_dob,
+	CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name FROM slots
+	left join orders on (slots.masterBin_mac_id = orders.bin_mac_id AND slots.order_id= orders.id)
+	left JOIN manufacturers as m on orders.manufacture_id = m.id        
+	left JOIN brands as b on orders.brand_id = b.id        
+	left JOIN models on orders.model_id = models.id 
+	left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       
+	left JOIN brands as bb on orders.b_brand_id = bb.id  
+	left JOIN models as mob on orders.b_model_id = mob.id 
+	left JOIN other_users ON orders.surgeon_id = other_users.user_id 
+	where  masterBin_mac_id = '${macID}' AND slots.slot_ID = ${slotID}`;
+
+	conn.query(sql, function (err, binresults){
+		if(err){
+			// console.log("Error", err);
+			res.status(500).json({ message: "Error" });
+		}
+		// console.log(binresults)
+		res.status(200).send(binresults);
+	});
 });
 
 module.exports = router;
