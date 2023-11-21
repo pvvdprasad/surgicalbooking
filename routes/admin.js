@@ -274,7 +274,7 @@ router.post('/updatepractise', async function(req, res, next) {
 router.post('/get_day_records_nnnn', async function(req, res, next) {
 	
 	reqs = req.body;
-	reqs.m++;
+		reqs.m++;
 	reqs.m=reqs.m<10?'0'+reqs.m:reqs.m;
 	reqs.d=reqs.d<10?'0'+reqs.d:reqs.d;
 	sid=reqs.sid;
@@ -283,38 +283,40 @@ router.post('/get_day_records_nnnn', async function(req, res, next) {
 	
 	await conn.query(sql, function (err, result) {
 		sid = result[0].id;
-		sql = 'select o.id,u.first_name,u.middle_name,u.last_name,surgery_date,o.surgeon_id from orders o  left join other_users u on u.user_id = o.surgeon_id where surgery_date like "'+reqs.m+'/'+reqs.d+'/'+reqs.y+'" and surgery_center_id='+sid+' order by surgery_date';
+				sql = 'select o.id,u.first_name,u.middle_name,u.last_name,surgery_date,o.surgeon_id from orders o  left join other_users u on u.user_id = o.surgeon_id where surgery_date like "'+reqs.m+'/'+reqs.d+'/'+reqs.y+'" and surgery_center_id='+sid+' order by surgery_date';
 	
 	
 	
 	
-	console.log(sql);
+		console.log(sql);
 	
-	conn.query(sql, function (err, result) {
-		if (err) console.log( err);
-		else{console.log(result);
-			html='<table class="table"><tr><th>Surgeon Name</th><th>Surgery Date</th><th>Cases</th></tr>';
-			dd='';count=0;
-			for(i=0;i<result.length;i++){
-				if(dd==result[i].surgeon_id){
-					count++;
-				}else{if(count>0){html+='<td>'+(count)+' case(s)</td>';html+='</tr>';}count=0;count++;
-//				dd=result[i].surgery_date;
-				dd=result[i].surgeon_id;
-			//html+='<tr><td><input type="checkbox" name="chdnames" value="'+result[i].id+'" /></td>';
-				html+='<tr style="cursor:pointer" onclick="showindiv('+reqs.m+','+reqs.d+','+reqs.y+','+sid+','+result[i].surgeon_id+')"><td><span style="color:#333">'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
-				html += '<td>'+result[i].surgery_date+'</td>';
-				//html += '<td><a href="javascript:void(0);" onclick="popo('+result[i].id+')" class="view-detail-link" data-order-id="' + result[i].id + '">View Detail</a></td>';
-				//spanhtml+='<input name="inputhid" type="hidden" value='+result[i].surgery_date+'/>';
+		conn.query(sql, function (err, result) {
+			if (err) console.log( err);
+			else{console.log(result);
+				html='<table class="table"><tr><th>Surgeon Name</th><th>Surgery Date</th><th>Cases</th></tr>';
+				dd='';count=0;
+				for(i=0;i<result.length;i++){
+					if(dd==result[i].surgeon_id){
+						count++;
+					}else{
+						if(count>0){
+							html+='<td>'+(count)+' case(s)</td>';html+='</tr>';
+						}
+						count=0;count++;
+//						dd=result[i].surgery_date;
+						dd=result[i].surgeon_id;
+						//html+='<tr><td><input type="checkbox" name="chdnames" value="'+result[i].id+'" /></td>';
+						html+='<tr style="cursor:pointer" onclick="showindiv('+reqs.m+','+reqs.d+','+reqs.y+','+sid+','+result[i].surgeon_id+')"><td><span style="color:#333">'+result[i].first_name + ' ' +result[i].middle_name+ ' ' +result[i].last_name+'</td>';
+						html += '<td>'+result[i].surgery_date+'</td>';
+						//html += '<td><a href="javascript:void(0);" onclick="popo('+result[i].id+')" class="view-detail-link" data-order-id="' + result[i].id + '">View Detail</a></td>';
+					//spanhtml+='<input name="inputhid" type="hidden" value='+result[i].surgery_date+'/>';
+					}
 				}
-			
+				html+='<td>'+(count)+' case(s)</td></tr>';
+				res.send({html:html});
 			}
-			html+='<td>'+(count)+' case(s)</td></tr>';
-			res.send({html:html});
-		}
 	
-	});
-	
+		});
 	});
 });
 
