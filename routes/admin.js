@@ -1219,19 +1219,54 @@ router.post('/scneworders2', async function(req, res, next) {
 	});*/
 });
 
+
+router.post('/getbindeta', async function(req, res, next) {
+	reqs = req.body;
+	
+	html = '<table class="">';
+	
+	sql = "SELECT  orders.id,slots.slot_ID,orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id left JOIN slots on orders.id = slots.order_id WHERE orders.id = '"+reqs.id+"'";
+	
+	await conn.query(sql, function (err, result) {
+		for(i=0;i<result.length;i++){
+			obj = result[0];
+			html += '<tr><td>'+obj.Surgeon_Name+'</td><td>DOS:'+obj.surgery_date+'</td></tr>';
+			html += '<tr><td>'+obj.Patient_Name+'</td><td>DOB:'+obj.patient_dob+'</td></tr>';
+			html += '<tr><td colspan=2>IOL(P):'+obj.PrimaryIOL+'</td></tr>';
+			html += '<tr><td colspan=2>IOL(B):'+obj.BackupIOL+'</td></tr>';
+		}
+		html += '</table>';
+	
+		res.send({html:html});
+	});
+});
+
 router.post('/openbin', async function(req, res, next) {
 	reqs = req.body;
 	
-	sql = 'select b.id,binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.bid;
+	sql = 'select id,slot_ID,masterBin_mac_id,order_id,status from slots where masterBin_mac_id="'+reqs.bid+'"';
 	
-	html = '<table class="table">';
+	html = '<table class="table">';tc='style="border-left:1px solid #000"';
+	html += '<tr><td>Master Bin</td><td colspan=5>'+reqs.bid+'('+(reqs.isalive=='yes'?'Online':'Offline')+')</td></tr>';
+	html += '<tr><th>Slave #</th><th>Display Info</th><th>Status</th><th '+tc+'>Slave #</th><th>Display Info</th><th>Status</th></tr>'
 	await conn.query(sql, function (err, result) {
 		for(i=0;i<result.length;i++){
+			tc='';
+			if(i==0||i==2||i==4||i==6||i==8||i==10||i==12||i==14) html += '<tr>';
+			else tc='style="border-left:1px solid #000"';
+			html += '<td '+tc+'>Slot'+result[i].slot_ID+'</td>';
+			if(result[i].order_id == 0)
+				html += '<td>Available</td><td>Empty</td>';
+			else
+				html += '<td name="orids">'+result[i].order_id+'</td><td>Full</td>';
+			if(i==1||i==5||i==7||i==9||i==11||i==13||i==15||i==3) 
+			html += '</tr>';
 		}
-	});
-	html += '</table>';
+		html += '</table>';
 	
-	res.send({html:html});
+		res.send({html:html});
+	});
+	
 		
 });
 
@@ -1239,16 +1274,24 @@ router.post('/loadbins', async function(req, res, next) {
 	reqs = req.body;
 	// sql = 'select binstatus,comments,fact_id,firmware, b.mac_id    , mandate,model  from bins  b left join users u on u.name=f.email left join facilities f on f.email = u.name where removed_bins =0 and u.id='+reqs.fid+' and f.id=b.fact_id';
 	
-	sql = 'select uid,binstatus,comments,fact_id,firmware, mac_id, mandate,model  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email where removed_bins =0 and u.id='+reqs.fid;
+	sql = 'select uid,binstatus,comments,fact_id,firmware, b.mac_id, mandate,model,connection_status  from bins  b left join facilities f on f.id=b.fact_id  left join users u on u.name=f.email left join bin_logs l on l.mac_id= b.mac_id where removed_bins =0 and u.id='+reqs.fid;
 	
 	console.log(sql);
 	await conn.query(sql, function (err, result) {
 	console.log(result);
 	html = '';
 	for(i=0;i<result.length;i++){
-		html += '<div class="bindivs" onclick="openbin('+result[i].id+')">';
+		html += '<div class="bindivs" onclick="openbin(\''+result[i].mac_id+'\')">';
 		html += result[i].mac_id;
+		html += '<div style="float:right;margin-left:5px;width:20px;height:20px;background:';
+		html += result[i].connection_status==1?'green':'red';
+		
+		html += '"></div>';
 		html += '</div>';
+		if(result[i].connection_status==1)
+			html +='<input type="hidden" id="hidlive" value="yes"/>';
+		else
+			html +='<input type="hidden" id="hidlive" value="no"/>';
 	}
 	
 	res.send({html:html});

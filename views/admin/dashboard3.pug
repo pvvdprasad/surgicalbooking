@@ -16,10 +16,12 @@ style(type="text/css").
 	.thdd{background-color:#003595 !important;color:#FFF !important;}
 	.cp{cursor:pointer !important}
 	.bindivs{border: 1px solid #000;float:left;margin:10px;padding:10px;cursor:pointer}
-	#invidiv{z-index:9999;display:none;border:1px solid #666}
-	#invidivcover{z-index:9998;background:#FAFAFA;display:none;width:100%;height:100%}
-	
-if( pageid == 'neworder')	
+	#invidiv{z-index:9999;display:none;border:1px solid #666;position:absolute;background:#FFF;top:10%;width:80%;left:10%}
+	#invidivcover{z-index:9998;background:#FAFAFA;display:none;width:100%;height:100%;opacity:0.5;position:fixed}
+
+#invidiv
+#invidivcover
+if( pageid == 'neworder')
 	include calendar.pug
 
 .row(style='float:right;width:76%')
@@ -124,12 +126,30 @@ script.
 		});
 	}
 	function openbin(bid){
-		$.post('/admin/openbin', {bid:bid}, function(data){ // facid
-			console.log(bid+data);
+		
+		$.post('/admin/openbin', {bid:bid,isalive:o('hidlive').value}, function(data){ // facid
+			//console.log(bid+data);
 			o('invidiv').style.display='block';
 			o('invidivcover').style.display='block';
-			o('invidivcover').innerHTML = data.html;
+			o('invidiv').innerHTML = data.html;
+			loadbinslots();
 		});
+	}
+	function loadbinslots(){
+	//orids
+		arr = document.getElementsByName('orids');
+		//console.log('in teh loadbinslots....');
+		seqcaller(arr,0);
+	}
+	function seqcaller(arr,i){
+		if(i<arr.length){
+			id = arr[i].innerHTML;
+			$.post('/admin/getbindeta', {id:id}, function(data){ // facid
+				arr[i].innerHTML = data.html;
+				seqcaller(arr,i+1);
+			});
+			
+		}
 	}
 	function loadneworder(fid){
 		$.post('/admin/scneworders', {fid:fid}, function(data){ // facid
