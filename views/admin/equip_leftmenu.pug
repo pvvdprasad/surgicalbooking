@@ -7,8 +7,7 @@ style.
 	.orderinnerdiv{
 		position: absolute;
 		z-index: 1;
-		background-color: #3C3C3C;
-		color: white;
+		background-color: #F3F3F3;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
@@ -20,7 +19,7 @@ style.
 	td, h2{text-align:center}
 	.hidassdiv{display:none;position:absolute;border:1px solid #000;width: 150px;height: 100px;background: #FFF}
 	.spanclose{position:absolute;color:red;right:10px;cursor:pointer}
-	.slotsTable{position:absolute; top: 24px;border: 1px solid #000;background: #FFF;     width: 65vw;}	
+	.slotsTable{position:absolute; border: 1px solid #000;background: #FFF;width: 65vw;margin-left: 25px;}	
 .col-md-11(style='border:1px solid #e7e7e7;margin:10px 0 0 20px;padding:0')
 	ul#uuul
 		li(style='padding-bottom:10px')
@@ -127,7 +126,7 @@ script.
 		}
 		$.post('/admin/vieworder', {macID, slotID}, function(data){
 			console.log("I am data received from Backend", data);
-			let html = `<table id="orderview"><tr><th>Slot ID</th><th>Surgery Date</th><th>Surgey Side</th><th>Primary IOL</th><th>Backup IOL</th><th>Surgeon Name</th><th>Patient Name</th><th>Patient DOB<th><span onclick= "closediv('orderdiv')">X</span></tr> `;
+			let html = `<h2>Order Details</h2><table id="orderview"><tr><th>Slot ID</th><th>Surgery Date</th><th>Surgey Side</th><th>Primary IOL</th><th>Backup IOL</th><th>Surgeon Name</th><th>Patient Name</th><th>Patient DOB<th><span onclick= "closediv('orderdiv')">X</span></tr> `;
 			
 			if (Array.isArray(data) && data.length > 0) {
 				const orderDetails = data[0];

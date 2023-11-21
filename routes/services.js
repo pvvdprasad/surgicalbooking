@@ -84,6 +84,126 @@ router.post('/save_order', async function(req, res, next) {
 		res.send({results:result});
 	  });
 });
+
+
+
+// Setup to get new order records for facility approval
+router.post('/neworders', async function(req, res, next){
+	reqs = req.body;
+	console.log(reqs);
+	sid= reqs.sid
+	sql = 'select  id from facilities where email = (select name from users where id = '+sid+')';
+
+	await conn.query(sql, function (err, result) {
+		sid = result[0].id;
+		console.log(sid);
+		sql = `select o.id,surgery_date,
+				CONCAT(o.first_name, ' ', o.middle_name, ' ', o.last_name) As Patient_Name,o.patient_dob,o.side as Surgery_Side,
+				CONCAT(u.first_name, ' ', u.middle_name, ' ', u.last_name) As Surgeon_Name,
+				CONCAT(m.mname , ':', models.model_name, ':' , o.power_id) As PrimaryIOL,  
+				CONCAT(mb.mname, ' : ', bb.bname, ' : ', o.b_power_id ) As BackupIOL
+				from orders o 
+				left join other_users u on u.user_id = o.surgeon_id
+				left JOIN manufacturers as m on o.manufacture_id = m.id 
+				left JOIN models on o.model_id = models.id
+				left JOIN manufacturers as mb on o.b_manufacture_id = mb.id
+				left JOIN brands as bb on o.b_brand_id = bb.id
+				left JOIN facilities as f on o.surgery_center_id= f.id
+				where 
+				surgery_center_id='${sid}' AND status= 0 order by surgery_date`;
+		console.log(sql);
+	
+		conn.query(sql, function (err, result) {
+			if (err){
+			
+				console.log( err);
+				res.status(500).send("Not Found")
+			}else{
+				if(result.length > 0){
+					console.log(result);
+					res.status(200).json(result);
+				}else{
+					res.json({ message: "No New order available"})
+				}
+			}
+				
+		});
+	});
+});
+
+router.post('/approveorder', async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	
+	sql = 'select surgery_date,surgery_center_id,bin_mac_id from orders where id='+reqs.oid;
+	//sql = 'update orders set status = 1 where id='+reqs.oid;
+	await conn.query(sql, function (err, result) {
+		fact_id = 0;
+		if(result[0].bin_mac_id == ''){
+			fact_id = result[0].surgery_center_id;
+			surg_id = result[0].surgery_date;
+		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status int,
+		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
+		// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
+		sql = ' select bin_mac_id from orders where surgery_center_id='+fact_id +' and surgery_date="' +  surg_id+'"';
+		console.log(sql);
+		conn.query(sql, function (err, bookedbins) {
+			obj = bookedbins[0];
+			bbins = [];selected_mac_id=''; // array.splice(index, 1);
+			for(i=0;i<bookedbins.length;i++){if(bookedbins[i].bin_mac_id!='') bbins.push(bookedbins[i].bin_mac_id);}
+			//if(bbins.length>0)selected_mac_id=bbins[0];
+			sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+fact_id;
+			console.log(sql);
+			conn.query(sql, function (err, facbins) {
+				all_facbin = [];for(i=0;i<facbins.length;i++){all_facbin.push(facbins[i].mac_id);}
+				for(i=0;i<bookedbins.length;i++){
+					if(all_facbin.includes(bookedbins[i])){
+						ind = all_facbin.indexOf(bookedbins[i]);
+						all_facbin.splice(ind, 1);
+					}
+				}
+				selected_bin='';
+				if(all_facbin.length > 0)					
+					selected_bin = all_facbin[0];
+				
+				sql = 'update orders set status = 1,bin_mac_id= "'+selected_bin+'" where id='+reqs.oid;
+				conn.query(sql, function (err, freebins) {
+					if (err) {
+						console.error(err);
+						res.status(500).json({ message: "Error in finding available slots" });
+						return;
+					}
+					const selectAvailableSlotQuery = 'SELECT slot_ID FROM slots WHERE masterBin_mac_id = "'+selected_bin+'" AND status = 0 AND order_id= 0  ORDER BY slot_ID ASC LIMIT 1';
+					conn.query(selectAvailableSlotQuery, function (err, availableSlots){
+						if (err) {
+							console.error(err);
+							res.status(500).json({ message: "Error in finding available slots" });
+							return;
+						}
+						if(availableSlots.length > 0){
+							const availableSlot = availableSlots[0].slot_ID;
+							// Now, store order details into the first available slot
+							const storeOrderDetailsQuery = 'UPDATE slots SET order_id= "'+reqs.oid+'", status = "occupied" WHERE masterBin_mac_id = "'+selected_bin+'" AND slot_ID = "'+availableSlot+'"';
+							console.log(storeOrderDetailsQuery);
+							conn.query(storeOrderDetailsQuery, function (err, result) {
+								if (err) {
+									console.error(err);
+									res.status(500).json({ message: "Error in storing order details" });
+									return;
+								}
+				
+								console.log("Order details stored in the slot" );
+							});
+						}
+					})
+					res.status(200).json({ message : "Successfully Approved;"});
+				});
+			});
+		});
+		}else{res.send({});}
+	});
+	
+});
 // Endpoint for view order history as month
 router.post('/get_month_records', async function(req, res, next) {
     const { surgery_center_id, month, year } = req.body;
@@ -121,7 +241,21 @@ router.post('/get_day_records', async function (req, res, next) {
 
     const formattedDate = `${month}/${day}/${y}`;
 
-    const sql = 'SELECT * FROM orders WHERE surgery_date = ? AND surgery_center_id = ?';
+    const sql = `select o.id,surgery_date, 
+				CONCAT(o.first_name, ' ', o.middle_name, ' ', o.last_name) As Patient_Name,
+				o.patient_dob,o.side as Surgery_Side,
+				CONCAT(u.first_name, ' ', u.middle_name, ' ', u.last_name) As Surgeon_Name,
+				CONCAT(m.mname , ' : ', models.model_name, ' : ' , o.power_id) As PrimaryIOL,   
+				CONCAT(mb.mname, ' : ', bb.bname, ' : ', o.b_power_id ) As BackupIOL 
+				from orders o 
+				left join other_users u on u.user_id = o.surgeon_id 
+				left JOIN manufacturers as m on o.manufacture_id = m.id  
+				left JOIN models on o.model_id = models.id 
+				left JOIN manufacturers as mb on o.b_manufacture_id = mb.id 
+				left JOIN brands as bb on o.b_brand_id = bb.id 
+				left JOIN facilities as f on o.surgery_center_id= f.id 
+				WHERE 
+				surgery_date = ? AND surgery_center_id = ?`;
 
     console.log(sql);
     console.log(formattedDate); // Example: 10/24/2023
@@ -348,22 +482,30 @@ router.post('/save_slot_info',async function(req, res, next) {
 	*/
 	reqs = req.body;
 	console.log(reqs);
-	
+	macID= reqs.mac_id.trim();
 	sstaArr = reqs.slot_status.split('');
-	
-	sql = 'select id, Slot_mac_id from slots where masterBin_mac_id = "'+reqs.mac_id+'"';
-	
+	console.log(sstaArr);
+	sql = 'select * from slots where masterBin_mac_id = "'+macID+'"';
+	console.log(sql);
 	await conn.query(sql, function (err, dbresult) {
 			//res.send({"message":"success"});
+			// console.log(dbresult)
 		dcount = dbresult.length;
 		//if(dcount<sstaArr.length){
 			for(si=0;si<sstaArr.length;si++){
 				if(dcount>si){// In range{
-					sql = "update slots set Slot_mac_id='"+si+"', status='"+ssstr(sstaArr[si])+"' where id = "+dbresult[si].id;
+										// slot_ID='"+si+"', PUT this after set if going to update slot_ID
+					sql = "update slots set  status='"+ssstr(sstaArr[si])+"' where id = "+dbresult[si].id;
 				}else{
-					sql = "insert into slots(masterBin_mac_id,Slot_mac_id,status) values('"+reqs.mac_id+"', '"+si+"', '"+ssstr(sstaArr[si])+"')";
+					sql = "insert into slots(masterBin_mac_id,slot_ID,status) values('"+macID+"', '"+si+"', '"+ssstr(sstaArr[si])+"')";
 				}
+				if(dbresult[si].order_id != 0 ){
+					// console.log("I am calling ", si);
+					slotsTBupdate(macID, dbresult[si].id);
+				}
+				
 				conn.query(sql, function (err, dbresult) {});
+			
 			}
 			
 			res.send({"message":"success"});
@@ -629,5 +771,41 @@ router.post('/showstatus', async function(req, res, next) {
 	});
 });
 
+
+function slotsTBupdate(mac_id, slot_ID) {
+    console.log("I am Mac_ID:", mac_id + " I am Slot_ID", slot_ID);
+    const currentDate = new Date(); // Get current date
+	currentDate.setHours(0, 0, 0, 0); // Set time to 00:00:00
+    const sql = 'SELECT slots.order_id, orders.surgery_date, slots.status FROM slots LEFT JOIN orders ON slots.order_id = orders.id WHERE slots.masterBin_mac_id = "' + mac_id + '" AND slots.id = "' + slot_ID + '" AND slots.order_id != 0';
+    // console.log(sql);
+
+    conn.query(sql, function (err, dbresult) {
+        if (dbresult.length > 0) {
+            // console.log("=============================================dbresult===========================================================");
+            console.log(dbresult);
+
+            dbresult.forEach((row) => {
+                const surgeryDate = new Date(row.surgery_date);
+				console.log ("I am the surgery Date :::: ", surgeryDate);
+				console.log("^^^^^^^^^^^^^^^^^^^^^")
+				console.log ("I am the current Date :::: ", currentDate);
+                // Check if surgery_date is less than the current date
+                if (surgeryDate < currentDate) {
+                    // Perform the update query for the specific slot_ID here
+                    const updateSql = `UPDATE slots SET order_id = 0, status = 'empty' WHERE id = ${slot_ID} AND masterBin_mac_id = '${mac_id}' AND status != 'due'`;
+                    conn.query(updateSql, function (updateErr, updateResult) {
+                        if (updateErr) {
+                            console.error("Error updating order_id:", updateErr);
+                            return;
+                        }
+                        // console.log("order_id updated for slot_ID:", slot_ID + "  >>>>>AND<<<<<<<  "  + "masterBin_mac_id = ",mac_id);
+						// console.log("I am updated Result",updateResult);
+						return updateResult;
+                    });
+                }
+            });
+        }
+    });
+}
 
 module.exports = router;
