@@ -131,9 +131,14 @@ script.
 			//console.log(bid+data);
 			o('invidiv').style.display='block';
 			o('invidivcover').style.display='block';
-			o('invidiv').innerHTML = data.html;
+			html = '<img src="../images/cross.png" style="cursor:pointer;position:absolute;top:2px;right:2px" onclick="hidebin()" />';
+			o('invidiv').innerHTML = data.html + html;
 			loadbinslots();
 		});
+	}
+	function hidebin(){
+		o('invidiv').style.display='none';
+		o('invidivcover').style.display='none';
 	}
 	function loadbinslots(){
 	//orids
