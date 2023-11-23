@@ -7,6 +7,7 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const io = require('../bin/www').io;
 const moment = require('moment');
+const cron = require('node-cron');
 
   
 const app = express();
@@ -499,10 +500,6 @@ router.post('/save_slot_info',async function(req, res, next) {
 				}else{
 					sql = "insert into slots(masterBin_mac_id,slot_ID,status) values('"+macID+"', '"+si+"', '"+ssstr(sstaArr[si])+"')";
 				}
-				if(dbresult[si].order_id != 0 ){
-					// console.log("I am calling ", si);
-					slotsTBupdate(macID, dbresult[si].id);
-				}
 				
 				conn.query(sql, function (err, dbresult) {});
 			
@@ -772,40 +769,36 @@ router.post('/showstatus', async function(req, res, next) {
 });
 
 
-function slotsTBupdate(mac_id, slot_ID) {
-    console.log("I am Mac_ID:", mac_id + " I am Slot_ID", slot_ID);
-    const currentDate = new Date(); // Get current date
-	currentDate.setHours(0, 0, 0, 0); // Set time to 00:00:00
-    const sql = 'SELECT slots.order_id, orders.surgery_date, slots.status FROM slots LEFT JOIN orders ON slots.order_id = orders.id WHERE slots.masterBin_mac_id = "' + mac_id + '" AND slots.id = "' + slot_ID + '" AND slots.order_id != 0';
-    // console.log(sql);
 
-    conn.query(sql, function (err, dbresult) {
-        if (dbresult.length > 0) {
-            // console.log("=============================================dbresult===========================================================");
-            console.log(dbresult);
+function slotsTBupdate() {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
 
-            dbresult.forEach((row) => {
-                const surgeryDate = new Date(row.surgery_date);
-				console.log ("I am the surgery Date :::: ", surgeryDate);
-				console.log("^^^^^^^^^^^^^^^^^^^^^")
-				console.log ("I am the current Date :::: ", currentDate);
-                // Check if surgery_date is less than the current date
-                if (surgeryDate < currentDate) {
-                    // Perform the update query for the specific slot_ID here
-                    const updateSql = `UPDATE slots SET order_id = 0, status = 'empty' WHERE id = ${slot_ID} AND masterBin_mac_id = '${mac_id}' AND status != 'due'`;
-                    conn.query(updateSql, function (updateErr, updateResult) {
-                        if (updateErr) {
-                            console.error("Error updating order_id:", updateErr);
-                            return;
-                        }
-                        // console.log("order_id updated for slot_ID:", slot_ID + "  >>>>>AND<<<<<<<  "  + "masterBin_mac_id = ",mac_id);
-						// console.log("I am updated Result",updateResult);
-						return updateResult;
-                    });
-                }
-            });
+	const updateSql = `
+	UPDATE slots
+	SET order_id = 0, status = 'empty'
+	WHERE order_id IN (
+		SELECT orders.id
+		FROM orders
+		WHERE orders.surgery_date < DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')
+	)
+	AND status != 'due';`;
+    conn.query(updateSql, function (err, updateSql) {
+        if (err) {
+            console.error("Error updating slots based on surgery date:", err);
+            return;
         }
+		console.log(updateSql);
+		console.log("Slots updated successfully:", updateSql.affectedRows);
     });
 }
+
+// Schedule the task to run at 12:01 AM every day
+cron.schedule('1 0 * * *', () => {
+    slotsTBupdate();
+}, {
+    scheduled: true,
+    timezone: 'America/New_York' // Replace with your timezone, e.g., 'America/New_York'
+});
 
 module.exports = router;
