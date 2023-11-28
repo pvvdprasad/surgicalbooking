@@ -283,7 +283,7 @@ router.post('/get_day_records_nnnn', async function(req, res, next) {
 	
 	await conn.query(sql, function (err, result) {
 		sid = result[0].id;
-				sql = 'select o.id,u.first_name,u.middle_name,u.last_name,surgery_date,o.surgeon_id from orders o  left join other_users u on u.user_id = o.surgeon_id where surgery_date like "'+reqs.m+'/'+reqs.d+'/'+reqs.y+'" and surgery_center_id='+sid+' order by surgery_date';
+				sql = 'select o.id,u.first_name,u.middle_name,u.last_name,surgery_date,o.surgeon_id from orders o  left join other_users u on u.user_id = o.surgeon_id where status= 0 AND surgery_date like "'+reqs.m+'/'+reqs.d+'/'+reqs.y+'" and surgery_center_id='+sid+' order by surgery_date';
 	
 	
 	
