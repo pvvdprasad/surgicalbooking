@@ -457,8 +457,9 @@ script.
                 }        
                 obj.add(option);
             }
+            console.log('jj is:-----:'+jj);
             if('manu'!=snam){
-                removeOptions(o('select_power'));
+                //removeOptions(o('select_power'));
                 if(jj==1)
                 loadpowers();
                 else
@@ -468,7 +469,7 @@ script.
     }
 
     function loadpowers(){
-
+        console.log('In loadpowers.........');
         option = document.createElement("option");
         obj1 = o('select_power');
         removeOptions(obj1);
@@ -491,7 +492,7 @@ script.
     }
     function loadpowers2(){
 
-        
+        console.log('In loadpowers 2.........');
         option2 = document.createElement("option");
         
         obj2 = o('select_power2');
