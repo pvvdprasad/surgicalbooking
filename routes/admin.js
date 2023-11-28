@@ -1384,7 +1384,7 @@ router.post('/openorder', async function(req, res, next) {
 				if(total_bins < occu){ occu = 0; }
 				else { occu = total_bins - occu; }
 				
-				html += '<div style="position: absolute;padding:10px;background:red;color:#FFF;top:28%;right:5%">'+(occu)+' Bin(s) Available</div>';
+				//html += '<div style="position: absolute;padding:10px;background:red;color:#FFF;top:28%;right:5%">'+(occu)+' Bin(s) Available</div>';
 				
 				res.send({html:html});
 			});
