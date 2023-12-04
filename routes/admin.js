@@ -1227,7 +1227,7 @@ router.post('/getbindeta', async function(req, res, next) {
 	
 	html = '<table class="">';
 	
-	sql = "SELECT  orders.id,slots.slot_ID,orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id left JOIN slots on orders.id = slots.order_id WHERE orders.id = '"+reqs.id+"'";
+	sql = "SELECT  orders.id,slots.slot_ID,orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', mob.model_name, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id left JOIN slots on orders.id = slots.order_id WHERE orders.id = '"+reqs.id+"'";
 	
 	await conn.query(sql, function (err, result) {
 		for(i=0;i<result.length;i++){
@@ -1871,7 +1871,7 @@ router.post('/allmanufacturers', async function(req, res, next) {
 });
 
 router.post('/allbrands', async function(req, res, next) {
-	var sql = "select b.id, bname, mname from brands b left join manufacturers m on mid = m.id";
+	var sql = "select b.id, bname, mname from brands b left join manufacturers m on mid = m.id order by b.bname";
 	
 	await conn.query(sql, function (err, result) {
 		if (err) throw err;
@@ -2335,7 +2335,7 @@ router.post('/showstatus', async function(req, res, next) {
 
 router.post('/showslots', async function(req, res, next) {
 	const userMacId = req.body.id; // Assuming the user sends the mac_id in the request body
-	// console.log('Received mac_id:', userMacId);
+	console.log('Received mac_id:', userMacId);
 	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? AND order_id != 0';
 	// console.log(sql);
 	conn.query(sql, [userMacId], function (err, binresults) {
@@ -2421,11 +2421,12 @@ router.get('/equipmain', async function(req, res, next) {
   res.render('admin/equipmain', { BASE_PATH: '../', results: {}});
 });
 
-router.post('/vieworder', async function(req, res, next) {
+router.get('/vieworder', async function(req, res, next) {
 	reqs = req.body;
-	// console.log(reqs);
-	const macID= reqs.macID;
-	const slotID= reqs.slotID;
+	console.log(reqs);
+	const macID = req.query.macID;
+    const slotID = req.query.slotID;
+	console.log(macID,slotID)
 	sql = `Select   slots.slot_ID,orders.surgery_date, orders.status As Order_Status, orders.side AS Surgery_Side,
 	CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, 
 	CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL,
@@ -2444,8 +2445,8 @@ router.post('/vieworder', async function(req, res, next) {
 
 	conn.query(sql, function (err, binresults){
 		if(err){
-			// console.log("Error", err);
-			res.status(500).json({ message: "Error" });
+			console.log("Error", err);
+			res.status(500).json({ message: "Error"});
 		}
 		// console.log(binresults)
 		res.status(200).send(binresults);

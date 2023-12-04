@@ -124,7 +124,7 @@ script.
 		if(o('orderdiv').style.display='none'){
 			o('orderdiv').style.display='block';
 		}
-		$.post('/admin/vieworder', {macID, slotID}, function(data){
+		$.get('/admin/vieworder', {macID, slotID}, function(data){
 			console.log("I am data received from Backend", data);
 			let html = `<h2>Order Details</h2><table id="orderview"><tr><th>Slot ID</th><th>Surgery Date</th><th>Surgey Side</th><th>Primary IOL</th><th>Backup IOL</th><th>Surgeon Name</th><th>Patient Name</th><th>Patient DOB<th><span onclick= "closediv('orderdiv')">X</span></tr> `;
 			

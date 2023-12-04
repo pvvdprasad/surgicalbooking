@@ -339,7 +339,7 @@ router.post('/decommissioned', async function(req, res, next) {
 router.post('/unassignedBins', async function(req, res, next) {
 	const { fact_id } = req.body;
     if (!fact_id) {
-        return res.status(400).json({ error: 'Missing fact_id in the request body' });
+        return res.status(400).json({ error: 'Missing facility ID.' });
     }
 	//var results = await scanTable(config.aws_users_table_name);
 	//var binresults = await scanTable(config.aws_bins_table_name);
@@ -361,15 +361,17 @@ router.post('/unassignedBins', async function(req, res, next) {
         res.status(200).json({ data: binresults });
 	});
 });
-// Endpoints for  related to show assigned Master Bins
-router.post('/assignedBins', async function(req, res, next) {
+
+// Mobile View USe
+// Endpoints for  related to see Master Bins
+router.post('/mastersBins', async function(req, res, next) {
     const { fact_id } = req.body;
 
     if (!fact_id) {
         return res.status(400).json({ error: 'Missing fact_id in the request body' });
     }
 
-    const sql = 'SELECT * FROM bins WHERE binstatus = 1 AND fact_id = ?';
+    const sql = 'SELECT binname, binstatus, firmware, mac_id, mandate, model FROM bins WHERE binstatus = 1 AND fact_id = ?';
 	console.log('SQL Query:', sql);
 
     conn.query(sql, [fact_id], function (err, binresults) {
@@ -383,6 +385,61 @@ router.post('/assignedBins', async function(req, res, next) {
         res.status(200).json({ data: binresults });
     });
 });
+// EndPoint to check slots info of selected Master Bins 
+router.post('/viewslots', async function(req, res, next) {
+	const userMacId = req.body.mac_id; // Assuming the user sends the mac_id in the request body
+	console.log('Received mac_id:', userMacId);
+	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? AND order_id != 0';
+	// console.log(sql);
+	conn.query(sql, [userMacId], function (err, binresults) {
+	  if (err) {
+		// console.error('SQL Query Error:', err);
+		return res.status(500).json({ error: 'An error occurred while fetching data' });
+	  }
+	  
+	  if (binresults.length === 0) {
+		// console.log('Bin status is not available');
+		return res.status(400).json({ message: 'Bin status is not available' });
+	  } else {
+		// console.log(binresults)
+		res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
+	  }
+	});
+});
+// EndPoint to check order Details of selected slot of master bin 
+router.get('/vieworder', async function(req, res, next) {
+	reqs = req.body;
+	console.log(reqs);
+	const macID = req.query.macID;
+    const slotID = req.query.slotID;
+	console.log(macID,slotID)
+	sql = `Select   slots.slot_ID,orders.surgery_date, orders.status As Order_Status, orders.side AS Surgery_Side,
+	CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, 
+	CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL,
+	CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name,
+	orders.patient_dob,
+	CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name FROM slots
+	left join orders on (slots.masterBin_mac_id = orders.bin_mac_id AND slots.order_id= orders.id)
+	left JOIN manufacturers as m on orders.manufacture_id = m.id        
+	left JOIN brands as b on orders.brand_id = b.id        
+	left JOIN models on orders.model_id = models.id 
+	left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       
+	left JOIN brands as bb on orders.b_brand_id = bb.id  
+	left JOIN models as mob on orders.b_model_id = mob.id 
+	left JOIN other_users ON orders.surgeon_id = other_users.user_id 
+	where  masterBin_mac_id = '${macID}' AND slots.slot_ID = ${slotID}`;
+
+	conn.query(sql, function (err, binresults){
+		if(err){
+			console.log("Error", err);
+			res.status(500).json({ message: "Error"});
+		}
+		// console.log(binresults)
+		res.status(200).send(binresults);
+	});
+});
+
+
 
 // Endpoints for  related to add Master Bins
 router.post('/addbin', async function(req, res, next) {
@@ -474,6 +531,8 @@ res.json({"message":"success"});
 
 });
 
+
+//Hardware Use Only 
 router.post('/save_slot_info',async function(req, res, next) {
 	/*{
 		"mac_id":"CC:DB:A7:12:91:2C",
@@ -564,13 +623,13 @@ router.get('/getbinUpdate',async function(req, res, next) {
 	});
 });
 */
-
+//Hardware Use Only 
 router.get('/getbinUpdate',async function(req, res, next) {	
 	
     var bin_mac_id = req.query.bin_mac_id;
     console.log(bin_mac_id + ' in getbinUpdate ----');
 	
-	var sql = "SELECT  orders.id,slots.slot_ID,orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', bb.bname, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id left JOIN slots on orders.id = slots.order_id WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y') order by slots.slot_ID";
+	var sql = "SELECT  orders.id,slots.slot_ID,orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, ' ', other_users.last_name) As Surgeon_Name, CONCAT(orders.first_name, ' ', orders.last_name) As Patient_Name, CONCAT(m.mname , ':', models.model_name, ':' , orders.power_id) As PrimaryIOL, CONCAT(mb.mname, ' : ', mob.model_name, ' : ', b_power_id ) As BackupIOL FROM  bins left JOIN orders ON  bins.mac_id = orders.bin_mac_id left JOIN other_users ON orders.surgeon_id = other_users.user_id left JOIN manufacturers as m on orders.manufacture_id = m.id        left JOIN brands as b on orders.brand_id = b.id        left JOIN models on orders.model_id = models.id left JOIN manufacturers as mb on orders.b_manufacture_id = mb.id       left JOIN brands as bb on orders.b_brand_id = bb.id  left JOIN models as mob on orders.b_model_id = mob.id left JOIN slots on orders.id = slots.order_id WHERE orders.bin_mac_id = '"+bin_mac_id+"' AND surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')";
 			 
 	console.log(sql);
 	conn.query(sql, function (err, result) {

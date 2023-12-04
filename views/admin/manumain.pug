@@ -19,22 +19,22 @@ style.
 	#uuul{padding:0;margin:0}
 	.dbutton{width:18px;cursor:pointer}
 	ul.horizontal {
-	  list-style-type: none;
-	  padding: 0;
-	  overflow: hidden;
-	  background-color: #f3f3f3;
-	  width: 100%;
-	  border: 1px solid #e7e7e7;
+		list-style-type: none;
+		padding: 0;
+		overflow: hidden;
+		background-color: #f3f3f3;
+		width: 100%;
+		border: 1px solid #e7e7e7;
 	}
 	#headerspan{display:none}
 	ul.horizontal li {
-	  float: left;
-	  margin: 20px 40px;
+		float: left;
+		margin: 20px 40px;
 	}	
 	#side_menu{}
 	#rightdiv{border: 1px solid #CCC}
 	th{padding:10px;background:#F3F3F3}
-	 .content {
+		.content {
 			position: absolute;
 			top: 50%;
 			left: 50%;
@@ -49,7 +49,7 @@ style.
 			display: none;
 			/*to hide popup initially*/
 		}
-		  
+
 		#close-btn {
 			position: absolute;
 			right: 20px;
@@ -89,14 +89,14 @@ script.
 	}
 	$( document ).ready(function() {
 		manufacturers();
-		
+
 	});
 	function deleteEntity(ch,id){
 		msg='';
 		if(ch==1){msg='Do you really want to delete manufacturer';}
 		else if(ch==2){msg='Do you really want to delete brand';}
 		else if(ch==3){msg='Do you really want to delete model';}
-		
+
 		if(confirm(msg))
 		$.post('/admin/deleteEntity',{ch:ch,id:id},function(data){
 			window.location=window.location.href;
@@ -108,7 +108,7 @@ script.
 		});
 	}
 	function showaddbrands(){
-		 
+
 		html = '<div id="close-btn" onclick="togglePopup()">X</div>';
 		html += '<select id="manusele"></select>';
 		html += '<br>';
@@ -125,7 +125,7 @@ script.
 		msel = o('manusele').value;
 		bnam = o('mname').value;
 		url = '/admin/addbrand';
-		
+
 		if(msel == '') alert('Select Manufacturer'); else
 		$.post(url,{mid:msel,bname:bnam},function(data){
 			alert('Brand created successfully');
@@ -137,7 +137,7 @@ script.
 		msel = o('manusele').value;
 		bnam = o('mname').value;
 		url = '/admin/addmodel';
-		
+
 		if(msel == '') alert('Select Brand'); else
 		$.post(url,{bid:msel,bname:bnam},function(data){
 			alert('Model created successfully');
@@ -149,19 +149,19 @@ script.
 		url = '/admin/';
 		var option = document.createElement("option");
 		m = o('manusele');
-		
+
 		if(id =='manu'){
 			url += 'allmanufacturers';
 			option.text = "All Manufacturers";
 			option.value = "";
-			 
+
 		}else{
 			url += 'allbrands';			
 			option.text = "All Brands";
 			option.value = "";
 		}
 		m.add(option);
-		
+
 		$.post(url,{},function(data){
 			results = data.results;
 			for(i=0;i<results.length;i++){
@@ -175,7 +175,7 @@ script.
 					option.value = results[i].id;
 				//o('manusele').innerHtml += '<option value="'+results[i].id+'">'+results[i].bname+'</option>';
 				}
-				
+
 				m.add(option);
 			}
 		});		
@@ -198,13 +198,15 @@ script.
 	function brands(){
 		console.log('In the brands---------');
 		$.post('/admin/allbrands',{},function(data){
-			html = '<br><br><input type="button" onclick="showaddbrands()" value="Add brand" /><br><br><table class="table"><tr>';
-			html += '<th scope="col">Id</th><th scope="col">Brand Name</th><th scope="col">Manufacturer</th><th scope="col">Action</th></tr>';
+			html = '<br><br><input type="button" onclick="showaddbrands()" value="Add brand" /><br><br>';
+			html += '<label for="brandsearch">Search Brand: </label>'
+			html +='<input type= "search" id="brandsearch" placeholder="Enter Brand to Search For" class="magnify" style="width:50%" onkeyup="searchBrand2()" name="brandsearch">'
+			html += '<table class="table" id="brandsTable"><tr><th scope="col">Id</th><th scope="col">Brand Name</th><th scope="col">Manufacturer</th><th scope="col">Action</th></tr>';
 			console.log(data);
 			results = data.results;
 			for(i=0;i<results.length;i++){
 				console.log(data[i]); // id, bname, mid
-				html += '<tr><td>'+results[i].id+'</td><td>'+results[i].bname+'</td><td>'+results[i].mname+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(2,'+results[i].id+')" /></td></tr>';
+				html += '<tr><td>'+(i+1)+'</td><td>'+results[i].bname+'</td><td>'+results[i].mname+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(2,'+results[i].id+')" /></td></tr>';
 			}
 			html += '</table>';
 			o('rightdiv').innerHTML = html;
@@ -213,15 +215,79 @@ script.
 	function models(){
 		console.log('In the models---------');
 		$.post('/admin/allmodels',{},function(data){
-			html = '<br><br><input type="button" onclick="showaddmodels()" value="Add model" /><br><br><table class="table"><tr>';
-			html += '<th scope="col">Id</th><th scope="col">Model Name</th><th scope="col">Brand</th><th scope="col">Manufacturer</th><th>Action</th></tr>';
+			html = '<br><br><input type="button" onclick="showaddmodels()" value="Add model" /><br>';
+
+			html += '<br><label for= "modelSearch">Search Model: </label>'
+			html += '<input type= "search" id= "modelsearch" placeholder="Enter Model to Search For" class= "magnify" style="width:50%" onkeyup="searchModel()" name="modelsearch">'
+
+			html += '<br><br><label for="brandsearch">Search Brand: </label>'
+			html +='<input type= "search" id="brandsearch" placeholder="Enter Brand to Search For" class="magnify" style="width:50%" onkeyup="searchBrand()" name="brandsearch">'
+			html += '<br><table class="table" id="modelsTable"><tr><th scope="col">Id</th><th scope="col">Model Name</th><th scope="col">Brand</th><th scope="col">Manufacturer</th><th>Action</th></tr>';
 			console.log(data);
 			results = data.results;
 			for(i=0;i<results.length;i++){ // id , model_name , bid
-				console.log(data[i]);
+				//- console.log(data[i]);
 				html += '<tr><td>'+results[i].id+'</td><td>'+results[i].model_name+'</td><td>'+results[i].bname+'</td><td>'+results[i].mname+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(3,'+results[i].id+')" /></td></tr>';
 			}
 			html += '</table>';
 			o('rightdiv').innerHTML = html;
 	});
+	}
+
+
+		function searchBrand2() {
+		var input = document.getElementById("brandsearch");
+		var filter = input.value.toUpperCase(); 
+		var table  = document.getElementById("brandsTable");
+		var tr = table.getElementsByTagName("tr");
+
+		for ( var i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+			var td = tr[i].getElementsByTagName("td")[1]; // Index 2 corresponds to the Brand column
+			if (td) {
+				var txtValue = td.textContent || td.innerText;
+				if (txtValue.toUpperCase().indexOf(filter) > -1) {
+					tr[i].style.display = "";
+				} else {
+					tr[i].style.display = "none";
+				}
+			}
+		}
+	}
+
+	function searchBrand() {
+		var input = document.getElementById("brandsearch");
+		var filter = input.value.toUpperCase(); 
+		var table  = document.getElementById("modelsTable");
+		var tr = table.getElementsByTagName("tr");
+
+		for ( var i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+			var td = tr[i].getElementsByTagName("td")[2]; // Index 2 corresponds to the Brand column
+			if (td) {
+				var txtValue = td.textContent || td.innerText;
+				if (txtValue.toUpperCase().indexOf(filter) > -1) {
+					tr[i].style.display = "";
+				} else {
+					tr[i].style.display = "none";
+				}
+			}
+		}
+	}
+
+	function searchModel(){
+		var input = document.getElementById("modelsearch");
+		var filter = input.value.toUpperCase(); 
+		var table  = document.getElementById("modelsTable");
+		var tr = table.getElementsByTagName("tr");
+
+		for ( var i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+			var td = tr[i].getElementsByTagName("td")[1]; // Index 1 corresponds to the Model column
+			if (td) {
+				var txtValue = td.textContent || td.innerText;
+				if (txtValue.toUpperCase().indexOf(filter) > -1) {
+					tr[i].style.display = "";
+				} else {
+					tr[i].style.display = "none";
+				}
+			}
+		}
 	}
