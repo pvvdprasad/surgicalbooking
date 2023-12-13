@@ -164,7 +164,7 @@ header#header.header.fixed-top(data-scrollto-offset='0')
                 img(src=BASE_PATH+'images/125.png' style='width:150px;top:20px;position:absolute')
                 // | SurgicalBooking
         .container.align-items-center.justify-content-between
-            section#features.features(class="col-md-6" style="margin:15% auto")
+            section#features.features(class="col-md-4" style="margin:10% auto")
                 form#loginform(action='/admin/postlogin' method='post')
                     .form-group.text-center
 
@@ -176,11 +176,9 @@ header#header.header.fixed-top(data-scrollto-offset='0')
                             div.did-floating-label-content
                                 input.form-control.did-floating-input(type='text' id='floatingInput' name='loginid' placeholder=' ' required='' autocomplete="off" )
                                 label.did-floating-label Username/Email
-                            br
                             div.did-floating-label-content
                                 input.form-control.did-floating-input(type='password' id='floatingInput' name='passid' placeholder=' ' required='' autocomplete="off")
                                 label.did-floating-label Password
-                            br
                             br
                             input.btn.btn-success( type='submit' value='Login')
                         //- div.form-floating.mb-3

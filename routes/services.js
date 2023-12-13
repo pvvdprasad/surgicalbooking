@@ -91,14 +91,15 @@ router.post('/save_order', async function(req, res, next) {
 // Setup to get new order records for facility approval
 router.post('/neworders', async function(req, res, next){
 	reqs = req.body;
-	console.log(reqs);
+	// console.log(reqs);
 	sid= reqs.sid
 	sql = 'select  id from facilities where email = (select name from users where id = '+sid+')';
 
 	await conn.query(sql, function (err, result) {
-		sid = result[0].id;
-		console.log(sid);
-		sql = `select o.id,surgery_date,
+		if (result && result.length > 0) {
+			sid = result[0].id;
+			// console.log(sid);
+			sql = `select o.id,surgery_date,
 				CONCAT(o.first_name, ' ', o.middle_name, ' ', o.last_name) As Patient_Name,o.patient_dob,o.side as Surgery_Side,
 				CONCAT(u.first_name, ' ', u.middle_name, ' ', u.last_name) As Surgeon_Name,
 				CONCAT(m.mname , ':', models.model_name, ':' , o.power_id) As PrimaryIOL,  
@@ -112,23 +113,25 @@ router.post('/neworders', async function(req, res, next){
 				left JOIN facilities as f on o.surgery_center_id= f.id
 				where 
 				surgery_center_id='${sid}' AND status= 0 order by surgery_date`;
-		console.log(sql);
-	
-		conn.query(sql, function (err, result) {
-			if (err){
-			
-				console.log( err);
-				res.status(500).send("Not Found")
-			}else{
-				if(result.length > 0){
-					console.log(result);
-					res.status(200).json(result);
-				}else{
-					res.json({ message: "No New order available"})
-				}
-			}
+			// console.log(sql);
+			conn.query(sql, function (err, result) {
+				if (err){
 				
-		});
+					console.log( err);
+					res.status(500).send("Not Found")
+				}else{
+					if(result.length > 0){
+						// console.log(result);
+						res.status(200).json(result);
+					}else{
+						res.json({ message: "No New order available"})
+					}
+				}
+					
+			});
+		}else{
+			res.json({ message: "No New order available"})
+		}
 	});
 });
 
@@ -371,7 +374,7 @@ router.post('/mastersBins', async function(req, res, next) {
         return res.status(400).json({ error: 'Missing fact_id in the request body' });
     }
 
-    const sql = 'SELECT binname, binstatus, firmware, mac_id, mandate, model FROM bins WHERE binstatus = 1 AND fact_id = ?';
+    const sql = 'select  bins.binname,bins.binstatus,bins.firmware,bins.mac_id, bins.mandate, bins.model from facilities left join users ON facilities.email = users.name left join bins ON facilities.id= bins.fact_id WHERE bins.binstatus = 1 AND users.id = ?';
 	console.log('SQL Query:', sql);
 
     conn.query(sql, [fact_id], function (err, binresults) {
@@ -380,8 +383,8 @@ router.post('/mastersBins', async function(req, res, next) {
             return res.status(500).json({ error: 'An error occurred while fetching data' });
         }
 
-        console.log('Fact ID:', fact_id);
-        console.log('Data:', binresults);
+        // console.log('Fact ID:', fact_id);
+        // console.log('Data:', binresults);
         res.status(200).json({ data: binresults });
     });
 });
@@ -389,9 +392,10 @@ router.post('/mastersBins', async function(req, res, next) {
 router.post('/viewslots', async function(req, res, next) {
 	const userMacId = req.body.mac_id; // Assuming the user sends the mac_id in the request body
 	console.log('Received mac_id:', userMacId);
-	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? AND order_id != 0';
+	const sql = 'SELECT slot_ID,masterBin_mac_id,order_id,status FROM slots WHERE masterBin_mac_id = ?';
 	// console.log(sql);
 	conn.query(sql, [userMacId], function (err, binresults) {
+
 	  if (err) {
 		// console.error('SQL Query Error:', err);
 		return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -399,10 +403,11 @@ router.post('/viewslots', async function(req, res, next) {
 	  
 	  if (binresults.length === 0) {
 		// console.log('Bin status is not available');
-		return res.status(400).json({ message: 'Bin status is not available' });
+		return res.status(404).json({ message: 'MasterBin Slots are not available' });
 	  } else {
+		//if slots have order
 		// console.log(binresults)
-		res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
+		res.status(200).json({ binresults });
 	  }
 	});
 });

@@ -58,9 +58,11 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
             h2 Change Password
                 div(style='margin:0 30%')
                     br
-                    input.form-control#password(type="password" placeholder="Enter Password")
+                    input.form-control#oldpassword(type="password" placeholder="Enter Old Password" required)
                     br
-                    input.form-control#cpassword(type="password" placeholder="Enter Confirm Password")
+                    input.form-control#password(type="password" placeholder="Enter Password" required)
+                    br
+                    input.form-control#cpassword(type="password" placeholder="Enter Confirm Password" required)
                     br
                     input.form-control(type="button" style="margin:0" value="Submit" class="btn cbut blue" onclick="changepassword()")
                     input(type='hidden', id='uid', value=uid)
@@ -76,13 +78,13 @@ script.
         url = '/admin/save_password';
         p = o('password').value;
         c = o('cpassword').value; 
-        
+        oldPassword= o('oldpassword').value
         if(p != c){
             alert('Passwords mismatch');
         }else{
-            $.post(url,{p:p,uid:o('uid').value},function(data){
+            $.post(url,{old:oldPassword,p:p,uid:o('uid').value},function(data){
                 alert('Password saved successfully');
-                window.location = window.location.href;
+                window.location.href = "./login";
             });
         }
     }

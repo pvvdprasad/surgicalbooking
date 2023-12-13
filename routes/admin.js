@@ -66,24 +66,35 @@ router.post('/save_password',async function(req, res, next) {
 	// query2 = "select id, first_name,  selected_sc,  used_sc from other_users where user_id="+req.session.userid;
 	reqs = req.body;
 	console.log(reqs);
+	old= reqs.old;
+	console.log(old);
 	//reqs.p
 	//reqs.uid   sid = req.session.userid;   p:p,uid:o('uid').value,path:'sc'
+	sql = 'select passcode from users where id='+reqs.uid;
+	conn.query(sql, async function (err, result){
+		if(result && result.length > 0 && result[0].passcode === old){
+			if(reqs.path && reqs.path == 'sc'){
+
+			sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
+			console.log(sql);
+			
+			conn.query(sql, function (err, result1) {
+				res.send({});
+			});
+		}else{
+			sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
+			console.log(sql);
+			
+			conn.query(sql, function (err, result1) {
+				res.send({});
+			});
+		}
+		}else{
+			res.status(401).send({message: 'Unauthorized access.Old password is incorrect'})
+		}
+		
+	})
 	
-	if(reqs.path && reqs.path == 'sc'){
-		sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
-		console.log(sql);
-		
-		conn.query(sql, function (err, result) {
-			res.send({});
-		});
-	}else{
-		sql = 'update users set passcode = "'+reqs.p+'" where id='+reqs.uid;
-		console.log(sql);
-		
-		conn.query(sql, function (err, result) {
-			res.send({});
-		});
-	}
 });
 
 router.get('/neworder',async function(req, res, next) {	
@@ -2346,7 +2357,7 @@ router.post('/showslots', async function(req, res, next) {
 	  
 	  if (binresults.length === 0) {
 		// console.log('Bin status is not available');
-		return res.status(400).json({ message: 'Bin status is not available' });
+		res.status(202).json({ message: 'No Order is available on any of the slots', data: binresults });
 	  } else {
 		// console.log(binresults)
 		res.status(200).json({ message: 'Bins are online', status: 'online', data: binresults });
