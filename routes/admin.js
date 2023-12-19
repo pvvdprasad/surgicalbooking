@@ -15,6 +15,9 @@ router.get('/login', function(req, res, next) {
   res.render('admin/login', { BASE_PATH: '../' });
 });
 
+router.get('/forgetpassword', function(req,res, next){
+	res.render('admin/forgetpassword', { BASE_PATH: '../', results:[] });
+});
 
 
 router.post('/save_favsg',async function(req, res, next) {
@@ -244,26 +247,25 @@ router.post('/updatefacili', async function(req, res, next) {
 
 router.post('/resetpassword', async function(req, res, next) {
 	reqs = req.body;
+	console.log(reqs)
 	var pass = generatePassword();
 	
 		
-	sql = 'select id,user_id,first_name,npi,passcode,email,fact_id from other_users where id= '+reqs.user_id;
-	
+	sql = `select id,name from users where name= '${reqs.email}'`;
+	console.log(sql);
 	conn.query(sql, function (err, result) {
+		console.log(result)
 		if (err) console.log( err);
 		else{
-			if(result[0].npi=='' ||result[0].npi=='undefined'){ // Facility
-				sql = '';
-			}else{
-				sql = 'update users set passcode ='+pass+' where id='+result[0].user_id;
-			}
-			sendEmail(result[0].email,'Temporary password for surgicalbooking.com', '<b><i>Hi '+result[0].first_name+',<br></i></b>Your temporary password is '+pass);
-			conn.query(sql, function (err, result) {
+			sql = 'update users set passcode ="'+pass+'" where id='+result[0].id;	
+			console.log(sql);
+			sendEmail(result[0].name,'Temporary password for surgicalbooking.com', '<b><i>Hi <br></i></b>Your temporary password for surgical booking is '+pass);
+			conn.query(sql, function (err, result1) {
 			
 			});
 		}
-		res.send({});
-		//res.render('admin/order_history', { BASE_PATH: '../',results:result });
+		res.render('admin/login', { BASE_PATH: '../',results:result , message : " Mail is sent to given email."});
+		// res.send({});
 	});
 });
 
@@ -677,7 +679,8 @@ router.post('/addpractise', async function(req, res, next) {
 	console.log('In addpractise...........');
 	console.log(reqs);
 	var pass = generatePassword();
-	var sql = 'INSERT INTO users (name,passcode,role) values("'+reqs.prac_name+'","'+pass+'",2)';
+	var sql = 'INSERT INTO users (name,passcode,role) values("'+reqs.email+'","'+pass+'",2)';
+	
 	/*
 		{
 	  prac_name: 'uuhuhukhkhj',
@@ -1741,8 +1744,8 @@ router.post('/addsurgeon', async function(req, res, next) {
 	sql = "";
 	
 	
-	sql = "INSERT INTO users(name,passcode,role ) VALUES('"+reqs.first_name+"','"+pass+"',2)";
-	
+	sql = "INSERT INTO users(name,passcode,role ) VALUES('"+reqs.email+"','"+pass+"',2)";
+	console.log(sql)
 	await conn.query(sql, function (err, result) {
 		if (err) throw err;
 		
