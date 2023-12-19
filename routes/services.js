@@ -20,16 +20,6 @@ function generatePassword() {
     return retVal;
 }
 
-function sendEmail(to,sub, body){
-	// send html in body
-	var transporter = nodemailer.createTransport({
-   host: 'smtp.gmail.com',
-  port: 587,
-  auth: {
-    user: 'akhtar@surgicalbooking.com',
-    pass: 'Project@2529$'
-  }
-});
 
 //transporter.verify().then(console.log).catch(console.error);
 
