@@ -7,3 +7,4 @@ package.json
 .vscode
 backup.sql
 aws_certificate
+publish.js
