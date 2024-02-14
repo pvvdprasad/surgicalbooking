@@ -20,6 +20,8 @@ head
     link(href=BASE_PATH+'assets/vendor/swiper/swiper-bundle.min.css' rel='stylesheet')
     // Template Main CSS File
     link(href=BASE_PATH+'assets/css/style.css' rel='stylesheet')
+    link(rel='stylesheet' href='//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css')
+    link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
 
     script.
         function o(id){return document.getElementById(id);}
@@ -178,7 +180,8 @@ header#header.header.fixed-top(data-scrollto-offset='0')
                                 label.did-floating-label Username/Email
                             div.did-floating-label-content
                                 input.form-control.did-floating-input(type='password' id='floatingInput' name='passid' placeholder=' ' required='' autocomplete="off")
-                                label.did-floating-label Password
+                                label.did-floating-label(for='floatingInput') Password
+                                i.fa.fa-eye-slash#togglePassword( aria-hidden="true" style="position: absolute;top: 10px;right: 15px;")
                             div(style='display:  grid; align-items: center;')
                                 input.btn.btn-success( type='submit' value='Login')
                                 br
@@ -192,3 +195,18 @@ header#header.header.fixed-top(data-scrollto-offset='0')
                     if message
                         script.
                             alert("#{message}");
+script. 
+
+    const togglePasswordIcon = document.getElementById('togglePassword');
+
+    togglePasswordIcon.addEventListener('click', function() {
+        const input = this.parentElement.querySelector('input');
+        this.classList.toggle('fa-eye-slash');
+        this.classList.toggle('fa-eye');
+
+        if (input.getAttribute('type') === 'password') {
+            input.setAttribute('type', 'text');
+        } else {
+            input.setAttribute('type', 'password');
+        }
+    });

@@ -23,8 +23,8 @@ include header.pug
             select.form-select(id='modelsele', name='modelsele')
                 option(value='')= 'Select Model'
             br
-            input(class="btn cbut grey bbbutons" type="button" value="Add More" onclick="save_iol(0)")
-            input(class="btn cbut blue bbbutons" type="button" value="Save and Exit" style="margin-left:20%"  onclick="save_iol(1)")
+            //- input(class="btn cbut grey bbbutons" type="button" value="Add More" onclick="save_iol(0)" style="margin-left:20%")
+            input(class="btn cbut blue bbbutons" type="button" value="Save"   onclick="save_iol(1)")
             input(type='hidden',value=userid,id='hiduserid',name='hiduserid')
             span#favhtml
 script.

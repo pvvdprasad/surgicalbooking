@@ -1,12 +1,49 @@
 style.
 	.uuul li{background:#f3f3f3;padding: 10px 10px 0 10px;}
 	.bbbutons{position:absolute;z-index:999;bottom:0;left:20px}
+	.leftmenuExtended{margin-left: 50px !important;}
+	.normal-text {font-weight: normal; /* Adjust as needed */}
+	.clicked-text {font-weight: bold;font-size: 18px; /* Adjust as needed */}
 
 script. 
 	function open_facility(){
 		// console.log('In the open_facility.................');
 		o('left_fac_div').style.display='block';
 	}
+
+	document.addEventListener("DOMContentLoaded", function() {
+		document.querySelectorAll('.leftmenuExtended td').forEach(function(td) {
+			td.addEventListener('click', function() {
+				// Remove clicked-text class from all tds
+				document.querySelectorAll('.leftmenuExtended td').forEach(function(td) {
+					td.classList.remove('clicked-text');
+					td.classList.add('normal-text');
+				});
+
+				// Add clicked-text class to the clicked td
+				this.classList.remove('normal-text');
+				this.classList.add('clicked-text');
+			});
+		});
+	});
+
+	document.addEventListener("DOMContentLoaded", function() {
+		document.querySelectorAll('.surgeonOption li').forEach(function(li) {
+			li.addEventListener('click', function() {
+				// Remove clicked-text class from all lis
+				document.querySelectorAll('.surgeonOption li').forEach(function(li) {
+					li.classList.remove('clicked-text');
+					li.classList.add('normal-text');
+				});
+
+				// Add clicked-text class to the clicked li
+				this.classList.remove('normal-text');
+				this.classList.add('clicked-text');
+			});
+		});
+	});
+
+
 
 ul.uuul(style='margin-top:10px;')
 	li
@@ -21,47 +58,35 @@ ul.uuul(style='margin-top:10px;')
 						.tttdiv= element.fname
 							i(class='bi bi-pen pendd', onclick='edit_facility("'+element.id+'")') Edit
 						.hidivs(id=element.id)
-							table
+							table(class= 'leftmenuExtended')
 								tr
-									td
-										|
-									td
+									td(class='normal-text')
 										a(href='javascript:add_user("'+element.id+'")') Add User 
 								tr
-									td
-										|
-									td
+									td(class='normal-text')
 										a(href='javascript:add_surgeon2("'+element.id+'","'+element.fname+'")') Link Surgeon
 								tr
-									td
-										|
-									td
+									td(class='normal-text')
 										a(href='javascript:assign_bins("'+element.id+'","'+element.fname+'")') Assign Bin
 								tr
-									td(style='vertical-align: top;')
-										.miniarrow.miniup(id=element.id+'_uttd', onclick='view_dlink("'+element.id+'")')
-									td
+									td(class='normal-text')
 										a(href='javascript:view_dlink("'+element.id+'")') View/Dlink Surgeon
 										.hidddds(id=element.id+'_uuus')
 								tr
-									td(style='vertical-align: top;')
-										.miniarrow.miniup(id=element.id+'_utd', onclick='view_user("'+element.id+'")')
-									td
+									td(class='normal-text')
 										a(href='javascript:view_user("'+element.id+'")') View/Edit User
 									.hidddd(id=element.id+'_uuu')
 								tr
-									td(style='vertical-align: top;')
-										.miniarrow.miniup(id=element.id+'_', onclick='view_edit_bins("'+element.id+'")')
-									td
+									td(class='normal-text')
 										a(href='javascript:view_edit_bins("'+element.id+'")') View/Edit Bins
 										.hidddds(id=element.id+'_')
 		
-ul.uuul(style='margin-top:10px;')
+ul.uuul(class='surgeonOption' style='margin-top:10px;')
 	li
 		p(style='margin:0')= 'Manage Surgeons'
-	li
+	li(class='normal-text')
 		a(href='javascript:add_practise()') Add Surgeon
-	li(style='padding-bottom:10px')
+	li(class='normal-text' style='padding-bottom:10px')
 		a(href='javascript:open_practise()') View / Remove Surgeon
 		
 		

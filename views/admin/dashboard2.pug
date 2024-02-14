@@ -151,6 +151,12 @@ style.
 		form(method='get' onsubmit='return submitform()')
 			.form-group.text-center(style='position:relative')
 				h2 Add Facility
+
+				div.did-floating-label-content
+					input#facility_ID.form-control.did-floating-input(type='text', name='facility_ID' , placeholder=' ', required)
+					div#facility_ID_error.error-message
+					label.did-floating-label Enter Facility ID
+
 				div.did-floating-label-content
 					input#facility_name.form-control.did-floating-input(type='text', name='facility_name' , placeholder=' ', required, oninput='validateFacilityName(this)')
 					div#facility_name_error.error-message
@@ -183,7 +189,6 @@ script.
 
 
 	function validateFacilityName(inputElement) {
-		debugger
 		var facilityName = inputElement.value;
 		var errorElement = document.getElementById("facility_name_error");
 		if (/^[A-Za-z\s]+$/.test(facilityName) && facilityName.trim() !== "") {
@@ -221,42 +226,96 @@ script.
 	}
 
 	function validatePhoneNumber(inputElement) {
-		var phoneNumber = inputElement.value.replace(/\D/g, ''); // Remove non-digit characters
+		var phoneNumber = inputElement.value;
 		var errorElement = document.getElementById("facility_phoneNumber_error");
-		if (/^\d{10}$/.test(phoneNumber) || phoneNumber.trim() === '') {
+
+		// Remove non-digit characters and keep track of cursor position
+		var cursorPosition = inputElement.selectionStart;
+		phoneNumber = phoneNumber.replace(/\D/g, "");
+
+		// Add dashes after the first three digits and after the next three digits
+		if (phoneNumber.length > 3 && phoneNumber.charAt(3) !== '-') {
+			phoneNumber = phoneNumber.slice(0, 3) + '-' + phoneNumber.slice(3);
+			if (cursorPosition >= 3) {
+				cursorPosition++;
+			}
+		}
+		if (phoneNumber.length > 7 && phoneNumber.charAt(7) !== '-') {
+			phoneNumber = phoneNumber.slice(0, 7) + '-' + phoneNumber.slice(7);
+			if (cursorPosition >= 7) {
+				cursorPosition++;
+			}
+		}
+
+		// Set the modified value back to the input element
+		inputElement.value = phoneNumber;
+
+		// Update cursor position
+		inputElement.setSelectionRange(cursorPosition, cursorPosition);
+
+		// Validate the formatted phone number
+		if (/^\d{3}-\d{3}-\d{4}$/.test(phoneNumber) || phoneNumber.trim() === '') {
 			errorElement.textContent = "";
-			inputElement.setCustomValidity(''); // Clear custom validity
-			inputElement.style.border = "1px solid #ADA4C6"; // Set the border color to the default
+			inputElement.setCustomValidity('');
+			inputElement.style.border = "1px solid #ADA4C6";
 			return true;
 		} else {
-			errorElement.textContent = "Please enter a valid phone number (10 digits)";
+			errorElement.textContent = "Please enter a valid phone number with 10 digits (e.g., XXX-XXX-XXXX)";
 			inputElement.setCustomValidity('Invalid input');
-			inputElement.style.border = "1px solid red"; // Set a red border for the input element
-			errorElement.style.color = "red"; // Make the error message text red
+			inputElement.style.border = "1px solid red";
+			errorElement.style.color = "red";
 			return false;
 		}
 	}
 
+
 	function validateFaxNumber(inputElement) {
-		var faxNumber = inputElement.value.replace(/\D/g, ''); // Remove non-digit characters
+		var faxNumber = inputElement.value;
 		var errorElement = document.getElementById("facility_faxNumber_error");
-		if (/^\d{10}$/.test(faxNumber) || faxNumber.trim() === '') {
+
+		// Remove non-digit characters and keep track of cursor position
+		var cursorPosition = inputElement.selectionStart;
+		faxNumber = faxNumber.replace(/\D/g, "");
+
+		// Add dashes after the first three digits and after the next three digits
+		if (faxNumber.length > 3 && faxNumber.charAt(3) !== '-') {
+			faxNumber = faxNumber.slice(0, 3) + '-' + faxNumber.slice(3);
+			if (cursorPosition >= 3) {
+				cursorPosition++;
+			}
+		}
+		if (faxNumber.length > 7 && faxNumber.charAt(7) !== '-') {
+			faxNumber = faxNumber.slice(0, 7) + '-' + faxNumber.slice(7);
+			if (cursorPosition >= 7) {
+				cursorPosition++;
+			}
+		}
+
+		// Set the modified value back to the input element
+		inputElement.value = faxNumber;
+
+		// Update cursor position
+		inputElement.setSelectionRange(cursorPosition, cursorPosition);
+
+		// Validate the formatted fax number
+		if (/^\d{3}-\d{3}-\d{4}$/.test(faxNumber) || faxNumber.trim() === '') {
 			errorElement.textContent = "";
-			inputElement.setCustomValidity(''); // Clear custom validity
-			inputElement.style.border = "1px solid #ADA4C6"; // Set the border color to the default
+			inputElement.setCustomValidity('');
+			inputElement.style.border = "1px solid #ADA4C6";
 			return true;
 		} else {
-			errorElement.textContent = "Please enter a valid fax number (10 digits)";
+			errorElement.textContent = "Please enter a valid fax number with 10 digits (e.g., XXX-XXX-XXXX)";
 			inputElement.setCustomValidity('Invalid input');
-			inputElement.style.border = "1px solid red"; // Set a red border for the input element
-			errorElement.style.color = "red"; // Make the error message text red
+			inputElement.style.border = "1px solid red";
+			errorElement.style.color = "red";
 			return false;
 		}
 	}
+
 
 
 	function validateEmail(input) {
-		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		const emailPattern = /^[^\s@]+@[^\s@]+\.(?:com)$/;
 		var isValid = emailPattern.test(input.value);
 		var errorElement = document.getElementById("facility_email_error");
 
@@ -266,7 +325,7 @@ script.
 			input.style.border = "1px solid #ADA4C6";
 			return true; // Set the border color to the default
 		} else {
-			errorElement.textContent = "Please enter a valid email address. For example, user@example.com";
+			errorElement.textContent = "Please enter a valid email address ending with '.com'. For example, user@example.com";
 			input.setCustomValidity('Invalid input');
 			input.style.border = "1px solid red"; // Set a red border for the input element
 			errorElement.style.color = "red";
@@ -380,7 +439,7 @@ script.
 			'left' : _tmp[0],
 			'top' : _tmp[1]
 		};
-		console.log(positions, positions.left, positions.top);
+		//- console.log(positions, positions.left, positions.top);
 		if(positions.left == '1px'){
 			console.log('arrow is up');
 			objc.style.display = 'block';
@@ -394,26 +453,26 @@ script.
 
 	}	
 
-	function callswapp(obj,className){
-		//console.log(className);
-		objc = o(className+'ppp');
-			_tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
-		positions = {
-			'left' : _tmp[0],
-			'top' : _tmp[1]
-		};
-		console.log(positions, positions.left, positions.top);
-		if(positions.left == '1px'){
-			console.log('arrow is up');
-			objc.style.display = 'block';
-			// open
-			obj.style.backgroundPosition = '34px -1px';
+	//- function callswapp(obj,className){
+	//- 	//console.log(className);
+	//- 	objc = o(className+'ppp');
+	//- 		_tmp = window.getComputedStyle(obj,null).backgroundPosition.trim().split(/\s+/),
+	//- 	positions = {
+	//- 		'left' : _tmp[0],
+	//- 		'top' : _tmp[1]
+	//- 	};
+	//- 	console.log(positions, positions.left, positions.top);
+	//- 	if(positions.left == '1px'){
+	//- 		console.log('arrow is up');
+	//- 		objc.style.display = 'block';
+	//- 		// open
+	//- 		obj.style.backgroundPosition = '34px -1px';
 
-		}else{
-			obj.style.backgroundPosition = '1px -1px';
-			objc.style.display = 'none';
-		}		
-	}	
+	//- 	}else{
+	//- 		obj.style.backgroundPosition = '1px -1px';
+	//- 		objc.style.display = 'none';
+	//- 	}		
+	//- }	
 	function update_practise(id){
 		$.post('/admin/updatepractise', {id: id, fax:o('facility_fax').value,phone: o('facility_phone').value, website:o('facility_website').value,namee:o('facility_name').value,npi:o('npi').value,email:o('facility_email').value }, function(data){
 			//console.log(data);
@@ -636,14 +695,80 @@ script.
 		});
 	}
 	function submitformuser(){
-		if(o('cemail').value != o('email').value){
-			alert('Emails did not match');
-		}else{
-			$.post('/admin/adduser', {first_name: o('first_name').value, middle_name: o('middle_name').value, last_name: o('last_name').value, email: o('email').value, cell: o('cell').value, facid:o('facid').value}, function(data){
-				alert('User added successfully');
-				window.location.href = window.location;
-			});
-		}
+		
+		// Validation for First Name
+			var firstNameInput = document.getElementById('first_name');
+			var firstNameValue = firstNameInput.value.trim();
+			var firstNameRegex = /^[A-Za-z]+$/; // Regular expression to match only alphabetic characters
+
+			if (firstNameValue === '') {
+				alert('Please enter First Name');
+				firstNameInput.focus();
+				return false;
+			} else if (!firstNameRegex.test(firstNameValue)) {
+				alert('Please enter a valid First Name with alphabetic characters only');
+				firstNameInput.focus();
+				return false;
+			}
+
+		// Validation for middle Name
+			var lastNameInput = document.getElementById('middle_name');
+			var lastNameValue = lastNameInput.value.trim();
+			var lastNameRegex = /^[A-Za-z]+$/; // Regular expression to match only alphabetic characters
+
+			if (lastNameValue === '') {
+				alert('Please enter middle Name');
+				lastNameInput.focus();
+				return false;
+			} else if (!lastNameRegex.test(lastNameValue)) {
+				alert('Please enter a valid middle name with alphabetic characters only');
+				lastNameInput.focus();
+				return false;
+			}
+
+
+		// Validation for Last Name
+			var lastNameInput = document.getElementById('last_name');
+			var lastNameValue = lastNameInput.value.trim();
+			var lastNameRegex = /^[A-Za-z]+$/; // Regular expression to match only alphabetic characters
+
+			if (lastNameValue === '') {
+				alert('Please enter Last Name');
+				lastNameInput.focus();
+				return false;
+			} else if (!lastNameRegex.test(lastNameValue)) {
+				alert('Please enter a valid Last Name with alphabetic characters only');
+				lastNameInput.focus();
+				return false;
+			}
+
+		// Validation for Cell Number
+			var cellInput = document.getElementById('cell');
+			var cellRegex = /^\d{10}$/; // Adjust the regex as per your requirement
+			if (!cellRegex.test(cellInput.value.trim())) {
+				alert('Please enter a valid 10-digit Cell Number');
+				cellInput.focus();
+				return false;
+			}
+
+		// Validation for Email
+			var emailInput = document.getElementById('email');
+			var emailRegex = /^\S+@\S+\.\S+$/; // Adjust the regex for email validation
+			if (!emailRegex.test(emailInput.value.trim())) {
+				alert('Please enter a valid Email');
+				emailInput.focus();
+				return false;
+			}
+
+		//- email checks
+			if(o('cemail').value != o('email').value){
+				alert('Emails did not match');
+			}else{
+				$.post('/admin/adduser', {first_name: o('first_name').value, middle_name: o('middle_name').value, last_name: o('last_name').value, email: o('email').value, cell: o('cell').value, facid:o('facid').value}, function(data){
+					alert('User added successfully');
+					window.location.href = window.location;
+				});
+			}
 		return false;
 	}
 	function submitformsurgeon(){
@@ -661,7 +786,7 @@ script.
 	//- function add_user(name){console.log(name);o('rightdiv').innerHTML = '<h2>Add User</h2><form method="get" onsubmit="return submitformuser()"><div class="form-group text-center" style="position:relative"><input class="form-control subdiv" id="first_name" type="text" required name="first_name" placeholder="Enter First Name" /><input class="form-control subdiv" id="middle_name" type="text" name="middle_name" placeholder="Enter Middle Name" /><input class="form-control subdiv" id="last_name" type="text" name="last_name" required placeholder="Enter Last Name" /><input class="form-control subdiv" id="cell" type="text" name="cell" required oninput="validatePhoneNumber(this)" placeholder="Enter Cell" /><input class="form-control subdiv" id="email" type="text" name="email" required oninput="validateEmail(this)" placeholder="Enter Email" /><input class="form-control subdiv" required id="cemail" type="text" name="cemail" placeholder="Enter Confirm Email" /><br><input type="hidden" name="facid" id="facid" value="'+name+'" /><input class="btn cbut blue bbbutons" type="submit" style="position:relative;left:-4%" value="Save"><br></div></form>';}
 
 	function add_user(name) {
-		console.log(name);
+		//- console.log(name);
 
 		var formHTML = `
 		<h2>Add User</h2>
@@ -706,7 +831,7 @@ script.
 		document.getElementById('rightdiv').innerHTML = formHTML;
 	}
 
-	function add_surgeon2(name,fname){console.log(name);o('rightdiv').innerHTML = '<h2>Add Surgeon</h2><div style="text-align:left;font-weight:bold;margin-left:10px">'+fname+'</div><input type="text" placeholder="Name/NPI" class="magnify" id="searchtext" onkeyup="search_surgeon('+name+',this.value)" /><br><input class="btn cbut blue bbbutons" type="button" style="left:-4%;margin-top:10px;position:relative;" value="Search" /><div id="searchpopup"></div>';}
+	function add_surgeon2(name,fname){console.log(name);o('rightdiv').innerHTML = '<h2>Link A Surgeon</h2><div style="text-align:left;font-weight:bold;margin-left:10px">'+fname+'</div><input type="text" placeholder="Name/NPI" class="magnify" id="searchtext" onkeyup="search_surgeon('+name+',this.value)" /><br><input class="btn cbut blue bbbutons" type="button" style="left:-4%;margin-top:10px;position:relative;" value="Search" /><div id="searchpopup"></div>';}
 
 	function npis(val){
 		console.log(val+'---------');
@@ -1007,9 +1132,10 @@ script.
 
 	function submitform(){
 		console.log('In the Add Facility function');
-
-		$.post('/admin/addFacility', {facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value, facility_email: o('facility_email').value }, function(data){
+		
+		$.post('/admin/addFacility', {facility_ID: o('facility_ID').value,facility_name: o('facility_name').value, facility_website: o('facility_website').value, facility_phone: o('facility_phone').value, facility_fax: o('facility_fax').value, facility_email: o('facility_email').value }, function(data){
 		console.log('In the function');
+			o('facility_ID').value= '';
 			o('facility_name').value = '';
 			o('facility_website').value = '';
 			o('facility_phone').value = '';

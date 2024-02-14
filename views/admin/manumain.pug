@@ -70,6 +70,8 @@ h2(style='text-align: center;margin: 20px 0 0;') Manufacturer Management
 				a(href="javascript:brands()") Brands
 			li
 				a(href="javascript:models()") Models
+			li
+				a(href="javascript: lenspower()") Lens power
 	.col-md-9#rightdiv
 script.
 	function manufacturers(){
@@ -96,6 +98,7 @@ script.
 		if(ch==1){msg='Do you really want to delete manufacturer';}
 		else if(ch==2){msg='Do you really want to delete brand';}
 		else if(ch==3){msg='Do you really want to delete model';}
+		else if(ch==4){msg='Do you really want to remove power of lens?';}
 
 		if(confirm(msg))
 		$.post('/admin/deleteEntity',{ch:ch,id:id},function(data){
@@ -149,6 +152,7 @@ script.
 		url = '/admin/';
 		var option = document.createElement("option");
 		m = o('manusele');
+		mod = o('modsele');
 
 		if(id =='manu'){
 			url += 'allmanufacturers';
@@ -193,6 +197,21 @@ script.
 		$(".content").toggle();
 		loadoptions('brand');
 	}
+
+	function showaddpower(){
+		html = '<div id="close-btn" onclick="togglePopup()">X</div>';
+		html += '<select id="modsele"></select>';
+		html += '<br>';
+		html += '<br>';
+		html += '<input id="power" type="text" name="power" placeholder="Enter Power number" style="padding:10px">';
+		html += '<br>';
+		html += '<br>';
+		html += '<input type="button"  value="Add" onclick="addpower()" style="padding:5px">';
+		o('moddiv').innerHTML = html;
+		$(".content").toggle();
+		loadoptions('model');
+	}
+
 	function showaddmanufacturers(){$(".content").toggle();}
 	function togglePopup(){$(".content").toggle();}
 	function brands(){
@@ -212,6 +231,7 @@ script.
 			o('rightdiv').innerHTML = html;
 			});
 	}
+
 	function models(){
 		console.log('In the models---------');
 		$.post('/admin/allmodels',{},function(data){
@@ -234,6 +254,25 @@ script.
 	});
 	}
 
+	function lenspower(){
+		console.log('---------In Adding lens Power');
+		$.post('/admin/lenspower',{},function(data){
+			html = '<br><br><input type="button" onclick="showaddpower()" value="Add power" /><br>';
+
+			html += '<br><label for= "modelSearch">Search Model: </label>'
+			html += '<input type= "search" id= "modelsearch" placeholder="Enter Model to Search For" class= "magnify" style="width:50%" onkeyup="searchModel()" name="modelsearch">'
+
+			html += '<br><table class="table" id="powerTable"><tr><th scope="col">Id</th><th scope="col">Brand</th><th scope="col">Model Name</th><th scope="col">Lens Power</th><th>Action</th></tr>';
+			results = data.results;
+			for(i=0;i<results.length;i++){ // id , model_name , bid
+				console.log(data[i]);
+				html += '<tr><td>'+(i+1)+'</td><td>'+results[i].model_name+'</td><td>'+results[i].bname+'</td><td>'+results[i].lens_power+'</td><td><img src="../images/trash.png" class="dbutton" onclick="deleteEntity(4,'+results[i].id+')" /></td></tr>';
+			}
+			html += '</table>';
+			o('rightdiv').innerHTML = html;
+
+		});
+	}
 
 	function searchBrand2() {
 		var input = document.getElementById("brandsearch");

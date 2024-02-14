@@ -291,7 +291,7 @@ router.post('/get_day_records_nnnn', async function(req, res, next) {
 	reqs.m=reqs.m<10?'0'+reqs.m:reqs.m;
 	reqs.d=reqs.d<10?'0'+reqs.d:reqs.d;
 	sid=reqs.sid;
-	
+	console.log("month"+reqs.m, "day"+reqs.d, sid);
 	sql = 'select  id from facilities where email = (select name from users where id = '+sid+')';
 	
 	await conn.query(sql, function (err, result) {
@@ -446,7 +446,7 @@ router.post('/save_order', async function(req, res, next) {
 	*/
 	
 	// ,b_manufacture_id,b_brand_id ,b_model_id ,b_power_id
-	var sql = 'INSERT INTO orders(surgery_center_id, surgery_date, first_name, middle_name, last_name, patient_dob, side, manufacture_id, brand_id, model_id, power_id,surgeon_id ,practise_id,first_sel_type,second_sel_type,status,b_manufacture_id, b_brand_id , b_model_id , b_power_id , bin_mac_id) VALUES('+reqs.sucenter+', "'+reqs.start_dt+'", "'+reqs.fn+'", "'+reqs.mn+'", "'+reqs.ln+'", "'+reqs.dob+'", "'+reqs.side+'", '+reqs.manu+', '+reqs.brand+', '+reqs.model+', "'+reqs.power+'", '+req.session.userid+', '+reqs.sucenter+', "'+reqs.back_iol+'", "'+reqs.pri_iol+'",0, '+reqs.manu2+', '+reqs.brand2+', '+reqs.model2+', "'+reqs.power2+'","")'; 
+	var sql = 'INSERT INTO orders(surgery_center_id, surgery_date, first_name, middle_name, last_name, patient_dob, side, manufacture_id, brand_id, model_id, power_id,surgeon_id ,practise_id,first_sel_type,second_sel_type,status,b_manufacture_id, b_brand_id , b_model_id , b_power_id , bin_mac_id, gender) VALUES('+reqs.sucenter+', "'+reqs.start_dt+'", "'+reqs.fn+'", "'+reqs.mn+'", "'+reqs.ln+'", "'+reqs.dob+'", "'+reqs.side+'", '+reqs.manu+', '+reqs.brand+', '+reqs.model+', "'+reqs.power+'", '+req.session.userid+', '+reqs.sucenter+', "'+reqs.back_iol+'", "'+reqs.pri_iol+'",0, '+reqs.manu2+', '+reqs.brand2+', '+reqs.model2+', "'+reqs.power2+'", "", "'+reqs.gender+'")'; 
 	console.log(sql);
 	
 	await conn.query(sql, function (err, result) {
@@ -603,6 +603,7 @@ router.get('/manumain', async function(req, res, next) {
 });
 router.post('/deleteEntity', async function(req, res, next) {
 	reqs=req.body;
+	console.log(reqs)
 	/*
 	'select id,mname,cell from manufacturers';
 	// "select id, bname, mid from brands";"select id , model_name , bid from models "
@@ -649,6 +650,12 @@ router.post('/deleteEntity', async function(req, res, next) {
 		});
 	}else if(reqs.ch==3){
 		sql='delete from models where id='+reqs.id;
+		await conn.query(sql, function (err, result) {if (err) console.log( err);
+		});
+	}else if(reqs.ch==4){
+		console.log("=========>>>>>>In deleting lens power service");
+
+		sql='delete from power where id='+reqs.id;
 		await conn.query(sql, function (err, result) {if (err) console.log( err);
 		});
 	}
@@ -831,30 +838,55 @@ router.post('/removepractise', async function(req, res, next) {
 });
 
 router.post('/save_search_surgeon', async function(req, res, next) {
-	var reqs=req.body;
-	console.log(reqs);
-	sids=reqs.sids;
-	//sids = sids.replace(/\|/g, '');
-	sidArr = sids.split('|');
-	/*sArr = [];
-	for(i=0;i<sidArr.length;i++){
-		if(sidArr[i] != '')
-			sArr.push(sidArr[i]);
-	}*/
-	//  fid,sids
-	// reqs.fid 
-	
-	//sql = 'select id,surgeons from facilities where id='+reqs.fid;
-	for(i=0;i<sidArr.length;i++){
-		if(sidArr[i] != ''){
-			sql = 'insert into surgeon_facility(surgeon_id,status,facility_id) values('+sidArr[i]+',0,'+reqs.fid+')';
-			await conn.query(sql, function (err, result) {
-			if (err) console.log(err);
-			});
-		}
-	}
-	res.send({});
+    var reqs = req.body;
+    console.log(reqs);
+    sids = reqs.sids;
+    sidArr = sids.split('|');
+
+    let insertionMade = false;
+
+    for (i = 0; i < sidArr.length; i++) {
+        if (sidArr[i] != '') {
+            const surgeonId = sidArr[i];
+            const facilityId = reqs.fid;
+
+            // Check if the record exists in the table
+            const checkIfExistsQuery = `SELECT * FROM surgeon_facility WHERE surgeon_id = ${surgeonId} AND facility_id = ${facilityId}`;
+            
+            conn.query(checkIfExistsQuery, async function(err, rows) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    if (rows.length === 0) {
+                        // If the record doesn't exist, perform the insertion
+                        const insertQuery = `INSERT INTO surgeon_facility (surgeon_id, status, facility_id) VALUES (${surgeonId}, 0, ${facilityId})`;
+                        
+                        await conn.query(insertQuery, function(err, result) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                insertionMade = true;
+                            }
+                        });
+                    } else {
+                        console.log('Surgeon already linked to facility.');
+						// res.send({ message: "Surgeon already linked to the selected facility."});
+                    }
+                }
+            });
+        }
+    }
+
+    // Send response after all operations are completed
+    if (insertionMade) {
+        res.send({ message: 'Surgeon(s) linked to the facility.' });
+    } else {
+        res.send({ message: 'No new links added. Surgeon(s) already linked to the facility.' });
+    }
 });
+
+
+
 
 function mergeResult(surgeons, sids){
 	surarr = []; siarr = [];
@@ -1008,7 +1040,7 @@ router.post('/search_surgeon', async function(req, res, next) {
 */
 router.post('/scorderhistory', async function(req, res, next) {
 	var reqs = req.body;
-	console.log(reqs); // reqs.fid
+	// console.log(reqs); // reqs.fid
 	fid = reqs.fid;
 	fffid = 0;
 	
@@ -1021,7 +1053,7 @@ router.post('/scorderhistory', async function(req, res, next) {
 	*/
 	
 	sql = 'select id, name from users where id='+reqs.fid;
-	console.log(sql);
+	// console.log(sql);
 	await conn.query(sql, function (err, result) {
 		if(undefined != result){
 			sql = 'select id,fname,cell,email,fax,website from facilities where email = "'+result[0].name+'"';
@@ -1031,9 +1063,10 @@ router.post('/scorderhistory', async function(req, res, next) {
 					fffid = result2[0].id;
 					fobj = result2[0];
 					
-					sql = 'select o.id,surgery_date,patient_dob,side ,status,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id='+fffid+' and (status=3 or status = 4 or status = 1)';
+					// sql = 'select o.id,surgery_date,patient_dob,side ,status,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id='+fffid+' and (status=3 or status = 4 or status = 1)';
+					const sql = 'select o.id,surgery_date,patient_dob,status, concat(o.first_name, " ", o.middle_name, " ", o.last_name) as Patient_name,concat(u.first_name, " ",u.middle_name, " ", u.last_name) as Surgeon_name from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id= '+fffid+' and (status=3 or status = 4 or status = 1)';
 					console.log(':-'+sql);
-					html = '<h2 style="width:100%;text-align:center">Completed Orders</h2><table class="table"><tr><th class="thdd">Sr#</th><th class="thdd">Surgeon NPI</th><th class="thdd">Surgeon Name</th><th class="thdd">DOS</th><th class="thdd">Status</th></tr>';
+					html = '<h2 style="width:100%;text-align:center">Completed Orders</h2><table class="table"><tr><th class="thdd">Sr#</th><th class="thdd">DOS</th><th class="thdd">Patient Name</th><th class="thdd">Surgeon Name</th><th class="thdd">Status</th></tr>';
 	
 					conn.query(sql, function (err, result33) {
 						if (err) console.log( err);
@@ -1042,7 +1075,7 @@ router.post('/scorderhistory', async function(req, res, next) {
 							for(i=0;i<result33.length;i++){
 								obj = result33[i];
 								//console.log(obj);
-								html += '<tr class="cp" onclick="printorder('+obj.id+')"><td>'+(i+1)+'</td><td>'+(obj.npi)+'</td><td>'+(obj.first_name +' '+ obj.middle_name + ' ' +obj.last_name)+'</td><td>'+(obj.surgery_date)+'</td>';
+								html += '<tr class="cp" onclick="printorder('+obj.id+')"><td>'+(i+1)+'</td><td>'+(obj.surgery_date)+'</td><td>'+(obj.Patient_name)+'</td><td>'+(obj.Surgeon_name)+'</td>';
 								if(obj.status == 3){ // completed
 									html += '<td style="color:green">Completed</td>';
 								}else{
@@ -1050,7 +1083,7 @@ router.post('/scorderhistory', async function(req, res, next) {
 								}
 								
 								html += '</tr>';
-								console.log(html);
+								// console.log(html);
 							}
 							html += '</table>';
 					
@@ -1184,9 +1217,13 @@ router.post('/scneworders2', async function(req, res, next) {
 	var reqs = req.body;
 	console.log(reqs); // reqs.fid
 	// fid = reqs.fid;
-	m = reqs.m;
-	d = reqs.d;
+	m = reqs.m<10?'0'+reqs.m:reqs.m;;
+	d = reqs.d<10?'0'+reqs.d:reqs.d;
 	y = reqs.y;
+
+	sid=reqs.sid;
+	console.log("month"+reqs.m, "day"+reqs.d, sid);
+
 	sid = reqs.sid;
 	surid = reqs.surid;
 	
@@ -1208,7 +1245,7 @@ router.post('/scneworders2', async function(req, res, next) {
 					
 					
 					*/
-					sql = 'select o.id,surgery_date,patient_dob,side,o.first_name as fn,o.middle_name as mn,o.last_name   as ln,manufacture_id,brand_id,model_id,power_id,surgeon_id,practise_id,first_sel_type,second_sel_type, u.npi, u.first_name,u.middle_name,u.last_name  from orders o left join other_users u on u.user_id = o.surgeon_id where surgery_center_id = '+sid+' and surgeon_id='+surid+' and surgery_date like "'+m+'/'+d+'/'+y+'" ';
+					sql = 'select o.id,surgery_date,concat(o.first_name, " ",o.middle_name, " ",o.last_name) as Patient_name, concat(u.first_name, " ",u.middle_name, " ",u.last_name) as surgeon_name  from orders o left join other_users u on u.user_id = o.surgeon_id  where o.status = 0 AND surgery_center_id = '+sid+' and surgeon_id='+surid+' and surgery_date like "'+m+'/'+d+'/'+y+'" ';
 					console.log(':-'+sql);
 					html = '<h2 style="width:100%;text-align:center"></h2><table class="table"><tr><th class="thdd">Sr#</th><th class="thdd">Patient Name</th><th class="thdd">Surgeon Name</th><th class="thdd">DOS</th></tr>';
 	
@@ -1219,7 +1256,7 @@ router.post('/scneworders2', async function(req, res, next) {
 							for(i=0;i<result33.length;i++){
 								obj = result33[i];
 								//console.log(obj);
-								html += '<tr class="cp" onclick="openorder('+obj.id+')"><td>'+(i+1)+'</td><td>'+(obj.fn+' '+obj.mn+' '+obj.ln)+'</td><td>'+(obj.first_name +' '+ obj.middle_name + ' ' +obj.last_name)+'</td><td>'+(obj.surgery_date)+'</td></tr>';
+								html += '<tr class="cp" onclick="openorder('+obj.id+')"><td>'+(i+1)+'</td><td>'+(obj.Patient_name)+'</td><td>'+(obj.surgeon_name)+'</td><td>'+(obj.surgery_date)+'</td></tr>';
 								console.log(html);
 							}
 							html += '</table>';
@@ -1319,25 +1356,25 @@ router.post('/loadbins', async function(req, res, next) {
 router.post('/printorder', async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
-	
-	sql = 'select surgery_date,patient_dob,side, m.mname, b.bname, d.model_name ,manufacture_id,brand_id,model_id,power_id,surgeon_id, practise_id,first_sel_type,second_sel_type, u.npi, o.first_name,o.middle_name,o.last_name,u.first_name as sfname, u.last_name as lfname, u.middle_name as mfname  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
-	
+
+	sql = 'SELECT orders.surgery_date, orders.patient_dob, orders.side AS Surgery_Side, CONCAT(other_users.first_name, " ", other_users.last_name) AS Surgeon_Name, CONCAT(orders.first_name, " ", orders.last_name) AS Patient_Name, CONCAT(m.mname , ",", b.bname ,"," ,models.model_name, ":" , orders.power_id) AS PrimaryIOL, CONCAT(mb.mname, "," ,bb.bname  ,",", mob.model_name, ":", b_power_id ) AS BackupIOL FROM bins LEFT JOIN orders ON bins.mac_id = orders.bin_mac_id LEFT JOIN other_users ON orders.surgeon_id = other_users.user_id LEFT JOIN manufacturers AS m ON orders.manufacture_id = m.id LEFT JOIN brands AS b ON orders.brand_id = b.id LEFT JOIN models ON orders.model_id = models.id LEFT JOIN manufacturers AS mb ON orders.b_manufacture_id = mb.id LEFT JOIN brands AS bb ON orders.b_brand_id = bb.id LEFT JOIN models AS mob ON orders.b_model_id = mob.id WHERE orders.id =' + reqs.oid;
+	console.log(sql);
 	await conn.query(sql, function (err, result) {
+		console.log(result)
 		obj = result[0];
-		html = '<table class="table"><tr><td colspan="2" style="font-size:25px;text-align:center"><b>Information</b></td></tr><tr><td>Surgeon Name</td><td>'+(obj.sfname+' '+obj.mfname+' '+obj.lfname)+'</td></tr>'
-		+'<tr><td>Surgeon NPI</td><td>'+(obj.npi)+'</td></tr>'
-		
+		html = '<table class="table"><tr><td colspan="2" style="font-size:25px;text-align:center"><b>Information</b></td></tr><tr><td>Surgeon Name</td><td>'+(obj.Surgeon_Name)+'</td></tr>'
 		+'<tr><td>Surgeon Date</td><td>'+(obj.surgery_date)+'</td></tr>'
-		+'<tr><td>Patient First Name</td><td>'+(obj.first_name)+'</td></tr>'
-		+'<tr><td>Patient Middle Name</td><td>'+(obj.middle_name)+'</td></tr>'
-		+'<tr><td>Patient Last Name</td><td>'+(obj.last_name)+'</td></tr>'
+		+'<tr><td>Patient Name</td><td>'+(obj.Patient_Name)+'</td></tr>'
+		// +'<tr><td>Patient Middle Name</td><td>'+(obj.middle_name)+'</td></tr>'
+		// +'<tr><td>Patient Last Name</td><td>'+(obj.last_name)+'</td></tr>'
 		+'<tr><td>Date of Birth</td><td>'+(obj.patient_dob)+'</td></tr>'
 		
-		+'<tr><td>Selected side</td><td>'+(obj.side)+'</td></tr>'
-		+'<tr><td>Manufacture</td><td>'+(obj.mname)+'</td></tr>'
-		+'<tr><td>Brand</td><td>'+(obj.bname)+'</td></tr>'
-		+'<tr><td>Power</td><td>'+(obj.power_id)+'</td></tr>'
-		+'<tr><td>Stock Level</td><td>2</td></tr>'
+		+'<tr><td>Surgery side</td><td>'+(obj.Surgery_Side)+'</td></tr>'
+		+'<tr><td>IOL(P)</td><td>'+(obj.PrimaryIOL)+'</td></tr>'
+		+'<tr><td>IOL(B)</td><td>'+(obj.BackupIOL)+'</td></tr>'
+		// +'<tr><td>Brand</td><td>'+(obj.bname)+'</td></tr>'
+		// +'<tr><td>Power</td><td>'+(obj.power_id)+'</td></tr>'
+		+'<tr><td>Stock Level</td><td>Future Development</td></tr>'
 		//+'<tr><td colspan="2" style="color:red;text-align:center">Please check all the information for accuracy<td></tr>'
 		+'<tr><td colspan="2" style="text-align:center"><input type="button" class="btn cbut blue bbbutons" value="Print" onclick="printorder2('+reqs.oid+')"/><td></tr>'
 		+'</table>';
@@ -1350,30 +1387,24 @@ router.post('/printorder', async function(req, res, next) {
 
 router.post('/openorder', async function(req, res, next) {
 	reqs = req.body;
-	console.log(reqs);
+	console.log("in the openorder and order id is:",reqs);
 	
 	
 	
 	//reqs.oid;
-	sql = 'select surgery_date,patient_dob,side, m.mname, b.bname, d.model_name  , o.surgery_center_id,manufacture_id,brand_id,model_id,power_id,surgeon_id, practise_id,first_sel_type,second_sel_type, u.npi, o.first_name,o.middle_name,o.last_name,u.first_name as sfname, u.last_name as lfname, u.middle_name as mfname  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
+	sql = 'select o.surgery_date,o.surgery_center_id,o.patient_dob,o.side AS Surgery_Side,CONCAT(u.first_name, " ",u.middle_name," ", u.last_name) AS Surgeon_Name, CONCAT(o.first_name," " , o.middle_name, " ", o.last_name) AS Patient_Name,o.gender as patient_gender, CONCAT(m.mname , ",", b.bname ,"," ,d.model_name,",",  "Power:", o.power_id) AS PrimaryIOL,CONCAT(m.mname, "," ,b.bname  ,",", d.model_name,",",  "Power:", o.b_power_id ) AS BackupIOL  from orders o	left join manufacturers m on m.id = o.manufacture_id left join brands b on b.id = o.brand_id left join models d on d.id = o.model_id left join other_users u on u.user_id = o.surgeon_id where o.id='+reqs.oid;
 	fid=0;html = '';occu=0;
 	await conn.query(sql, function (err, result) {
 		obj = result[0];
 		if(fid==0){fid=obj.surgery_center_id;}
-		html = '<table class="table"><tr><td colspan="2" style="font-size:25px;text-align:center"><b>Information</b></td></tr><tr><td>Surgeon Name</td><td>'+(obj.sfname+' '+obj.mfname+' '+obj.lfname)+'</td></tr>'
-		+'<tr><td>Surgeon NPI</td><td>'+(obj.npi)+'</td></tr>'
-		
+		html = '<table class="table"><tr><td colspan="2" style="font-size:25px;text-align:center"><b>Information</b></td></tr><tr><td>Surgeon Name</td><td>'+(obj.Surgeon_Name)+'</td></tr>'
 		+'<tr><td>Surgeon Date</td><td>'+(obj.surgery_date)+'</td></tr>'
-		+'<tr><td>Patient First Name</td><td>'+(obj.first_name)+'</td></tr>'
-		+'<tr><td>Patient Middle Name</td><td>'+(obj.middle_name)+'</td></tr>'
-		+'<tr><td>Patient Last Name</td><td>'+(obj.last_name)+'</td></tr>'
+		+'<tr><td>Patient Name</td><td>'+(obj.Patient_Name)+'</td></tr>'
 		+'<tr><td>Date of Birth</td><td>'+(obj.patient_dob)+'</td></tr>'
-		
-		+'<tr><td>Selected side</td><td>'+(obj.side)+'</td></tr>'
-		+'<tr><td>Manufacture</td><td>'+(obj.mname)+'</td></tr>'
-		+'<tr><td>Brand</td><td>'+(obj.bname)+'</td></tr>'
-		+'<tr><td>Power</td><td>'+(obj.power_id)+'</td></tr>'
-		+'<tr><td>Stock Level</td><td>2</td></tr>'
+		+'<tr><td>Patient Gender</td><td>'+(obj.patient_gender)+'</td></tr>'
+		+'<tr><td>Selected side</td><td>'+(obj.Surgery_Side)+'</td></tr>'
+		+'<tr><td>IOL(P)</td><td>'+(obj.PrimaryIOL)+'</td></tr>'
+		+'<tr><td>IOL(B)</td><td>'+(obj.BackupIOL)+'</td></tr>'
 		+'<tr><td colspan="2" style="color:red;text-align:center">Please check all the information for accuracy<td></tr>'
 		
 		// if(obj.bin_mac_id != '') occu++;
@@ -1432,74 +1463,94 @@ router.post('/openorder', async function(req, res, next) {
 router.post('/approveorder', async function(req, res, next) {
 	reqs = req.body;
 	console.log(reqs);
-	
+	console.log("In the Approve Order process......")
 	sql = 'select surgery_date,surgery_center_id,bin_mac_id from orders where id='+reqs.oid;
 	//sql = 'update orders set status = 1 where id='+reqs.oid;
 	await conn.query(sql, function (err, result) {
 		fact_id = 0;
 		if(result[0].bin_mac_id == ''){
+			console.log("assigning slot of a masterbin")
 			fact_id = result[0].surgery_center_id;
 			surg_id = result[0].surgery_date;
-		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status int,
-		// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
-		// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
-		sql = ' select bin_mac_id from orders where surgery_center_id='+fact_id +' and surgery_date="' +  surg_id+'"';
-		console.log(sql);
-		conn.query(sql, function (err, bookedbins) {
-			obj = bookedbins[0];
-			bbins = [];selected_mac_id=''; // array.splice(index, 1);
-			for(i=0;i<bookedbins.length;i++){if(bookedbins[i].bin_mac_id!='') bbins.push(bookedbins[i].bin_mac_id);}
-			//if(bbins.length>0)selected_mac_id=bbins[0];
-			sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+fact_id;
+			console.log("I am the surgery Date",surg_id);
+			const currentDate = moment().format('MM/DD/YYYY');
+			console.log("I am the current Date",currentDate);
+			// surgery_dt varchar(25) NOT NULL, facility_id    int,  status int,
+			// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
+			// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
+			sql = ' select bin_mac_id from orders where surgery_center_id='+fact_id +' and surgery_date="' +  surg_id+'"';
 			console.log(sql);
-			conn.query(sql, function (err, facbins) {
-				
-				
-				all_facbin = [];for(i=0;i<facbins.length;i++){all_facbin.push(facbins[i].mac_id);}
+			conn.query(sql, function (err, bookedbins) {
+				obj = bookedbins[0];
+				bbins = [];selected_mac_id=''; // array.splice(index, 1);
 				for(i=0;i<bookedbins.length;i++){
-					if(all_facbin.includes(bookedbins[i])){
-						ind = all_facbin.indexOf(bookedbins[i]);
-						all_facbin.splice(ind, 1);
-					}
+					if(bookedbins[i].bin_mac_id!=''){
+						bbins.push(bookedbins[i].bin_mac_id);
+					} 
 				}
-				selected_bin='';
-				if(all_facbin.length > 0)					
-					selected_bin = all_facbin[0];
-				
-				sql = 'update orders set status = 1,bin_mac_id= "'+selected_bin+'" where id='+reqs.oid;
-				conn.query(sql, function (err, freebins) {
-					if (err) {
-						console.error(err);
-						res.status(500).json({ message: "Error in finding available slots" });
-						return;
+				//if(bbins.length>0)selected_mac_id=bbins[0];
+				sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+fact_id;
+				console.log(sql);
+				conn.query(sql, function (err, facbins) {	
+					
+					all_facbin = [];for(i=0;i<facbins.length;i++){all_facbin.push(facbins[i].mac_id);}
+					for(i=0;i<bookedbins.length;i++){
+						if(all_facbin.includes(bookedbins[i])){
+							ind = all_facbin.indexOf(bookedbins[i]);
+							all_facbin.splice(ind, 1);
+						}
 					}
-					const selectAvailableSlotQuery = 'SELECT slot_ID FROM slots WHERE masterBin_mac_id = "'+selected_bin+'" AND status = 0 AND order_id= 0  ORDER BY slot_ID ASC LIMIT 1';
-					conn.query(selectAvailableSlotQuery, function (err, availableSlots){
+					selected_bin='';
+					if(all_facbin.length > 0){
+						
+						selected_bin = all_facbin[0];
+					}					
+					
+					sql = 'update orders set status = 1,bin_mac_id= "'+selected_bin+'" where id='+reqs.oid;
+					conn.query(sql, function (err, freebins) {
 						if (err) {
 							console.error(err);
 							res.status(500).json({ message: "Error in finding available slots" });
 							return;
 						}
-						if(availableSlots.length > 0){
-							const availableSlot = availableSlots[0].slot_ID;
-							// Now, store order details into the first available slot
-							const storeOrderDetailsQuery = 'UPDATE slots SET order_id= "'+reqs.oid+'" WHERE masterBin_mac_id = "'+selected_bin+'" AND slot_ID = "'+availableSlot+'"';
-							console.log(storeOrderDetailsQuery);
-							conn.query(storeOrderDetailsQuery, function (err, result) {
+						console.log("Matching date of surgery")
+						// if(surg_id === currentDate)
+						if(surg_id){
+							console.log("Date match");
+							// Rows already exist, proceed with your existing logic
+									const selectAvailableSlotQuery = 'SELECT slot_ID FROM slots WHERE masterBin_mac_id = "'+selected_bin+'" AND status = 0 AND order_id= 0  ORDER BY slot_ID ASC LIMIT 1';
+							conn.query(selectAvailableSlotQuery, function (err, availableSlots){
 								if (err) {
 									console.error(err);
-									res.status(500).json({ message: "Error in storing order details" });
+									res.status(500).json({ message: "Error in finding available slots" });
 									return;
 								}
-				
-								console.log("Order details stored in the slot" );
-							});
+								if(availableSlots.length > 0){
+									const availableSlot = availableSlots[0].slot_ID;
+									// Now, store order details into the first available slot
+									const storeOrderDetailsQuery = 'UPDATE slots SET order_id= "'+reqs.oid+'" WHERE masterBin_mac_id = "'+selected_bin+'" AND slot_ID = "'+availableSlot+'"';
+									console.log(storeOrderDetailsQuery);
+									conn.query(storeOrderDetailsQuery, function (err, result) {
+										if (err) {
+											console.error(err);
+											res.status(500).json({ message: "Error in storing order details" });
+											return;
+										}
+										console.log("Order details stored in the slot" );
+									});
+								}
+							})
 						}
-					})
-					res.send({});
+					});
 				});
+				res.send({});
+			});
+		}
+	});
+});
 				
 				/*
+				THIS WAS IN THE ABOVE api
 				sql = 'select id,mac_id    , facility_id  from bins_logs  where facility_id='+obj.surgery_center_id +' and surgery_dt !="'+obj.surgery_date+'"';
 				console.log(sql);
 				mac_id='';
@@ -1522,12 +1573,7 @@ router.post('/approveorder', async function(req, res, next) {
 						res.send({});});});
 				});
 				*/
-			});
-		});
-		}else{res.send({});}
-	});
-	
-});
+
 router.get('/sc_neworders', async function(req, res, next) {
 	if(checkAuth(req,res)) return;
 	
@@ -1904,6 +1950,17 @@ router.post('/allmodels', async function(req, res, next) {
 		res.send({results:result});
 	  });
 });
+
+router.post('/lenspower', async function(req, res, next) {
+	var sql = "select brands.bname, models.model_name ,power.lens_power from power left join models on models.id = power.model_id left join brands on brands.id = models.bid ";
+	
+	await conn.query(sql, function (err, result) {
+		if (err) throw err;
+		console.log("lens power query created");	
+		res.send({results:result});
+	  });
+});
+
 router.post('/modelbymid', async function(req, res, next) {
 	reqs = req.body;
 	var sql = "select id , model_name , bid from models where bid="+reqs.id;
@@ -2047,7 +2104,8 @@ router.post('/addFacility', async function(req, res, next) {
 	
 
 	try{
-		sql = "INSERT INTO facilities(fname,fax,cell,website,email,removed_users) VALUES('"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.facility_email+"',0)";
+		console.log("Adding facilities in DB")
+		sql = "INSERT INTO facilities(facility_ID,fname,fax,cell,website,email,removed_users) VALUES('"+reqs.facility_ID+"','"+reqs.facility_name+"','"+reqs.facility_fax+"','"+reqs.facility_phone+"','"+reqs.facility_website+"','"+reqs.facility_email+"',0)";
 		
 		conn.query(sql, function (err, result) {
 			if (err) throw err;
@@ -2341,7 +2399,7 @@ router.post('/showstatus', async function(req, res, next) {
 router.post('/showslots', async function(req, res, next) {
 	const userMacId = req.body.id; // Assuming the user sends the mac_id in the request body
 	console.log('Received mac_id:', userMacId);
-	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? AND order_id != 0';
+	const sql = 'SELECT * FROM slots WHERE masterBin_mac_id = ? ';
 	// console.log(sql);
 	conn.query(sql, [userMacId], function (err, binresults) {
 	  if (err) {

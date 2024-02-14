@@ -151,6 +151,21 @@ function checkToken(req){
 
 	});
 
+
+	// For Logging out
+	router.get('/logout',  function(req, res, next) {
+		console.log('in the logout');
+		//console.log(req.session);
+		try{
+		//if(typeof req.session === undefined){}else{
+			req.session.destroy(); //
+			console.log("Logged out.")
+			res.status(200); 
+		//}
+		}catch(e){console.log(e);}
+		res.send({})
+	}); 
+
 	// Endpoints for  creating New orders
 	router.post('/save_order', async function(req, res, next) {
 		var reqs = req.body;
@@ -211,8 +226,6 @@ function checkToken(req){
 						if(result.length > 0){
 							// console.log(result);
 							res.status(200).json(result);
-						}else{
-							res.json({ message: "No New order available"})
 						}
 					}
 				});
@@ -222,18 +235,21 @@ function checkToken(req){
 		});
 	});
 
-	// For Approving New Order
 	router.post('/approveorder', async function(req, res, next) {
 		reqs = req.body;
-		console.log(reqs);
-	
+		// console.log(reqs);
+		console.log("In the Approve Order process......")
 		sql = 'select surgery_date,surgery_center_id,bin_mac_id from orders where id='+reqs.oid;
 		//sql = 'update orders set status = 1 where id='+reqs.oid;
 		await conn.query(sql, function (err, result) {
 			fact_id = 0;
 			if(result[0].bin_mac_id == ''){
+				console.log("assigning slot of a masterbin")
 				fact_id = result[0].surgery_center_id;
 				surg_id = result[0].surgery_date;
+				// console.log("I am the surgery Date",surg_id);
+				const currentDate = moment().format('MM/DD/YYYY');
+				// console.log("I am the current Date",currentDate);
 				// surgery_dt varchar(25) NOT NULL, facility_id    int,  status int,
 				// surgery_dt varchar(25) NOT NULL, facility_id    int,  status 
 				// sql = 'select surgery_date,surgery_center_id from orders where id='+reqs.oid;
@@ -247,6 +263,8 @@ function checkToken(req){
 					sql = 'select binstatus,comments,fact_id,firmware, mac_id    , mandate,model  from bins  b  where removed_bins =0 and fact_id='+fact_id;
 					console.log(sql);
 					conn.query(sql, function (err, facbins) {
+						
+						
 						all_facbin = [];for(i=0;i<facbins.length;i++){all_facbin.push(facbins[i].mac_id);}
 						for(i=0;i<bookedbins.length;i++){
 							if(all_facbin.includes(bookedbins[i])){
@@ -256,8 +274,8 @@ function checkToken(req){
 						}
 						selected_bin='';
 						if(all_facbin.length > 0)					
-						selected_bin = all_facbin[0];
-				
+							selected_bin = all_facbin[0];
+						
 						sql = 'update orders set status = 1,bin_mac_id= "'+selected_bin+'" where id='+reqs.oid;
 						conn.query(sql, function (err, freebins) {
 							if (err) {
@@ -265,36 +283,70 @@ function checkToken(req){
 								res.status(500).json({ message: "Error in finding available slots" });
 								return;
 							}
-						const selectAvailableSlotQuery = 'SELECT slot_ID FROM slots WHERE masterBin_mac_id = "'+selected_bin+'" AND status = 0 AND order_id= 0  ORDER BY slot_ID ASC LIMIT 1';
-						conn.query(selectAvailableSlotQuery, function (err, availableSlots){
-						if (err) {
-							console.error(err);
-							res.status(500).json({ message: "Error in finding available slots" });
-							return;
-						}
-						if(availableSlots.length > 0){
-							const availableSlot = availableSlots[0].slot_ID;
-							// Now, store order details into the first available slot
-							const storeOrderDetailsQuery = 'UPDATE slots SET order_id= "'+reqs.oid+'", status = "occupied" WHERE masterBin_mac_id = "'+selected_bin+'" AND slot_ID = "'+availableSlot+'"';
-							console.log(storeOrderDetailsQuery);
-							conn.query(storeOrderDetailsQuery, function (err, result) {
-								if (err) {
-									console.error(err);
-									res.status(500).json({ message: "Error in storing order details" });
-									return;
-								}
-				
-								console.log("Order details stored in the slot" );
-							});
-						}
-						})
-					res.status(200).json({ message : "Successfully Approved;"});
+							console.log("Matching date of surgery")
+							if(surg_id === currentDate){
+								console.log("Date match");
+								const selectAvailableSlotQuery = 'SELECT slot_ID FROM slots WHERE masterBin_mac_id = "'+selected_bin+'" AND status = 0 AND order_id= 0  ORDER BY slot_ID ASC LIMIT 1';
+								conn.query(selectAvailableSlotQuery, function (err, availableSlots){
+									if (err) {
+										console.error(err);
+										res.status(500).json({ message: "Error in finding available slots" });
+							
+									}
+									if(availableSlots.length > 0){
+										const availableSlot = availableSlots[0].slot_ID;
+										// Now, store order details into the first available slot
+										const storeOrderDetailsQuery = 'UPDATE slots SET order_id= "'+reqs.oid+'" WHERE masterBin_mac_id = "'+selected_bin+'" AND slot_ID = "'+availableSlot+'"';
+										console.log(storeOrderDetailsQuery);
+										conn.query(storeOrderDetailsQuery, function (err, result) {
+											if (err) {
+												console.error(err);
+												res.status(500).json({ message: "Error in storing order details" });
+												return;
+											}
+											console.log("Order details stored in the slot" );
+										});
+									}
+								});
+							}
+							// else{
+							// 	// Do something else...
+							// 	console.log('Dates are not equal');
+							// }
+										
 						});
+								
 					});
+					
+					res.send({});
 				});
+					
+					/*
+					sql = 'select id,mac_id    , facility_id  from bins_logs  where facility_id='+obj.surgery_center_id +' and surgery_dt !="'+obj.surgery_date+'"';
+					console.log(sql);
+					mac_id='';
+					conn.query(sql, function (err, freebins) {
+						
+						if(freebins==undefined || freebins.length==0){
+							bin=facbins[0];
+							mac_id=facbins[0].mac_id;
+							sql = 'insert into bins_logs(surgery_dt,facility_id,status,order_id,mac_id) values("'+obj.surgery_date+'",'+obj.surgery_center_id+',1,'+reqs.oid+',"'+facbins[0].mac_id+'")';
+						}else if(freebins.length>0){
+							bin=freebins[0];
+							mac_id=freebins[0].mac_id;
+							sql = 'insert into bins_logs(surgery_dt,facility_id,status,order_id,mac_id) values("'+obj.surgery_date+'",'+obj.surgery_center_id+',1,'+reqs.oid+',"'+freebins[0].mac_id+'")';
+						}
+						console.log(sql);
+						
+						conn.query(sql, function (err, freebins) {
+							sql = 'update orders set status = 1,bin_mac_id= "'+mac_id+'" where id='+reqs.oid;
+							conn.query(sql, function (err, freebins) {
+							res.send({});});});
+					});
+					*/
 			}else{res.send({});}
 		});
-	
+			
 	});
 
 	// Endpoint for view order history as month
@@ -305,6 +357,7 @@ function checkToken(req){
 		fffid = 0;
 		sql = 'select id, name from users where id='+fid;
 		await conn.query(sql, function (err, result) {
+			console.log(result);
 			if(undefined != result){
 				sql = 'select id,fname,cell,email,fax,website from facilities where email = "'+result[0].name+'"';
 				conn.query(sql, function (err, result2){
@@ -476,26 +529,38 @@ function checkToken(req){
 		});
 	});
 
+	
 	// Endpoints for  related to see Master Bins
 	router.post('/mastersBins', async function(req, res, next) {
-		const { fact_id } = req.body;
-
-		if (!fact_id) {
-			return res.status(400).json({ error: 'Missing fact_id in the request body' });
+		const { user_id } = req.body;
+		const currentTime = moment(); // Use moment to get the current time
+		if (!user_id) {
+			return res.status(400).json({ error: 'Missing user_id in the request body' });
 		}
-
-		const sql = 'select  bins.binname,bins.binstatus,bins.firmware,bins.mac_id, bins.mandate, bins.model from facilities left join users ON facilities.email = users.name left join bins ON facilities.id= bins.fact_id WHERE bins.binstatus = 1 AND users.id = ?';
+	
+		const sql = 'SELECT bins.binstatus, bins.firmware, bins.mac_id, bins.mandate, bins.model, bin_logs.timestamp FROM facilities LEFT JOIN users ON facilities.email = users.name LEFT JOIN bins ON facilities.id = bins.fact_id LEFT JOIN bin_logs ON bins.mac_id = bin_logs.mac_id WHERE bins.binstatus = 1 AND users.id = ' + user_id;
 		console.log('SQL Query:', sql);
-
-		conn.query(sql, [fact_id], function (err, binresults) {
+	
+		conn.query(sql, [user_id], async function(err, binresults) {
+			console.log(binresults);
 			if (err) {
 				console.error('SQL Query Error:', err);
 				return res.status(500).json({ error: 'An error occurred while fetching data' });
 			}
-
-			// console.log('Fact ID:', fact_id);
-			// console.log('Data:', binresults);
-			res.status(200).json({ data: binresults });
+			
+			const filteredBins = binresults.map(bin => {
+				const lastHeartbeatTime = moment(bin.timestamp, 'YYYY-MM-DD HH:mm:ss');
+				const timeDifference = currentTime.diff(lastHeartbeatTime, 'minutes');
+				const connectionStatus = timeDifference <= 10 ? 1 : 0;
+				const { binname, timestamp, ...rest } = bin;
+				
+				// Create a new bin object with 'connection_status' key-value pair
+				return {
+					...rest,
+					connection_status: connectionStatus
+				};
+			});
+			return res.status(200).json({ bins: filteredBins });
 		});
 	});
 
@@ -623,45 +688,45 @@ function checkToken(req){
 			res.send({}); // or res.status(400).send('Email not provided');
 		}
 	});
-	// upload master bin details
-	router.post('/uploadbin',async function(req, res, next) {
-		reqs = req.body;
-		console.log(reqs);
+	// // upload master bin details
+	// router.post('/uploadbin',async function(req, res, next) {
+	// 	reqs = req.body;
+	// 	console.log(reqs);
 		
-		data = reqs;
-	/*
-	Expected output
-	------------------
-	[{
-		"masterBin_mac_id":"CC:DB:A7:12:91:2C",
-		"Slot_mac_id":"Slot 0",
-		"manufacturer_id":"",
-		"brand_id":"",
-		"model_id":"",
-		"status":"empty",
-		"order_id":"",
-		"power_id":"3",
-		"slotjson":""
-	}]
-	*/
+	// 	data = reqs;
+	// /*
+	// Expected output
+	// ------------------
+	// [{
+	// 	"masterBin_mac_id":"CC:DB:A7:12:91:2C",
+	// 	"Slot_mac_id":"Slot 0",
+	// 	"manufacturer_id":"",
+	// 	"brand_id":"",
+	// 	"model_id":"",
+	// 	"status":"empty",
+	// 	"order_id":"",
+	// 	"power_id":"3",
+	// 	"slotjson":""
+	// }]
+	// */
 
-	for(i=0;i<data.length;i++){
-		obj = data[i];
-		query = `INSERT INTO slots(masterBin_mac_id, Slot_id, manufacturer_id, brand_id, model_id, power_of_lens, status, order_id) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-	const values = [obj.masterBin_mac_id, obj.Slot_id, obj.manufacturer_id, obj.brand_id, obj.model_id, obj.power_of_lens, obj.status, obj.order_id];
+	// for(i=0;i<data.length;i++){
+	// 	obj = data[i];
+	// 	query = `INSERT INTO slots(masterBin_mac_id, Slot_id, manufacturer_id, brand_id, model_id, power_of_lens, status, order_id) 
+	// 	VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+	// const values = [obj.masterBin_mac_id, obj.Slot_id, obj.manufacturer_id, obj.brand_id, obj.model_id, obj.power_of_lens, obj.status, obj.order_id];
 
-	await conn.query(query, values, function (err, result) {
-		console.log(err);
-	});
+	// await conn.query(query, values, function (err, result) {
+	// 	console.log(err);
+	// });
 
 		
-	}
+	// }
 
-	console.log('Sending success response');
-	res.json({"message":"success"});
+	// console.log('Sending success response');
+	// res.json({"message":"success"});
 
-	});
+	// });
 
 			
 	//change password
@@ -953,7 +1018,7 @@ function checkToken(req){
 
 
 
-// General Function to update slots table at every night 12:00 AM 
+// General Function to remove past date orders from slots table at every night 12:00 AM 
 	function slotsTBupdate() {
 		const currentDate = new Date();
 		currentDate.setHours(0, 0, 0, 0);
@@ -977,12 +1042,92 @@ function checkToken(req){
 		});
 	}
 
+	async function orderPlace() {
+		console.log("Updating slots table with new orders");
+		const currentDate = new Date();
+		currentDate.setHours(0, 0, 0, 0);
+		const sql = `SELECT id, bin_mac_id FROM orders WHERE surgery_date = DATE_FORMAT(CURRENT_DATE(),'%m/%d/%Y')`;
+		console.log("Query is ", sql);
+	
+		try {
+			const result = await new Promise((resolve, reject) => {
+				conn.query(sql, (err, result) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(result);
+					}
+				});
+			});
+	
+			if (!result || result.length === 0) {
+				console.log("No master bin is available with the mac address");
+				console.log("No slot is available to get an order. All the slots are occupied.");
+				return; // No orders to process, exit function
+			}
+	
+			for (const row of result) {
+				console.log("Row is id", row.id);
+				console.log("Row is id", row.bin_mac_id);
+	
+				const checkExistingOrderSql = `SELECT COUNT(*) AS count FROM slots WHERE order_id = ${row.id}`;
+				const existingOrderResult = await new Promise((resolve, reject) => {
+					conn.query(checkExistingOrderSql, (err, result) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(result[0].count);
+						}
+					});
+				});
+	
+				if (existingOrderResult === 0) {
+					const updateSql = `UPDATE slots
+										SET order_id = ${row.id}
+										WHERE masterBin_mac_id = '${row.bin_mac_id}'
+										AND (status = '0' OR status = 'empty')
+										AND order_id = 0
+										ORDER BY slot_ID ASC
+										LIMIT 1`;
+	
+					const updateResult = await new Promise((resolve, reject) => {
+						conn.query(updateSql, (err, result) => {
+							if (err) {
+								reject(err);
+							} else {
+								resolve(result);
+							}
+						});
+					});
+	
+					if (updateResult && updateResult.affectedRows > 0) {
+						console.log(`Updated slots for bin_mac_id '${row.bin_mac_id}' with order_id ${row.id}`);
+					} else {
+						console.log(`No available slot for bin_mac_id '${row.bin_mac_id}' to assign order_id ${row.id}`);
+						// Handle case where the slot was not updated (all slots might be occupied)
+					}
+				} else {
+					console.log(`Order ID ${row.id} already exists in slots table. Skipping update.`);
+				}
+			}
+		} catch (err) {
+			console.error("Error:", err);
+		}
+	};
+	
+	
 	// Schedule the task to run at 12:01 AM every day
-	cron.schedule('1 0 * * *', () => {
+	const task1 = cron.schedule('0 0 * * *', () => {
 		slotsTBupdate();
 	}, {
 		scheduled: true,
 		timezone: 'America/New_York' // Replace with your timezone, e.g., 'America/New_York'
 	});
 
+	const task2 = cron.schedule('1 0 * * *', () => {
+		orderPlace();
+	}, {
+		scheduled: true,
+		timezone: 'America/New_York' // Replace with your timezone, e.g., 'America/New_York'
+	});
 module.exports = router;

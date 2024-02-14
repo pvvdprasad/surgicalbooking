@@ -28,7 +28,7 @@ if( pageid == 'neworder')
 	input(type='hidden' id='hidid' name='hidid' value=pageid)
 	input(type='hidden' id='surgyid' name='surgyid' value=uid)
 	if pageid == 'neworder'
-		.col-md-8#rightdiv_neworder(style='border:1px solid #e7e7e7;margin:12px;width:98%')
+		.col-md-8#rightdiv_neworder(style='border:1px solid #00000038;margin:12px;width:90%; border-radius: 15px; z-index= 1')
 	else if pageid == 'orderhistory'
 		.col-md-8#rightdiv_orderhistory(style='border:1px solid #e7e7e7;margin:12px' )
 	else if pageid == 'reports'
@@ -195,13 +195,13 @@ script.
 	}
 	function loadbins(fid){
 		$.post('/admin/loadbins', {fid:fid}, function(data){ // facid
-			console.log(data);
+			//- console.log(data);
 			o('rightbins').innerHTML = data.html;
 		});
 	}
 	function loadorderhistory(fid){
 		$.post('/admin/scorderhistory', {fid:fid}, function(data){ // facid
-			console.log(data);
+			//- console.log(data);
 			o('rightdiv_orderhistory').innerHTML = data.html;
 			//if(ch == 2) window.location.href = window.location; 
 			//else o('subdivddd').innerHTML = '';

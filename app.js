@@ -11,6 +11,7 @@ var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var usersRouter = require('./routes/users');
 var servicesRouter = require('./routes/services');
+var iotpublishRouter = require('./routes/publish')
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin', adminRouter);
 app.use('/services', servicesRouter);
+app.use('/publish', iotpublishRouter);
 app.use(express.static('public'));
 
 

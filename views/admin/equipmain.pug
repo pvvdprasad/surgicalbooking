@@ -126,6 +126,11 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
 				div.did-floating-label-content
 					input#model_name.form-control.did-floating-input(type='text' name='model_name' placeholder=' ')
 					label.did-floating-label Enter Model
+					//- label.did-floating-label(for='bin_type' class='did-floating-label did-floating-label1') Select Bin Type
+					//- select.did-floating-input.float-label-input.form-select#bin_type(type="text" name='bin_type' placeholder=' ')
+					//- 	option(value='')= 'Select Bin Type'
+					//- 	option(value='master bin')= 'Master Bin'
+					//- 	option(value='slave')= 'Slave'
 				div.did-floating-label-content
 					input#mac_id.form-control.did-floating-input(type='text' name='mac_id' placeholder=' ')
 					label.did-floating-label Enter Mac ID
@@ -145,10 +150,21 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
 				br
 				br
 				input.btn.cbut.grey(type="button" value='Add More', onclick="submitform(1)")
-				input.btn.cbut.blue(type="button" value='Save and Exit', onclick="submitform(2)",style='margin-left:20px')
+				input.btn.cbut.blue(type="button" value='Save', onclick="submitform(2)",style='margin-left:20px')
 				br
 script.
-	 function chooseFile() {
+
+	$('select#bin_type').on('change', function () {
+		var $label = $('label.did-floating-label1');
+		if ($(this).val() === '') {
+		$label.css('margin-top', '0');
+		} else {
+		$label.css('margin-top', '-20px');
+		$label.removeClass('did-floating-label1');
+		}
+	});
+
+	function chooseFile() {
 		$("#fileInput").click();
 	}
 	function recommission(uuid){

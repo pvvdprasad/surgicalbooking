@@ -32,16 +32,16 @@ head
     position: absolute;
     display: inline-block;
     top: 20px;
-    right: 130px;
+    right: 110px;
     z-index: 9999;
     }
     .dropdown-content {
     display: none;
     position: absolute;
     background-color: #f9f9f9;
-    min-width: 160px;
+    min-width: 130px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    padding: 12px 16px;
+    padding: 7px 5px;
     z-index: 1;
     }
     .dropdown:hover .dropdown-content {
@@ -83,15 +83,15 @@ head
         img(src=BASE_PATH+'images/125.png' style='width:150px;top:20px;position:absolute')
       header#header.header.fixed-top(data-scrollto-offset='0',style='position:absolute')
         a(href=BASE_PATH+'admin/logout')
-          img(src=BASE_PATH+'images/logout.png',title='Logout',style='width: 40px;float: right;margin-right: 20px;')
+          img(src=BASE_PATH+'images/logout.png',title='Logout',style='width: 40px;float: right;margin-right: 5px; vertical-align: middle; height: 42px;')
         a(href=BASE_PATH+'admin/settings')
-          img(src=BASE_PATH+'images/profile.png',title='change password',style='width: 30px;float: right;margin-right: 10px;')
+          img(src=BASE_PATH+'images/profile.png',title='change password',style='width: 40px;float: right;margin-right: 5px; vertical-align: middle; height: 38px;')
     .dropdown#linemenu
-      img(src='/images/line.ico' style='width: 30px;top: 0px;right: 0px;position: absolute;')
+      img(src='/images/line.ico' style='width: 30px;')
       .dropdown-content#surgeonmenu
         a(href='/admin/iolsetup')= 'IOL Setup'
         br
-        a(href='/admin/settings')= 'Settings'
+        a(href='/admin/settings')= 'Change Password'
     .container.align-items-center.justify-content-between
         section#features.features(class="col-md-6",style="margin: auto")
             span#headerspan(style='position: absolute;z-index: 9999;width: 44%;')

@@ -55,17 +55,16 @@ script(src='https://code.jquery.com/ui/1.13.2/jquery-ui.js')
             input.btn.cbut.blue(type='button' onclick='savesg()' value='save')
             input(type='hidden',value=uid,id='uidhid')
           #ex1-tabs-2(role='tabpanel' style='display:block;text-align:center')
-            h2 Change Password
-                div(style='margin:0 30%')
-                    br
-                    input.form-control#oldpassword(type="password" placeholder="Enter Old Password" required)
-                    br
-                    input.form-control#password(type="password" placeholder="Enter Password" required)
-                    br
-                    input.form-control#cpassword(type="password" placeholder="Enter Confirm Password" required)
-                    br
-                    input.form-control(type="button" style="margin:0" value="Submit" class="btn cbut blue" onclick="changepassword()")
-                    input(type='hidden', id='uid', value=uid)
+            div(style='margin:0 30%')
+                br
+                input.form-control#oldpassword(type="password" placeholder="Enter Old Password" required)
+                br
+                input.form-control#password(type="password" placeholder="Enter Password" required)
+                br
+                input.form-control#cpassword(type="password" placeholder="Enter Confirm Password" required)
+                br
+                input.form-control(type="button" style="margin:0" value="Submit" class="btn cbut blue" onclick="changepassword()")
+                input(type='hidden', id='uid', value=uid)
         #megadiv()
             h2 Information
             #megadiv_body()
