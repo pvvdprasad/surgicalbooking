@@ -11,12 +11,12 @@ var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var usersRouter = require('./routes/users');
 var servicesRouter = require('./routes/services');
-var iotpublishRouter = require('./routes/publish')
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-var db = require('./model/db');
+
+const mqttHandler = require('./mqttHandler');
 
 var app = express();
 
@@ -48,7 +48,10 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin', adminRouter);
 app.use('/services', servicesRouter);
-app.use('/publish', iotpublishRouter);
+
+// Initialize MQTT subscription
+mqttHandler();
+
 app.use(express.static('public'));
 
 
